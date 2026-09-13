@@ -68,3 +68,11 @@ If modules are corrupted:
 cd website
 hugo mod get -u ./...
 ```
+
+## Subscription
+
+The mailing list block is `website/layouts/_partials/subscribe.html`, configured under
+`[subscription]` in `params.toml`. Default is a SendGrid-hosted signup form embedded as an
+iframe (`provider = "sendgrid_form"`, needs `form_url`); `provider = "endpoint"` switches to the
+site's own styled form posting to `workers/subscribe`. Confirmations land on `/subscribed/`,
+which reads a `status` query parameter.

@@ -6,7 +6,7 @@ hide_subscribe: true
 draft: false
 ---
 
-<div data-subscribe-result>Checking...</div>
+<p data-subscribe-result>If you just confirmed from an email link, you are on the list.</p>
 
 <script>
   (function () {
@@ -16,8 +16,9 @@ draft: false
       failed: "Something broke on our side and you were not added. Try again, or email us.",
     };
     var status = new URLSearchParams(window.location.search).get("status");
-    document.querySelector("[data-subscribe-result]").textContent =
-      messages[status] || "Nothing to confirm here.";
+    if (messages[status]) {
+      document.querySelector("[data-subscribe-result]").textContent = messages[status];
+    }
   })();
 </script>
 

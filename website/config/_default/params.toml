@@ -105,28 +105,33 @@ github = "https://github.com/kibertoad/refurbished-dinosaurs"
 
 ########################## Subscription ##########################
 # Mailing list for release announcements, handled by Twilio SendGrid
-# Marketing Campaigns. Two ways to wire it up, pick one:
+# Marketing Campaigns. See ../../../README.md ("Mailing list") for setup.
 #
-#   "sendgrid_form" - paste the URL of a SendGrid-hosted signup form
-#                     (Marketing > Signup Forms > Actions > Share Code).
-#                     SendGrid owns the double opt-in confirmation mail,
-#                     the contact list and the unsubscribe page. No backend.
+#   "sendgrid_form" (recommended) - a SendGrid signup form embedded in the
+#                     page. SendGrid sends the double opt-in mail, keeps the
+#                     contact list and serves the unsubscribe page. No backend,
+#                     no API key in the browser.
 #
 #   "endpoint"      - post to your own endpoint, which holds the API key and
 #                     calls the SendGrid Marketing Contacts API. A ready-made
-#                     Cloudflare Worker lives in ../workers/subscribe.
-#
-# See ../README.md ("Mailing list") for the trade-offs.
+#                     Cloudflare Worker lives in ../../../workers/subscribe.
 [subscription]
 enable = true
 provider = "sendgrid_form"
 title = "Get told when a dinosaur wakes up"
 content = "A few emails a year: new restorations, playable releases, nothing else. Unsubscribe link in every message."
+
 # provider = "sendgrid_form"
+# SendGrid > Marketing > Signup Forms > your form > Actions > Share Code:
+#   form_url    the src="..." URL out of the Direct Embed snippet
+#   landing_url the Landing Page URL (used if the embed cannot load)
 form_url = ""
+landing_url = ""
 form_height = "460px"
+
 # provider = "endpoint"
 endpoint = ""
 placeholder = "you@example.com"
 button_label = "Subscribe"
+
 note = "Double opt-in. We store your address in SendGrid and use it for release announcements only."

@@ -1,11 +1,19 @@
-{{/* Mailing list block. Configured in config/_default/params.toml [subscription].
-     provider = "sendgrid_form" embeds a SendGrid-hosted signup form (SendGrid owns
-     the double opt-in mail, the contact list and the unsubscribe page).
-     provider = "endpoint" posts to your own endpoint (see workers/subscribe). */}}
+{{/* Mailing list block. Configured under [subscription] in
+     config/_default/params.toml.
+
+     provider = "sendgrid_form" (recommended): embeds the Direct Embed iframe
+     from a SendGrid signup form. SendGrid sends the double opt-in mail, holds
+     the contact list, and serves the unsubscribe page, so there is nothing to
+     deploy and no API key anywhere near the browser. Set the form's Sign Up
+     Confirmation redirect to /subscribed/?status=ok to land people back here.
+
+     provider = "endpoint": posts to your own endpoint instead, so the form can
+     be styled as part of the page. See workers/subscribe. */}}
 {{ $sub := site.Params.subscription }}
 {{ if $sub.enable }}
   {{ $useForm := and (eq $sub.provider "sendgrid_form") $sub.form_url }}
   {{ $useEndpoint := and (eq $sub.provider "endpoint") $sub.endpoint }}
+  {{ $feed := `blog/index.xml` | relLangURL }}
   <section class="section-sm">
     <div class="container">
       <div class="row justify-center">
@@ -15,12 +23,30 @@
             <p class="mb-6">{{ $sub.content | markdownify }}</p>
 
             {{ if $useForm }}
-              <iframe
-                title="{{ $sub.title }}"
-                src="{{ $sub.form_url }}"
-                loading="lazy"
-                class="w-full rounded border-0"
-                style="height: {{ $sub.form_height | default `460px` }}"></iframe>
+              {{/* SendGrid renders the form on a light background of its own,
+                   so it sits in a light card rather than inheriting the dark
+                   page and looking broken. */}}
+              <div
+                class="overflow-hidden rounded-lg bg-white"
+                style="color-scheme: light">
+                <iframe
+                  title="{{ $sub.title }}"
+                  src="{{ $sub.form_url }}"
+                  loading="lazy"
+                  class="block w-full border-0"
+                  style="height: {{ $sub.form_height | default `460px` }}"
+                  referrerpolicy="no-referrer-when-downgrade"></iframe>
+              </div>
+              {{ with $sub.landing_url }}
+                <p class="text-text-light dark:text-darkmode-text-light mt-4 text-sm">
+                  Form not loading?
+                  <a
+                    class="text-primary dark:text-darkmode-primary"
+                    href="{{ . }}"
+                    target="_blank"
+                    rel="noopener">Open it on its own page</a>.
+                </p>
+              {{ end }}
             {{ else if $useEndpoint }}
               <form
                 class="subscribe-form flex flex-col gap-3 sm:flex-row"
@@ -43,19 +69,28 @@
                 class="subscribe-status text-text-dark dark:text-darkmode-text-dark mt-4 hidden"
                 role="status"
                 aria-live="polite"></p>
+            {{ else if $sub.landing_url }}
+              {{/* No embed configured, but the SendGrid-hosted form exists. */}}
+              <a
+                class="btn btn-primary"
+                href="{{ $sub.landing_url }}"
+                target="_blank"
+                rel="noopener">
+                {{ $sub.button_label | default "Subscribe" }}
+              </a>
             {{ else }}
               <p class="mb-0">
                 The mailing list is not wired up yet. Until it is,
-                <a class="text-primary dark:text-darkmode-primary" href="{{ `blog/index.xml` | relLangURL }}">the RSS feed</a>
+                <a class="text-primary dark:text-darkmode-primary" href="{{ $feed }}">the RSS feed</a>
                 carries the same announcements.
               </p>
             {{ end }}
 
-            {{ if or $useForm $useEndpoint }}
+            {{ if or $useForm $useEndpoint $sub.landing_url }}
               <p class="text-text-light dark:text-darkmode-text-light mt-4 text-sm">
                 {{ $sub.note | markdownify }}
                 Prefer no email at all?
-                <a class="text-primary dark:text-darkmode-primary" href="{{ `blog/index.xml` | relLangURL }}">Use the RSS feed.</a>
+                <a class="text-primary dark:text-darkmode-primary" href="{{ $feed }}">Use the RSS feed.</a>
               </p>
             {{ end }}
           </div>
