@@ -67,64 +67,65 @@ status there is enough to make a new group appear.
 
 ## Mailing list
 
-SendGrid does this on its own. No Mailchimp, Buttondown or Formspree layer in between.
+Announcements go out through [Resend](https://resend.com), which covers the whole job: Contacts
+for the list, Broadcasts for the sending, and unsubscribe handling that drops people out of
+future Broadcasts on its own.
 
-The site uses a SendGrid signup form embedded in the page, which is the recommended setup for
-a static site: SendGrid sends the double opt-in confirmation mail, holds the contact list, serves
-the unsubscribe page and keeps the consent records, and no API key goes anywhere near the
-browser. The block is rendered by `website/layouts/_partials/subscribe.html` above the footer on
-every page; a page opts out with `hide_subscribe: true`. Until it is configured, the block
-degrades to a pointer at the RSS feed.
+Resend has no hosted signup form, so the site renders its own form and posts it to a small
+endpoint that holds the API key. Resend also has no built-in double opt-in, so the endpoint
+implements the flow Resend documents: the contact is created `unsubscribed`, which keeps it out
+of every Broadcast, and confirming from the emailed link flips it to subscribed. The
+confirmation link carries the address and an expiry signed with HMAC-SHA256, so there is no
+database and no state between the two requests.
+
+`workers/subscribe/worker.js` is that endpoint, as a Cloudflare Worker. The upside over an
+embedded third-party form is that the form is genuinely part of the page and matches the site.
 
 ### What to configure
 
-In SendGrid:
+In Resend:
 
-1. **Marketing → Contacts → Lists**: create the list, e.g. "Announcements".
-2. **Marketing → Signup Forms → Create Signup Form**: point it at that list. Ask for the email
-   address only; every extra field costs subscribers.
-3. In the form's settings, turn on double opt-in and edit the confirmation email. Its "from"
-   address has to be a [verified sender](https://www.twilio.com/docs/sendgrid/ui/sending-email/sender-verification).
-4. Set the form's **Sign Up Confirmation** redirect to
-   `https://kibertoad.github.io/refurbished-dinosaurs/subscribed/?status=ok`, so confirming lands
-   back on the site instead of a SendGrid page.
-5. **Actions → Share Code**. Copy two things: the `src="..."` URL out of the *Direct Embed*
-   iframe snippet, and the *Landing Page* URL.
+1. **Domains**: verify the domain you will send from (DNS records for DKIM and the return path).
+   `FROM_EMAIL` has to be on that domain.
+2. **API Keys**: create a key with sending access and full access to contacts.
+3. Optional: create a **Segment** for announcements if you want Broadcasts targeted at a subset
+   rather than every contact, and note its ID.
 
-Then in `website/config/_default/params.toml` under `[subscription]`:
-
-```toml
-provider = "sendgrid_form"
-form_url = "<the Direct Embed src URL>"
-landing_url = "<the Landing Page URL>"
-form_height = "460px"   # the embed cannot self-size, so match the form
-```
-
-`landing_url` is the fallback: if the iframe is blocked, the block offers a link to the hosted
-form instead. That is all. Nothing to deploy, no secrets in the repo.
-
-The one cost of this approach is that the form renders inside an iframe, so it only picks up as
-much styling as SendGrid's form editor offers. It sits in a light card for that reason, rather
-than inheriting the dark page and looking half-broken.
-
-### Alternative: your own endpoint
-
-If the form has to look native, `workers/subscribe/worker.js` is a Cloudflare Worker that does
-the same job against the SendGrid API, and the site then renders its own styled form. The
-SendGrid Contacts API has no double opt-in of its own, so the worker implements it: the
-confirmation link carries the address and an expiry signed with HMAC-SHA256, and the contact is
-only added to the list once that link comes back. No database.
+Then deploy the worker:
 
 ```bash
 cd workers/subscribe
-wrangler secret put SENDGRID_API_KEY   # needs mail.send + marketing scopes
+wrangler secret put RESEND_API_KEY
 wrangler secret put CONFIRM_SECRET     # any long random string
 wrangler deploy
 ```
 
-Set `SENDGRID_LIST_ID`, `FROM_EMAIL`, `SITE_URL` and `ALLOWED_ORIGIN` in `wrangler.toml`, then
-set `provider = "endpoint"` and `endpoint = "https://<worker>.workers.dev/"` in `params.toml`.
-Confirmation lands on `/subscribed/`, which reads the `status` query parameter.
+`FROM_EMAIL`, `FROM_NAME`, `SITE_URL`, `ALLOWED_ORIGIN` and the optional
+`RESEND_SEGMENT_ID` live in `wrangler.toml`. `ALLOWED_ORIGIN` has to match the site's origin
+exactly or the browser's POST is rejected.
+
+Finally, in `website/config/_default/params.toml` under `[subscription]`:
+
+```toml
+provider = "endpoint"
+endpoint = "https://<worker>.workers.dev/"
+```
+
+Confirmation lands on `/subscribed/`, which reads the `status` query parameter. The block is
+rendered by `website/layouts/_partials/subscribe.html` above the footer on every page; a page
+opts out with `hide_subscribe: true`. Until `endpoint` is set, it degrades to a pointer at the
+RSS feed.
+
+When you send the first Broadcast, keep Resend's unsubscribe link in the template. That is what
+makes the unsubscribe flow work.
+
+### Alternative: a provider-hosted form
+
+`provider = "hosted_form"` embeds a provider-hosted signup form in an iframe instead, with
+`form_url` for the embed and `landing_url` as the fallback link. Resend does not offer one, so
+this path only matters if the list ever moves to a provider that does (SendGrid's Marketing
+Campaigns signup forms, for instance, which carry their own double opt-in and unsubscribe pages
+and need no backend at all). It is kept because it is the one setup that removes the worker.
 
 ## Theme and colours
 
@@ -157,7 +158,7 @@ Every push to `main` builds and publishes to GitHub Pages via
 
 For a custom domain, add a `CNAME` file to `website/static/`, point DNS at GitHub, and change
 `baseURL` in `website/hugo.toml`. `ALLOWED_ORIGIN` and `SITE_URL` in the worker need the same
-change, and so does the `form_url` origin if SendGrid's form is restricted to one domain.
+change, or the subscribe form's POST starts getting rejected.
 
 ## Notes on the build
 

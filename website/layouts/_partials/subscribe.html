@@ -1,17 +1,17 @@
 {{/* Mailing list block. Configured under [subscription] in
      config/_default/params.toml.
 
-     provider = "sendgrid_form" (recommended): embeds the Direct Embed iframe
-     from a SendGrid signup form. SendGrid sends the double opt-in mail, holds
-     the contact list, and serves the unsubscribe page, so there is nothing to
-     deploy and no API key anywhere near the browser. Set the form's Sign Up
-     Confirmation redirect to /subscribed/?status=ok to land people back here.
+     provider = "endpoint" (the Resend setup): the form below posts to an
+     endpoint that holds the API key, creates the contact unsubscribed and
+     mails a confirmation link. See workers/subscribe. Confirmation lands on
+     /subscribed/, and Resend handles unsubscribes from then on.
 
-     provider = "endpoint": posts to your own endpoint instead, so the form can
-     be styled as part of the page. See workers/subscribe. */}}
+     provider = "hosted_form": embeds a provider-hosted signup form in an
+     iframe instead, for a provider that offers one. Needs form_url, and
+     landing_url as the fallback if the iframe cannot load. */}}
 {{ $sub := site.Params.subscription }}
 {{ if $sub.enable }}
-  {{ $useForm := and (eq $sub.provider "sendgrid_form") $sub.form_url }}
+  {{ $useForm := and (eq $sub.provider "hosted_form") $sub.form_url }}
   {{ $useEndpoint := and (eq $sub.provider "endpoint") $sub.endpoint }}
   {{ $feed := `blog/index.xml` | relLangURL }}
   <section class="section-sm">
@@ -23,8 +23,8 @@
             <p class="mb-6">{{ $sub.content | markdownify }}</p>
 
             {{ if $useForm }}
-              {{/* SendGrid renders the form on a light background of its own,
-                   so it sits in a light card rather than inheriting the dark
+              {{/* Hosted forms come with a light background of their own, so
+                   this sits in a light card rather than inheriting the dark
                    page and looking broken. */}}
               <div
                 class="overflow-hidden rounded-lg bg-white"
@@ -70,7 +70,7 @@
                 role="status"
                 aria-live="polite"></p>
             {{ else if $sub.landing_url }}
-              {{/* No embed configured, but the SendGrid-hosted form exists. */}}
+              {{/* No embed configured, but a hosted form exists to link to. */}}
               <a
                 class="btn btn-primary"
                 href="{{ $sub.landing_url }}"

@@ -71,8 +71,10 @@ hugo mod get -u ./...
 
 ## Subscription
 
-The mailing list block is `website/layouts/_partials/subscribe.html`, configured under
-`[subscription]` in `params.toml`. Default is a SendGrid-hosted signup form embedded as an
-iframe (`provider = "sendgrid_form"`, needs `form_url`); `provider = "endpoint"` switches to the
-site's own styled form posting to `workers/subscribe`. Confirmations land on `/subscribed/`,
-which reads a `status` query parameter.
+Email goes through Resend, not SendGrid. The mailing list block is
+`website/layouts/_partials/subscribe.html`, configured under `[subscription]` in `params.toml`.
+Default is `provider = "endpoint"`: the site's own form posts to `workers/subscribe`, a
+Cloudflare Worker that creates the Resend contact as `unsubscribed` and flips it to subscribed
+when the emailed link is confirmed. `provider = "hosted_form"` embeds a provider-hosted iframe
+instead, which Resend does not offer. Confirmations land on `/subscribed/`, which reads a
+`status` query parameter.

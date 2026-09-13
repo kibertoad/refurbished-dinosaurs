@@ -12,9 +12,9 @@ This site is static. It sets no tracking cookies, runs no analytics, and stores 
 
 ## The mailing list
 
-If you subscribe, your email address is stored by [Twilio SendGrid](https://www.twilio.com/en-us/legal/privacy), which sends the mail on our behalf. We use it for one thing: occasional announcements about restorations and releases. A few messages a year, no third-party sharing, no ads.
+If you subscribe, your email address is stored by [Resend](https://resend.com/legal/privacy-policy), which sends the mail on our behalf. We use it for one thing: occasional announcements about restorations and releases. A few messages a year, no third-party sharing, no ads.
 
-Subscriptions are double opt-in, so nothing is sent until you confirm from the address you entered. Every message carries an unsubscribe link, and unsubscribing removes you from the list immediately. You can also ask for removal or a copy of what is stored by emailing us; see [Contacts](/contact).
+Subscriptions are double opt-in. Entering your address stores it in a state that cannot receive anything, and only confirming from the link we email marks you as a subscriber. If you never confirm, you never hear from us again. Every message carries an unsubscribe link, and unsubscribing stops the mail immediately. You can also ask for removal or a copy of what is stored by emailing us; see [Contacts](/contact).
 
 ## The games
 
