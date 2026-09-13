@@ -1,0 +1,7 @@
+# defaultContentLanguageInSubdir must be true for language redirects to work.
+
+# Other languages redirects
+# [[redirects]]
+# from = '/fr/**'
+# to = '/fr/404.html'
+# status = 404

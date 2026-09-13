@@ -1,0 +1,17 @@
+{{/* Markdown link hook. The site is served from a subdirectory on GitHub
+     Pages, so root-relative destinations written in content ("/games/...")
+     have to be resolved against the baseURL. Hugo's relURL leaves a leading
+     slash alone, hence the trim. */}}
+{{- $dest := .Destination -}}
+{{- $external := strings.HasPrefix $dest "http" -}}
+{{- $bare := or $external (strings.HasPrefix $dest "#") (strings.HasPrefix $dest "mailto:") (strings.HasPrefix $dest "tel:") -}}
+{{- if not $bare -}}
+  {{- $dest = strings.TrimPrefix "/" $dest | relLangURL -}}
+{{- end -}}
+<a
+  href="{{ $dest | safeURL }}"
+  {{- with .Title }} title="{{ . }}"{{ end }}
+  {{- if $external }} target="_blank" rel="noopener"{{ end }}>
+  {{- .Text | safeHTML -}}
+</a>
+{{- /* This comment removes trailing newlines. */ -}}

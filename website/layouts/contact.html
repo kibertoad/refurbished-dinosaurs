@@ -1,0 +1,42 @@
+{{ define "main" }}
+  {{ partial "page-header" . }}
+
+  <section class="section-sm">
+    <div class="container">
+      <div class="row justify-center">
+        <div class="lg:col-8">
+          {{ with .Content }}
+            <div class="content mb-10">{{ . }}</div>
+          {{ end }}
+
+          <div class="space-y-6">
+            {{ with site.Params.contact.email }}
+              <div class="flex items-center gap-4">
+                <i class="fa-solid fa-envelope text-primary dark:text-darkmode-primary w-8 text-2xl"></i>
+                <a class="hover:text-primary dark:hover:text-darkmode-primary text-lg" href="mailto:{{ . }}">{{ . }}</a>
+              </div>
+            {{ end }}
+            {{ with site.Params.contact.github }}
+              <div class="flex items-center gap-4">
+                <i class="fa-brands fa-github text-primary dark:text-darkmode-primary w-8 text-2xl"></i>
+                <a
+                  class="hover:text-primary dark:hover:text-darkmode-primary text-lg"
+                  href="{{ . }}"
+                  target="_blank"
+                  rel="noopener">
+                  {{ strings.TrimPrefix "https://github.com/" . }}
+                </a>
+              </div>
+            {{ end }}
+            <div class="flex items-center gap-4">
+              <i class="fa-solid fa-rss text-primary dark:text-darkmode-primary w-8 text-2xl"></i>
+              <a class="hover:text-primary dark:hover:text-darkmode-primary text-lg" href="{{ `blog/index.xml` | relLangURL }}">
+                Blog RSS feed
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+{{ end }}

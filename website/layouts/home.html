@@ -1,0 +1,108 @@
+{{ define "main" }}
+  <!-- Banner -->
+  {{ with .Params.banner }}
+    <section class="section pt-14">
+      <div class="container">
+        <div class="row justify-center">
+          <div class="lg:col-8 md:col-10 text-center">
+            <h1 class="mb-6 text-h3 lg:text-h1">
+              {{ .title | markdownify }}
+            </h1>
+            <p class="mb-8 text-lg">
+              {{ .content | markdownify }}
+            </p>
+            {{ with .button }}
+              {{ if .enable }}
+                {{ $external := strings.HasPrefix .link `http` }}
+                <a
+                  class="btn btn-primary"
+                  href="{{ if $external }}{{ .link }}{{ else }}{{ strings.TrimPrefix `/` .link | relLangURL }}{{ end }}"
+                  {{ if $external }}target="_blank" rel="noopener"{{ end }}>
+                  {{ .label }}
+                </a>
+              {{ end }}
+            {{ end }}
+          </div>
+        </div>
+      </div>
+    </section>
+  {{ end }}
+  <!-- /Banner -->
+
+  <!-- What we do -->
+  {{ with .Params.principles }}
+    <section class="section-sm bg-gradient">
+      <div class="container">
+        <div class="row">
+          {{ range . }}
+            <div class="md:col-6 lg:col-4 mb-8">
+              <div class="h-full">
+                <i class="{{ .icon }} text-primary dark:text-darkmode-primary mb-4 text-3xl"></i>
+                <h3 class="h5 mb-2">{{ .title }}</h3>
+                <p>{{ .content | markdownify }}</p>
+              </div>
+            </div>
+          {{ end }}
+        </div>
+      </div>
+    </section>
+  {{ end }}
+  <!-- /What we do -->
+
+  <!-- Games -->
+  {{ with site.GetPage "/games" }}
+    <section class="section-sm">
+      <div class="container">
+        <div class="row mb-8 items-end">
+          <div class="md:col-8">
+            <h2 class="mb-2">The herd</h2>
+            <p class="mb-0">
+              What is playable today and what is being dug out next.
+            </p>
+          </div>
+          <div class="md:col-4 md:text-right">
+            <a class="btn btn-outline-primary btn-sm mt-4 md:mt-0" href="{{ .RelPermalink }}">
+              All games
+            </a>
+          </div>
+        </div>
+        <div class="row">
+          {{ range first 3 (sort .RegularPages "Weight") }}
+            <div class="md:col-6 lg:col-4 mb-8">
+              {{ partial "game-card" . }}
+            </div>
+          {{ end }}
+        </div>
+      </div>
+    </section>
+  {{ end }}
+  <!-- /Games -->
+
+  <!-- Latest posts -->
+  {{ $posts := where site.RegularPages "Section" "blog" }}
+  {{ with $posts }}
+    <section class="section-sm bg-gradient">
+      <div class="container">
+        <div class="row mb-8 items-end">
+          <div class="md:col-8">
+            <h2 class="mb-2">From the workshop</h2>
+            <p class="mb-0">Notes on file formats, rule reconstruction and the odd bug hunt.</p>
+          </div>
+          <div class="md:col-4 md:text-right">
+            <a class="btn btn-outline-primary btn-sm mt-4 md:mt-0" href="{{ `blog/` | relLangURL }}">
+              All posts
+            </a>
+          </div>
+        </div>
+        <div class="row">
+          {{ range first 2 . }}
+            <div class="md:col-6 mb-8">
+              {{ partial "components/blog-card" . }}
+            </div>
+          {{ end }}
+        </div>
+      </div>
+    </section>
+  {{ end }}
+  <!-- /Latest posts -->
+{{ end }}

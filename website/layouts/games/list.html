@@ -1,0 +1,41 @@
+{{ define "main" }}
+  {{ partial "page-header" . }}
+
+  <section class="section-sm">
+    <div class="container">
+      <div class="row justify-center">
+        <div class="lg:col-10">
+          {{ with .Content }}
+            <div class="content mb-12">{{ . }}</div>
+          {{ end }}
+        </div>
+      </div>
+
+      {{/* Group by status, following the order in data/game_status.json. */}}
+      {{ $pages := .RegularPages }}
+      {{ range sort hugo.Data.game_status "order" }}
+        {{ $meta := . }}
+        {{ $inStatus := where $pages "Params.status" .key }}
+        {{ with $inStatus }}
+          <div class="row mb-4">
+            <div class="col-12">
+              <h2
+                class="h4 border-border dark:border-darkmode-border mb-6 border-b pb-3">
+                {{ $meta.label }}
+                <span
+                  class="text-text-light dark:text-darkmode-text-light block text-base font-normal">
+                  {{ $meta.description }}
+                </span>
+              </h2>
+            </div>
+            {{ range (sort . "Weight") }}
+              <div class="md:col-6 lg:col-4 mb-8">
+                {{ partial "game-card" . }}
+              </div>
+            {{ end }}
+          </div>
+        {{ end }}
+      {{ end }}
+    </div>
+  </section>
+{{ end }}

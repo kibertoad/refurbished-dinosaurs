@@ -1,0 +1,107 @@
+{{/* Mailing list block. Configured in config/_default/params.toml [subscription].
+     provider = "sendgrid_form" embeds a SendGrid-hosted signup form (SendGrid owns
+     the double opt-in mail, the contact list and the unsubscribe page).
+     provider = "endpoint" posts to your own endpoint (see workers/subscribe). */}}
+{{ $sub := site.Params.subscription }}
+{{ if $sub.enable }}
+  {{ $useForm := and (eq $sub.provider "sendgrid_form") $sub.form_url }}
+  {{ $useEndpoint := and (eq $sub.provider "endpoint") $sub.endpoint }}
+  <section class="section-sm">
+    <div class="container">
+      <div class="row justify-center">
+        <div class="lg:col-8">
+          <div class="bg-light dark:bg-darkmode-light rounded-xl px-6 py-10 md:px-12">
+            <h2 class="h4 mb-3">{{ $sub.title }}</h2>
+            <p class="mb-6">{{ $sub.content | markdownify }}</p>
+
+            {{ if $useForm }}
+              <iframe
+                title="{{ $sub.title }}"
+                src="{{ $sub.form_url }}"
+                loading="lazy"
+                class="w-full rounded border-0"
+                style="height: {{ $sub.form_height | default `460px` }}"></iframe>
+            {{ else if $useEndpoint }}
+              <form
+                class="subscribe-form flex flex-col gap-3 sm:flex-row"
+                data-endpoint="{{ $sub.endpoint }}"
+                novalidate>
+                <label class="sr-only" for="subscribe-email">Email address</label>
+                <input
+                  class="form-input grow"
+                  id="subscribe-email"
+                  type="email"
+                  name="email"
+                  autocomplete="email"
+                  required
+                  placeholder="{{ $sub.placeholder | default `you@example.com` }}" />
+                <button class="btn btn-primary" type="submit">
+                  {{ $sub.button_label | default "Subscribe" }}
+                </button>
+              </form>
+              <p
+                class="subscribe-status text-text-dark dark:text-darkmode-text-dark mt-4 hidden"
+                role="status"
+                aria-live="polite"></p>
+            {{ else }}
+              <p class="mb-0">
+                The mailing list is not wired up yet. Until it is,
+                <a class="text-primary dark:text-darkmode-primary" href="{{ `blog/index.xml` | relLangURL }}">the RSS feed</a>
+                carries the same announcements.
+              </p>
+            {{ end }}
+
+            {{ if or $useForm $useEndpoint }}
+              <p class="text-text-light dark:text-darkmode-text-light mt-4 text-sm">
+                {{ $sub.note | markdownify }}
+                Prefer no email at all?
+                <a class="text-primary dark:text-darkmode-primary" href="{{ `blog/index.xml` | relLangURL }}">Use the RSS feed.</a>
+              </p>
+            {{ end }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {{ if $useEndpoint }}
+    <script>
+      document.querySelectorAll(".subscribe-form").forEach(function (form) {
+        var status = form.parentNode.querySelector(".subscribe-status");
+        var button = form.querySelector("button");
+        var input = form.querySelector("input[type=email]");
+
+        function say(message) {
+          status.textContent = message;
+          status.classList.remove("hidden");
+        }
+
+        form.addEventListener("submit", function (event) {
+          event.preventDefault();
+          if (!input.checkValidity()) {
+            say("That does not look like an email address.");
+            return;
+          }
+          button.disabled = true;
+          say("Sending...");
+          fetch(form.dataset.endpoint, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: input.value.trim() }),
+          })
+            .then(function (response) {
+              if (!response.ok) throw new Error(String(response.status));
+              form.reset();
+              say("Check your inbox and confirm the subscription.");
+            })
+            .catch(function () {
+              say("That did not go through. Try again in a minute.");
+            })
+            .finally(function () {
+              button.disabled = false;
+            });
+        });
+      });
+    </script>
+  {{ end }}
+{{ end }}

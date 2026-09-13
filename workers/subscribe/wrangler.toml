@@ -1,0 +1,14 @@
+name = "refurbished-dinosaurs-subscribe"
+main = "worker.js"
+compatibility_date = "2026-09-01"
+
+[vars]
+SENDGRID_LIST_ID = ""
+FROM_EMAIL = "news@refurbished-dinosaurs.org"
+FROM_NAME = "Refurbished Dinosaurs"
+SITE_URL = "https://kibertoad.github.io/refurbished-dinosaurs"
+ALLOWED_ORIGIN = "https://kibertoad.github.io"
+
+# Secrets are not stored here:
+#   wrangler secret put SENDGRID_API_KEY
+#   wrangler secret put CONFIRM_SECRET

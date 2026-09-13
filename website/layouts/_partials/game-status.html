@@ -1,0 +1,16 @@
+{{/* Renders a status badge for a game page.
+     Params: Status (string key into data/game_status.json), Class (optional). */}}
+{{ $status := .Status }}
+{{ $meta := index hugo.Data.game_status $status }}
+{{ with $meta }}
+  <span
+    title="{{ .description }}"
+    class="border-border dark:border-darkmode-border text-text-dark dark:text-darkmode-text-dark inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm leading-none
+      {{ if eq $status `high-fidelity-playable` }}
+        border-primary text-primary dark:border-darkmode-primary dark:text-darkmode-primary
+      {{ end }}
+      {{ with $.Class }}{{ . }}{{ end }}">
+    <i class="{{ .icon }}"></i>
+    {{ .label }}
+  </span>
+{{ end }}

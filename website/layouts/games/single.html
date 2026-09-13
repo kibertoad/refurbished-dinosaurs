@@ -1,0 +1,88 @@
+{{ define "main" }}
+  <section class="section pt-7">
+    <div class="container">
+      <div class="row justify-center">
+        <article class="lg:col-9">
+          {{ with .Params.image }}
+            <div class="mb-10">
+              {{ partial "image" (dict "Src" . "Context" $.Page "Alt" $.Title "Class" "w-full rounded") }}
+            </div>
+          {{ end }}
+
+          <div class="mb-4">
+            {{ partial "game-status" (dict "Status" .Params.status) }}
+          </div>
+
+          <h1 class="h2 mb-4">{{ .Title }}</h1>
+
+          {{ with .Params.original }}
+            <dl
+              class="bg-light dark:bg-darkmode-light mb-8 grid gap-x-8 gap-y-3 rounded-xl p-6 sm:grid-cols-2">
+              {{ with .title }}
+                <div>
+                  <dt class="text-text-light dark:text-darkmode-text-light text-sm">Original</dt>
+                  <dd class="text-text-dark dark:text-darkmode-text-dark">{{ . }}</dd>
+                </div>
+              {{ end }}
+              {{ with .year }}
+                <div>
+                  <dt class="text-text-light dark:text-darkmode-text-light text-sm">Released</dt>
+                  <dd class="text-text-dark dark:text-darkmode-text-dark">{{ . }}</dd>
+                </div>
+              {{ end }}
+              {{ with .developer }}
+                <div>
+                  <dt class="text-text-light dark:text-darkmode-text-light text-sm">Developer</dt>
+                  <dd class="text-text-dark dark:text-darkmode-text-dark">{{ . }}</dd>
+                </div>
+              {{ end }}
+              {{ with .publisher }}
+                <div>
+                  <dt class="text-text-light dark:text-darkmode-text-light text-sm">Publisher</dt>
+                  <dd class="text-text-dark dark:text-darkmode-text-dark">{{ . }}</dd>
+                </div>
+              {{ end }}
+              {{ with $.Params.engine }}
+                <div>
+                  <dt class="text-text-light dark:text-darkmode-text-light text-sm">Rebuilt on</dt>
+                  <dd class="text-text-dark dark:text-darkmode-text-dark">{{ . }}</dd>
+                </div>
+              {{ end }}
+              {{ with $.Params.platforms }}
+                <div>
+                  <dt class="text-text-light dark:text-darkmode-text-light text-sm">Runs on</dt>
+                  <dd class="text-text-dark dark:text-darkmode-text-dark">{{ delimit . ", " }}</dd>
+                </div>
+              {{ end }}
+            </dl>
+          {{ end }}
+
+          <div class="content mb-10">
+            {{ .Content }}
+          </div>
+
+          {{ if or .Params.repo .Params.store .Params.download }}
+            <div class="mb-10 flex flex-wrap gap-3">
+              {{ with .Params.download }}
+                <a class="btn btn-primary" href="{{ . }}" target="_blank" rel="noopener">
+                  <i class="fa-solid fa-download mr-2"></i>Download
+                </a>
+              {{ end }}
+              {{ with .Params.repo }}
+                <a class="btn btn-outline-primary" href="{{ . }}" target="_blank" rel="noopener">
+                  <i class="fa-brands fa-github mr-2"></i>Source
+                </a>
+              {{ end }}
+              {{ with .Params.store }}
+                <a class="btn btn-outline-primary" href="{{ . }}" target="_blank" rel="noopener">
+                  <i class="fa-solid fa-cart-shopping mr-2"></i>Buy the original
+                </a>
+              {{ end }}
+            </div>
+          {{ end }}
+        </article>
+      </div>
+    </div>
+  </section>
+
+{{ end }}

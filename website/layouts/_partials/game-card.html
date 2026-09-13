@@ -1,0 +1,21 @@
+{{/* Card for a single game in listings. Context: a game page. */}}
+<article
+  class="bg-body dark:bg-darkmode-body border-border dark:border-darkmode-border flex h-full flex-col rounded-xl border p-6">
+  <div class="mb-3">
+    {{ partial "game-status" (dict "Status" .Params.status) }}
+  </div>
+  <h3 class="h4 mb-2">
+    <a href="{{ .RelPermalink }}">{{ .Title }}</a>
+  </h3>
+  {{ with .Params.original }}
+    <p class="text-text-light dark:text-darkmode-text-light mb-4 text-sm">
+      {{ .title }}{{ with .year }}, {{ . }}{{ end }}{{ with .developer }} &middot; {{ . }}{{ end }}
+    </p>
+  {{ end }}
+  <p class="mb-6">{{ .Params.description | default (.Summary | plainify) }}</p>
+  <div class="mt-auto">
+    <a class="btn btn-outline-primary btn-sm" href="{{ .RelPermalink }}">
+      {{ T "read_more" | default "Read More" }}
+    </a>
+  </div>
+</article>

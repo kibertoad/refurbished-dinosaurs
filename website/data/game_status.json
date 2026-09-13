@@ -1,0 +1,30 @@
+{
+  "high-fidelity-playable": {
+    "key": "high-fidelity-playable",
+    "label": "High-fidelity playable",
+    "icon": "fa-solid fa-gamepad",
+    "order": 1,
+    "description": "Playable start to finish, close to the original's rules and feel."
+  },
+  "in-restoration": {
+    "key": "in-restoration",
+    "label": "In restoration",
+    "icon": "fa-solid fa-screwdriver-wrench",
+    "order": 2,
+    "description": "Work has started, not playable yet."
+  },
+  "on-the-way": {
+    "key": "on-the-way",
+    "label": "On the way",
+    "icon": "fa-solid fa-hourglass-half",
+    "order": 3,
+    "description": "Picked for restoration, work has not started yet."
+  },
+  "surveying": {
+    "key": "surveying",
+    "label": "Surveying",
+    "icon": "fa-solid fa-binoculars",
+    "order": 4,
+    "description": "Under consideration, poking at the data files to see what is feasible."
+  }
+}
