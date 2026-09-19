@@ -1,0 +1,24 @@
+name = "refurbished-dinosaurs-wishlist"
+main = "worker.js"
+compatibility_date = "2026-09-01"
+
+[vars]
+# Which game database backs search and the entry details: "igdb" or "rawg".
+GAME_DB_PROVIDER = "igdb"
+ALLOWED_ORIGIN = "https://kibertoad.github.io"
+# Entries a board read returns, and how many votes one voter gets per day.
+BOARD_LIMIT = "100"
+MAX_VOTES_PER_DAY = "25"
+
+# Created with: wrangler d1 create refurbished-dinosaurs-wishlist
+# Paste the id it prints here, then apply schema.sql.
+[[d1_databases]]
+binding = "WISHLIST_DB"
+database_name = "refurbished-dinosaurs-wishlist"
+database_id = ""
+
+# Secrets are not stored here:
+#   wrangler secret put VOTER_SECRET        # any long random string
+#   wrangler secret put IGDB_CLIENT_ID      # GAME_DB_PROVIDER = "igdb"
+#   wrangler secret put IGDB_CLIENT_SECRET
+#   wrangler secret put RAWG_API_KEY        # GAME_DB_PROVIDER = "rawg"

@@ -13,7 +13,9 @@
 - `website/content/english/` - content pages
 - `website/data/` - theme colours, game status definitions, social links
 - `website/layouts/` - custom layout overrides
+- `website/assets/js/` - page scripts (loaded through Hugo's asset pipeline)
 - `workers/subscribe/` - optional Cloudflare Worker for the mailing list
+- `workers/wishlist/` - Cloudflare Worker behind the voting wishlist (D1 + game database)
 
 ## Theme
 
@@ -30,6 +32,19 @@
 Each game is one file in `website/content/english/games/`. `status` in the front matter must be
 a key from `website/data/game_status.json`, which drives the badge and the grouping on the games
 page.
+
+## Wishlist
+
+- `/wishlist` is a voting board. The page is `website/layouts/wishlist.html` +
+  `website/layouts/_partials/wishlist.html`, the behaviour is `website/assets/js/wishlist.js`,
+  and everything it talks to is `workers/wishlist` (Cloudflare Worker + D1).
+- Row markup for entries and search suggestions lives in `<template>` elements in the partial,
+  not in strings in the JS: Tailwind purges classes it cannot find in rendered HTML.
+- The worker has tests that need no network (`cd workers/wishlist && npm test`); the store's SQL
+  runs against `node:sqlite`. Run them after touching anything under `workers/wishlist/`.
+- Game databases sit behind `lib/providers/` (`igdb` by default, `rawg` as the alternative).
+  Eligibility (PC, released before 2010) is enforced in the provider queries *and* again when a
+  vote is cast, since the browser only sends an id.
 
 ## CSS and TailwindCSS
 

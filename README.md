@@ -34,6 +34,7 @@ Content lives in `website/content/english/`:
 | `_index.md` | Home page: hero copy and the three principle blurbs |
 | `games/` | One file per game, plus `_index.md` for the section intro |
 | `blog/` | Posts |
+| `wishlist/_index.md` | Voting wishlist page (the board itself is loaded from the endpoint) |
 | `contact/_index.md` | Contacts page |
 | `authors/` | Post author pages |
 | `pages/` | Standalone pages (privacy policy, subscription confirmation) |
@@ -126,6 +127,81 @@ makes the unsubscribe flow work.
 this path only matters if the list ever moves to a provider that does (SendGrid's Marketing
 Campaigns signup forms, for instance, which carry their own double opt-in and unsubscribe pages
 and need no backend at all). It is kept because it is the one setup that removes the worker.
+
+## Wishlist
+
+`/wishlist` is a voting board: visitors search a game database, put a PC game released before
+2010 on the board, and vote for the ones already up there. Same idea as GOG's Dreamlist, with
+the counts in the open and no accounts.
+
+Search results, the entry details and the votes all come from `workers/wishlist`, a Cloudflare
+Worker with a D1 database behind it. The site itself stays static: the page loads the board and
+posts votes.
+
+| Endpoint | What it does |
+| --- | --- |
+| `GET /search?q=` | Searches the game database, filtered to PC releases from before 2010 |
+| `GET /wishlist` | The board, ranked by votes, with this visitor's own votes marked |
+| `POST /votes` | Votes for a game, adding it to the board if it is new |
+| `DELETE /votes` | Takes that vote back |
+
+### How a vote is counted
+
+There is no login. A vote is stored against an HMAC of the voter's IP address and user agent,
+and only that hash is written down, so a browser gets one vote per game and no address is ever
+stored. The trade-off is spelled out in `workers/wishlist/lib/voter.js`: address alone would
+merge everyone behind one office or carrier NAT into a single voter, so the browser goes into
+the hash, which also means a second browser is a second voter. `MAX_VOTES_PER_DAY` caps what one
+voter can do in a day.
+
+A vote never trusts the page. The browser sends a game id and nothing else; the worker re-reads
+that game from the database and re-checks that it is a PC release from before 2010 before
+anything is stored.
+
+### Game database
+
+`GAME_DB_PROVIDER` picks the source. Both implement the same small interface in
+`workers/wishlist/lib/providers/`, so adding another one is a file and a line.
+
+- **`igdb`** (default): the deeper catalogue of DOS and early Windows releases, which is the
+  era this project works in. IGDB credentials come from a Twitch application, created in the
+  [developer console](https://dev.twitch.tv/console/apps): note its client id and secret.
+- **`rawg`**: one API key from [rawg.io/apidocs](https://rawg.io/apidocs) and no OAuth
+  exchange, but thinner on obscure pre-2000 titles.
+
+### Deploying it
+
+```bash
+cd workers/wishlist
+npm test                       # the store's SQL and the provider queries, no network
+
+wrangler d1 create refurbished-dinosaurs-wishlist
+# paste the database_id it prints into wrangler.toml, then:
+wrangler d1 execute refurbished-dinosaurs-wishlist --file=schema.sql --remote
+
+wrangler secret put VOTER_SECRET         # any long random string
+wrangler secret put IGDB_CLIENT_ID       # or RAWG_API_KEY, for GAME_DB_PROVIDER = "rawg"
+wrangler secret put IGDB_CLIENT_SECRET
+wrangler deploy
+```
+
+`GAME_DB_PROVIDER`, `ALLOWED_ORIGIN`, `BOARD_LIMIT` and `MAX_VOTES_PER_DAY` live in
+`wrangler.toml`. Every endpoint checks the origin, so an `ALLOWED_ORIGIN` that does not match
+the site exactly makes the whole board go quiet.
+
+Then point the site at it, in `website/config/_default/params.toml`:
+
+```toml
+[wishlist]
+enable = true
+endpoint = "https://<worker>.workers.dev/"
+```
+
+Until `endpoint` is set, the page says voting is not wired up yet and points at GitHub issues.
+The headings, placeholder and footnote on the page are the other keys in that block. The board
+itself is `website/layouts/_partials/wishlist.html` plus `website/assets/js/wishlist.js`; row
+markup lives in `<template>` elements in the partial, because Tailwind's purge only keeps
+classes it can find in rendered HTML.
 
 ## Theme and colours
 

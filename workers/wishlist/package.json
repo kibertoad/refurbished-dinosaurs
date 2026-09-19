@@ -1,0 +1,11 @@
+{
+  "name": "refurbished-dinosaurs-wishlist",
+  "description": "Voting wishlist endpoint for the Refurbished Dinosaurs site",
+  "version": "1.0.0",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test"
+  }
+}
