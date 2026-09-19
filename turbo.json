@@ -1,0 +1,26 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "stream",
+  "tasks": {
+    "typecheck": {
+      "dependsOn": ["^typecheck"],
+      "inputs": ["src/**", "test/**", "assets/js/**", "tsconfig.json", "package.json"]
+    },
+    "test": {
+      "dependsOn": ["^typecheck"],
+      "inputs": [
+        "src/**",
+        "test/**",
+        "migrations/**",
+        "tsconfig.json",
+        "vitest.config.ts",
+        "wrangler.toml",
+        "package.json"
+      ]
+    },
+    "check:js": {
+      "dependsOn": ["^typecheck"],
+      "inputs": ["assets/js/**", "tsconfig.json", "package.json"]
+    }
+  }
+}

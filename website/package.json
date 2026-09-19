@@ -10,13 +10,22 @@
     "build:stats": "hugo --templateMetrics --logLevel info",
     "preview": "hugo server -e production --minify",
     "theme": "node scripts/theme.js",
-    "images": "node scripts/generate-images.js"
+    "images": "node scripts/generate-images.js",
+    "typecheck": "tsc --noEmit",
+    "check:js": "node scripts/check-js.js"
   },
   "devDependencies": {
     "@tailwindcss/cli": "^4.3.0",
     "@tailwindcss/forms": "^0.5.11",
     "@tailwindcss/typography": "^0.5.19",
+    "esbuild": "^0.25.0",
     "tailwind-bootstrap-grid": "^7.0.0",
-    "tailwindcss": "^4.3.0"
+    "tailwindcss": "^4.3.0",
+    "typescript": "^5.9.0"
+  },
+  "dependencies": {
+    "@refurbished-dinosaurs/wishlist-contracts": "workspace:*",
+    "@toad-contracts/frontend-http-client": "^1.0.0",
+    "wretch": "^3.0.0"
   }
 }

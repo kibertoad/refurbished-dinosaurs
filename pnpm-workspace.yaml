@@ -1,0 +1,22 @@
+packages:
+  - "packages/*"
+  - "website"
+  - "workers/*"
+
+# pnpm blocks install scripts by default. These three ship native binaries —
+# the bundler, the Workers runtime the tests run in, and the file watcher —
+# that those scripts fetch or link, so they have to run.
+allowBuilds:
+  "@parcel/watcher": true
+  esbuild: true
+  workerd: true
+
+# pnpm refuses dependencies published within the last day, which is a good
+# default against a freshly compromised release. The contracts stack this
+# project is built on is new enough to trip it, and pinned by hash in the
+# lockfile, so it is excluded by name rather than by turning the policy off.
+minimumReleaseAgeExclude:
+  - "@toad-contracts/core"
+  - "@toad-contracts/frontend-http-client"
+  - "@toad-contracts/hono"
+  - "@toad-contracts/valibot"
