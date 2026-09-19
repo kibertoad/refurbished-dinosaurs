@@ -303,6 +303,10 @@ change, or the subscribe form's POST starts getting rejected.
 - `hugo mod npm pack` is not used. It ignores `package.hugo.json` on Hugo 0.166 and empties
   `package.json`, so the Tailwind dependencies are declared directly in `website/package.json`
   and CI runs `pnpm install --frozen-lockfile`.
+- Hugo runs the Tailwind CLI itself and insists that `node_modules/.bin/tailwindcss` be a
+  Node.js script. pnpm writes shell shims there, so the site's postinstall
+  (`website/scripts/link-hugo-bins.js`) relinks that one bin, and `check:bins` fails the build
+  if it ever goes missing — Hugo only runs on a deploy, so CI has to catch this instead.
 - pnpm blocks dependency install scripts and dependencies published in the last day. The
   bundler, the Workers runtime and the file watcher need their scripts to run, and the
   contracts stack is new enough to trip the age policy, so both are excepted by name in
