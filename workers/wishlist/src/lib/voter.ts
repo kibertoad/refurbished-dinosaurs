@@ -16,10 +16,9 @@
 
 const encoder = new TextEncoder();
 
-/** @type {Map<string, CryptoKey>} */
-const keyCache = new Map();
+const keyCache = new Map<string, CryptoKey>();
 
-async function hmacKey(secret) {
+async function hmacKey(secret: string): Promise<CryptoKey> {
   let key = keyCache.get(secret);
   if (!key) {
     key = await crypto.subtle.importKey(
@@ -34,19 +33,18 @@ async function hmacKey(secret) {
   return key;
 }
 
-/**
- * @param {Request} request
- * @param {string} secret
- * @returns {Promise<string>} hex-encoded HMAC-SHA256
- */
-export async function voterHash(request, secret) {
-  const address = request.headers.get("CF-Connecting-IP") || "";
-  const agent = request.headers.get("User-Agent") || "";
+/** @returns hex-encoded HMAC-SHA256 of the caller's address and user agent */
+export async function voterHash(
+  headers: { address: string | undefined; agent: string | undefined },
+  secret: string,
+): Promise<string> {
   const signature = await crypto.subtle.sign(
     "HMAC",
     await hmacKey(secret),
-    encoder.encode(`${address}\n${agent}`),
+    encoder.encode(`${headers.address ?? ""}\n${headers.agent ?? ""}`),
   );
 
-  return Array.from(new Uint8Array(signature), (byte) => byte.toString(16).padStart(2, "0")).join("");
+  return Array.from(new Uint8Array(signature), (byte) => byte.toString(16).padStart(2, "0")).join(
+    "",
+  );
 }

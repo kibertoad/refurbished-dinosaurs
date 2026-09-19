@@ -15,7 +15,8 @@
 - `website/layouts/` - custom layout overrides
 - `website/assets/js/` - page scripts (loaded through Hugo's asset pipeline)
 - `workers/subscribe/` - optional Cloudflare Worker for the mailing list
-- `workers/wishlist/` - Cloudflare Worker behind the voting wishlist (D1 + game database)
+- `workers/wishlist/` - Hono app on Cloudflare Workers behind the voting wishlist (D1 + game database)
+- `packages/wishlist-contracts/` - API contracts shared by that worker and the page script
 
 ## Theme
 
@@ -36,15 +37,23 @@ page.
 ## Wishlist
 
 - `/wishlist` is a voting board. The page is `website/layouts/wishlist.html` +
-  `website/layouts/_partials/wishlist.html`, the behaviour is `website/assets/js/wishlist.js`,
-  and everything it talks to is `workers/wishlist` (Cloudflare Worker + D1).
-- Row markup for entries and search suggestions lives in `<template>` elements in the partial,
-  not in strings in the JS: Tailwind purges classes it cannot find in rendered HTML.
-- The worker has tests that need no network (`cd workers/wishlist && npm test`); the store's SQL
-  runs against `node:sqlite`. Run them after touching anything under `workers/wishlist/`.
-- Game databases sit behind `lib/providers/` (`igdb` by default, `rawg` as the alternative).
-  Eligibility (PC, released before 2010) is enforced in the provider queries *and* again when a
-  vote is cast, since the browser only sends an id.
+  `website/layouts/_partials/wishlist.html`, the behaviour is `website/assets/js/wishlist.ts`
+  (bundled by Hugo's `js.Build`), and the backend is `workers/wishlist`: a Hono app on
+  Cloudflare Workers with D1 behind it.
+- The API is defined once in `packages/wishlist-contracts` (`@toad-contracts` + valibot). The
+  worker mounts contracts with `buildHonoRoute`, the page calls them with `sendByApiContract`.
+  Change a schema there, not on one side.
+- Both consumers link that package with a `file:` dependency, so it needs its own
+  `npm ci` before theirs: esbuild (Hugo's and wrangler's alike) resolves valibot through the
+  package's own `node_modules`.
+- Row markup for entries and suggestions lives in `<template>` elements in the partial, not in
+  strings in the script: Tailwind purges classes it cannot find in rendered HTML.
+- `cd workers/wishlist && npm test` (vitest, no network) plus `npm run typecheck`. Run both
+  after touching anything under `workers/` or `packages/`; `cd website && npm run check:js`
+  after touching the page script, since Hugo is the only other thing that bundles it.
+- Game databases sit behind `src/lib/providers/` (`igdb` by default, `rawg` as the
+  alternative). Eligibility (PC, released before 2010) is enforced in the provider queries *and*
+  again when a vote is cast, since the browser only sends an id.
 
 ## CSS and TailwindCSS
 

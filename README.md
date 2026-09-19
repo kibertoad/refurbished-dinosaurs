@@ -8,7 +8,7 @@ theme, deployed to GitHub Pages.
 
 - [Hugo Extended](https://gohugo.io/installation/) 0.158 or newer (0.166 is what CI uses)
 - [Go](https://go.dev/dl/) 1.25+ (Hugo modules)
-- [Node.js](https://nodejs.org/) 24+ (Tailwind CSS)
+- [Node.js](https://nodejs.org/) 24+ (Tailwind CSS, the wishlist worker and its tests)
 
 ## Getting started
 
@@ -34,7 +34,7 @@ Content lives in `website/content/english/`:
 | `_index.md` | Home page: hero copy and the three principle blurbs |
 | `games/` | One file per game, plus `_index.md` for the section intro |
 | `blog/` | Posts |
-| `wishlist/_index.md` | Voting wishlist page (the board itself is loaded from the endpoint) |
+| `wishlist/_index.md` | Voting wishlist page (the board itself is loaded from the worker) |
 | `contact/_index.md` | Contacts page |
 | `authors/` | Post author pages |
 | `pages/` | Standalone pages (privacy policy, subscription confirmation) |
@@ -134,22 +134,33 @@ and need no backend at all). It is kept because it is the one setup that removes
 2010 on the board, and vote for the ones already up there. Same idea as GOG's Dreamlist, with
 the counts in the open and no accounts.
 
-Search results, the entry details and the votes all come from `workers/wishlist`, a Cloudflare
-Worker with a D1 database behind it. The site itself stays static: the page loads the board and
-posts votes.
+The site itself stays static. Everything dynamic runs on Cloudflare: `workers/wishlist` is a
+[Hono](https://hono.dev) app on Workers, the board lives in D1, and search results are held in
+the edge cache so a burst of typing does not become a burst of game-database traffic.
 
-| Endpoint | What it does |
-| --- | --- |
-| `GET /search?q=` | Searches the game database, filtered to PC releases from before 2010 |
-| `GET /wishlist` | The board, ranked by votes, with this visitor's own votes marked |
-| `POST /votes` | Votes for a game, adding it to the board if it is new |
-| `DELETE /votes` | Takes that vote back |
+### Contracts
+
+The API is defined once, in `packages/wishlist-contracts`, with
+[`@toad-contracts`](https://github.com/kibertoad/toad-contracts) and valibot schemas. Both sides
+consume that package: the worker mounts each contract as a route with `buildHonoRoute`, which
+derives the method, path and request validation from it, and the page calls the same contracts
+with `sendByApiContract`, which validates what it sends and parses what comes back. Neither side
+restates the other's shape, and a change to a schema fails to compile on both.
+
+| Contract | Route | What it does |
+| --- | --- | --- |
+| `searchGamesContract` | `GET /search?q=` | Searches the database, PC releases from before 2010 |
+| `getWishlistContract` | `GET /wishlist` | The board, ranked, with this visitor's votes marked |
+| `castVoteContract` | `POST /votes` | Votes, adding the game if it is new (201 new, 200 already cast) |
+| `retractVoteContract` | `DELETE /votes/{id}` | Takes that vote back |
+
+Votes and retractions answer with the whole board, so the page never follows a write with a read.
 
 ### How a vote is counted
 
 There is no login. A vote is stored against an HMAC of the voter's IP address and user agent,
 and only that hash is written down, so a browser gets one vote per game and no address is ever
-stored. The trade-off is spelled out in `workers/wishlist/lib/voter.js`: address alone would
+stored. The trade-off is spelled out in `workers/wishlist/src/lib/voter.ts`: address alone would
 merge everyone behind one office or carrier NAT into a single voter, so the browser goes into
 the hash, which also means a second browser is a second voter. `MAX_VOTES_PER_DAY` caps what one
 voter can do in a day.
@@ -161,7 +172,7 @@ anything is stored.
 ### Game database
 
 `GAME_DB_PROVIDER` picks the source. Both implement the same small interface in
-`workers/wishlist/lib/providers/`, so adding another one is a file and a line.
+`workers/wishlist/src/lib/providers/`, so adding another one is a file and a line.
 
 - **`igdb`** (default): the deeper catalogue of DOS and early Windows releases, which is the
   era this project works in. IGDB credentials come from a Twitch application, created in the
@@ -169,11 +180,25 @@ anything is stored.
 - **`rawg`**: one API key from [rawg.io/apidocs](https://rawg.io/apidocs) and no OAuth
   exchange, but thinner on obscure pre-2000 titles.
 
+### Working on it
+
+```bash
+cd packages/wishlist-contracts && npm ci   # both consumers link this package
+cd ../../workers/wishlist && npm ci
+
+npm test        # vitest: the store's SQL, the providers, and the app end to end
+npm run typecheck
+```
+
+The tests need no network and no Cloudflare account. The store runs against `node:sqlite`
+through a small D1 stand-in, the game database is stubbed, and `test/roundtrip.test.ts` drives
+the real client against the real app over the contracts, which is what catches the two sides
+drifting apart.
+
 ### Deploying it
 
 ```bash
 cd workers/wishlist
-npm test                       # the store's SQL and the provider queries, no network
 
 wrangler d1 create refurbished-dinosaurs-wishlist
 # paste the database_id it prints into wrangler.toml, then:
@@ -182,7 +207,7 @@ wrangler d1 execute refurbished-dinosaurs-wishlist --file=schema.sql --remote
 wrangler secret put VOTER_SECRET         # any long random string
 wrangler secret put IGDB_CLIENT_ID       # or RAWG_API_KEY, for GAME_DB_PROVIDER = "rawg"
 wrangler secret put IGDB_CLIENT_SECRET
-wrangler deploy
+npm run deploy
 ```
 
 `GAME_DB_PROVIDER`, `ALLOWED_ORIGIN`, `BOARD_LIMIT` and `MAX_VOTES_PER_DAY` live in
@@ -199,9 +224,9 @@ endpoint = "https://<worker>.workers.dev/"
 
 Until `endpoint` is set, the page says voting is not wired up yet and points at GitHub issues.
 The headings, placeholder and footnote on the page are the other keys in that block. The board
-itself is `website/layouts/_partials/wishlist.html` plus `website/assets/js/wishlist.js`; row
-markup lives in `<template>` elements in the partial, because Tailwind's purge only keeps
-classes it can find in rendered HTML.
+itself is `website/layouts/_partials/wishlist.html` plus `website/assets/js/wishlist.ts`, which
+Hugo bundles with its own esbuild; row markup lives in `<template>` elements in the partial,
+because Tailwind's purge only keeps classes it can find in rendered HTML.
 
 ## Theme and colours
 

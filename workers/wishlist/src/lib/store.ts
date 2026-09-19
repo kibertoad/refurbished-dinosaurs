@@ -7,8 +7,26 @@
  * few hundred rows at most, which SQLite groups without noticing.
  */
 
+import type { D1Database, D1Result } from "@cloudflare/workers-types";
+import type { WishlistEntry } from "@refurbished-dinosaurs/wishlist-contracts";
+
+import type { ProviderGame } from "./providers/index.ts";
+
 /** Rows a board request returns at most. */
 const DEFAULT_LIMIT = 100;
+
+type EntryRow = {
+  id: string;
+  title: string;
+  release_year: number | null;
+  url: string | null;
+  cover_url: string | null;
+  developer: string | null;
+  summary: string | null;
+  votes: number;
+  voted: number;
+  added_at: number;
+};
 
 /**
  * The board, ranked. Ties go to whichever game was nominated first, so an
@@ -16,11 +34,11 @@ const DEFAULT_LIMIT = 100;
  *
  * `voted` marks the entries this visitor already backed, which is what the
  * page uses to render their buttons as cast.
- *
- * @param {D1Database} db
- * @param {{voterHash: string, limit?: number}} options
  */
-export async function listEntries(db, { voterHash, limit = DEFAULT_LIMIT }) {
+export async function listEntries(
+  db: D1Database,
+  { voterHash, limit = DEFAULT_LIMIT }: { voterHash: string; limit?: number },
+): Promise<WishlistEntry[]> {
   const { results } = await db
     .prepare(
       `SELECT g.id,
@@ -40,9 +58,9 @@ export async function listEntries(db, { voterHash, limit = DEFAULT_LIMIT }) {
         LIMIT ?2`,
     )
     .bind(voterHash, clampLimit(limit))
-    .all();
+    .all<EntryRow>();
 
-  return (results || []).map(toEntry);
+  return (results ?? []).map(toEntry);
 }
 
 /**
@@ -53,13 +71,14 @@ export async function listEntries(db, { voterHash, limit = DEFAULT_LIMIT }) {
  * no-op rather than an error: the browser and the database can disagree about
  * what this visitor already backed, and the database wins quietly.
  *
- * @param {D1Database} db
- * @param {object} game  a normalized provider entry
- * @param {string} voterHash
- * @param {number} [now]  epoch milliseconds
- * @returns {Promise<{added: boolean}>} false when the vote was already there
+ * @returns added false when the vote was already there
  */
-export async function castVote(db, game, voterHash, now = Date.now()) {
+export async function castVote(
+  db: D1Database,
+  game: ProviderGame,
+  voterHash: string,
+  now: number = Date.now(),
+): Promise<{ added: boolean }> {
   const timestamp = Math.floor(now / 1000);
 
   const [, vote] = await db.batch([
@@ -80,11 +99,11 @@ export async function castVote(db, game, voterHash, now = Date.now()) {
         game.provider,
         game.externalId,
         game.title,
-        game.year ?? null,
-        game.url ?? null,
-        game.coverUrl ?? null,
-        game.developer ?? null,
-        game.summary ?? null,
+        game.year,
+        game.url,
+        game.coverUrl,
+        game.developer,
+        game.summary,
         timestamp,
       ),
     db
@@ -98,17 +117,18 @@ export async function castVote(db, game, voterHash, now = Date.now()) {
 /**
  * Retracts a vote, and drops the game with it when that was the last one
  * holding it on the board.
- *
- * @param {D1Database} db
- * @param {string} gameId
- * @param {string} voterHash
- * @returns {Promise<{removed: boolean}>}
  */
-export async function retractVote(db, gameId, voterHash) {
+export async function retractVote(
+  db: D1Database,
+  gameId: string,
+  voterHash: string,
+): Promise<{ removed: boolean }> {
   const [vote] = await db.batch([
     db.prepare(`DELETE FROM votes WHERE game_id = ?1 AND voter_hash = ?2`).bind(gameId, voterHash),
     db
-      .prepare(`DELETE FROM games WHERE id = ?1 AND NOT EXISTS (SELECT 1 FROM votes WHERE game_id = ?1)`)
+      .prepare(
+        `DELETE FROM games WHERE id = ?1 AND NOT EXISTS (SELECT 1 FROM votes WHERE game_id = ?1)`,
+      )
       .bind(gameId),
   ]);
 
@@ -119,21 +139,21 @@ export async function retractVote(db, gameId, voterHash) {
  * How many votes this visitor has cast since `since` (epoch seconds). The rate
  * limit reads this; it is the only thing keeping one script from filling the
  * board on its own.
- *
- * @param {D1Database} db
- * @param {string} voterHash
- * @param {number} since
  */
-export async function votesSince(db, voterHash, since) {
+export async function votesSince(
+  db: D1Database,
+  voterHash: string,
+  since: number,
+): Promise<number> {
   const row = await db
     .prepare(`SELECT COUNT(*) AS votes FROM votes WHERE voter_hash = ?1 AND created_at >= ?2`)
     .bind(voterHash, since)
-    .first();
+    .first<{ votes: number }>();
 
   return row?.votes ?? 0;
 }
 
-function toEntry(row) {
+function toEntry(row: EntryRow): WishlistEntry {
   return {
     id: row.id,
     title: row.title,
@@ -148,11 +168,11 @@ function toEntry(row) {
   };
 }
 
-function clampLimit(limit) {
+function clampLimit(limit: number): number {
   return Math.min(Math.max(Math.trunc(limit) || 1, 1), DEFAULT_LIMIT);
 }
 
 /** D1 reports affected rows on `meta.changes`. */
-function changeCount(result) {
+function changeCount(result: D1Result | undefined): number {
   return result?.meta?.changes ?? 0;
 }

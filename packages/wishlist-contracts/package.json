@@ -1,0 +1,21 @@
+{
+  "name": "@refurbished-dinosaurs/wishlist-contracts",
+  "description": "API contracts shared by the wishlist worker and the site",
+  "version": "1.0.0",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@toad-contracts/valibot": "^1.0.0",
+    "valibot": "^1.5.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.0"
+  }
+}

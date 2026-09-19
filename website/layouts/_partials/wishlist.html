@@ -2,8 +2,9 @@
      config/_default/params.toml.
 
      The board and the search suggestions are filled in by
-     assets/js/wishlist.js from the endpoint in workers/wishlist, which is what
-     holds the game database credentials and counts the votes. The markup for a
+     assets/js/wishlist.ts from the endpoint in workers/wishlist, which is what
+     holds the game database credentials and counts the votes. Both sides call
+     it through the contracts in packages/wishlist-contracts. The markup for a
      row lives in the <template> elements at the bottom: Tailwind's purge reads
      classes out of the rendered HTML, so markup built by script has to come
      from here rather than from strings in the script. */}}
@@ -118,10 +119,16 @@
     </template>
   </div>
 
-  {{ with resources.Get "js/wishlist.js" }}
-    {{ $script := . }}
+  {{/* esbuild bundles the entry with the contracts and the typed client it
+       imports from node_modules; js.Build handles the TypeScript. */}}
+  {{ with resources.Get "js/wishlist.ts" }}
+    {{ $script := . | js.Build (dict
+      "minify" hugo.IsProduction
+      "target" "es2020"
+      "format" "iife")
+    }}
     {{ if hugo.IsProduction }}
-      {{ $script = $script | minify | fingerprint }}
+      {{ $script = $script | fingerprint }}
     {{ end }}
     <script defer src="{{ $script.RelPermalink }}"></script>
   {{ end }}

@@ -53,7 +53,9 @@ jobs:
         with:
           node-version: '24'
           cache: 'npm'
-          cache-dependency-path: website/package-lock.json
+          cache-dependency-path: |
+            packages/wishlist-contracts/package-lock.json
+            website/package-lock.json
 
       - name: Cache Hugo modules
         uses: actions/cache@v6
@@ -67,6 +69,13 @@ jobs:
 
       - name: Get Hugo modules
         run: hugo mod get
+
+      # The page script imports the shared contracts, and Hugo's esbuild
+      # resolves them through this package, so its own dependencies have to be
+      # installed before the site's.
+      - name: Install shared contracts
+        run: npm ci
+        working-directory: ./packages/wishlist-contracts
 
       - name: Install npm dependencies
         run: npm ci

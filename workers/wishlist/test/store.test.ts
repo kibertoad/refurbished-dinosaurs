@@ -1,10 +1,11 @@
-import assert from "node:assert/strict";
-import { beforeEach, describe, it } from "node:test";
+import type { D1Database } from "@cloudflare/workers-types";
+import { beforeEach, describe, expect, it } from "vitest";
 
-import { castVote, listEntries, retractVote, votesSince } from "../lib/store.js";
-import { createDatabase } from "./helpers/d1.js";
+import type { ProviderGame } from "../src/lib/providers/index.ts";
+import { castVote, listEntries, retractVote, votesSince } from "../src/lib/store.ts";
+import { createDatabase } from "./helpers/d1.ts";
 
-const CHAOS = {
+const CHAOS: ProviderGame = {
   id: "igdb:1",
   provider: "igdb",
   externalId: "1",
@@ -16,20 +17,27 @@ const CHAOS = {
   summary: "Gang warfare on a city grid.",
 };
 
-const CONQUEROR = { ...CHAOS, id: "igdb:2", externalId: "2", title: "Conqueror: A.D. 1086", year: 1995 };
+const CONQUEROR: ProviderGame = {
+  ...CHAOS,
+  id: "igdb:2",
+  externalId: "2",
+  title: "Conqueror: A.D. 1086",
+  year: 1995,
+};
 
 describe("the wishlist store", () => {
-  let db;
+  let db: D1Database;
+
   beforeEach(() => {
     db = createDatabase();
   });
 
   it("puts a game on the board with its first vote", async () => {
-    assert.deepEqual(await castVote(db, CHAOS, "voter-a"), { added: true });
+    expect(await castVote(db, CHAOS, "voter-a")).toEqual({ added: true });
 
     const entries = await listEntries(db, { voterHash: "voter-a" });
-    assert.equal(entries.length, 1);
-    assert.partialDeepStrictEqual(entries[0], {
+    expect(entries).toHaveLength(1);
+    expect(entries[0]).toMatchObject({
       id: "igdb:1",
       title: "Chaos Overlords",
       year: 1996,
@@ -40,13 +48,13 @@ describe("the wishlist store", () => {
   });
 
   it("counts one vote per voter, however often they ask", async () => {
-    assert.deepEqual(await castVote(db, CHAOS, "voter-a"), { added: true });
-    assert.deepEqual(await castVote(db, CHAOS, "voter-a"), { added: false });
+    expect(await castVote(db, CHAOS, "voter-a")).toEqual({ added: true });
+    expect(await castVote(db, CHAOS, "voter-a")).toEqual({ added: false });
     await castVote(db, CHAOS, "voter-b");
 
     const [entry] = await listEntries(db, { voterHash: "voter-c" });
-    assert.equal(entry.votes, 2);
-    assert.equal(entry.voted, false, "a voter who has not voted should not be marked as having voted");
+    expect(entry?.votes).toBe(2);
+    expect(entry?.voted).toBe(false);
   });
 
   it("ranks by votes, and breaks ties on which game was nominated first", async () => {
@@ -54,21 +62,14 @@ describe("the wishlist store", () => {
     await castVote(db, CONQUEROR, "voter-a", 2_000_000_000_000);
 
     let entries = await listEntries(db, { voterHash: "voter-a" });
-    assert.deepEqual(
-      entries.map((entry) => entry.id),
-      ["igdb:1", "igdb:2"],
-      "equal votes: the older nomination leads",
-    );
+    expect(entries.map((entry) => entry.id)).toEqual(["igdb:1", "igdb:2"]);
 
     await castVote(db, CONQUEROR, "voter-b", 2_000_000_000_000);
     entries = await listEntries(db, { voterHash: "voter-a" });
-    assert.deepEqual(
-      entries.map((entry) => [entry.id, entry.votes]),
-      [
-        ["igdb:2", 2],
-        ["igdb:1", 1],
-      ],
-    );
+    expect(entries.map((entry) => [entry.id, entry.votes])).toEqual([
+      ["igdb:2", 2],
+      ["igdb:1", 1],
+    ]);
   });
 
   it("refreshes the stored details when a game is voted for again", async () => {
@@ -76,40 +77,41 @@ describe("the wishlist store", () => {
     await castVote(db, { ...CHAOS, title: "Chaos Overlords (1996)", coverUrl: null }, "voter-b");
 
     const [entry] = await listEntries(db, { voterHash: "voter-a" });
-    assert.equal(entry.title, "Chaos Overlords (1996)");
-    assert.equal(entry.coverUrl, null);
-    assert.equal(entry.votes, 2);
+    expect(entry?.title).toBe("Chaos Overlords (1996)");
+    expect(entry?.coverUrl).toBeNull();
+    expect(entry?.votes).toBe(2);
   });
 
   it("retracts a vote and keeps the entry while anyone still backs it", async () => {
     await castVote(db, CHAOS, "voter-a");
     await castVote(db, CHAOS, "voter-b");
 
-    assert.deepEqual(await retractVote(db, "igdb:1", "voter-a"), { removed: true });
+    expect(await retractVote(db, "igdb:1", "voter-a")).toEqual({ removed: true });
 
     const [entry] = await listEntries(db, { voterHash: "voter-a" });
-    assert.equal(entry.votes, 1);
-    assert.equal(entry.voted, false);
+    expect(entry?.votes).toBe(1);
+    expect(entry?.voted).toBe(false);
   });
 
   it("drops the entry when the last vote goes", async () => {
     await castVote(db, CHAOS, "voter-a");
     await retractVote(db, "igdb:1", "voter-a");
 
-    assert.deepEqual(await listEntries(db, { voterHash: "voter-a" }), []);
+    expect(await listEntries(db, { voterHash: "voter-a" })).toEqual([]);
   });
 
   it("reports nothing removed when there was no vote to retract", async () => {
     await castVote(db, CHAOS, "voter-a");
-    assert.deepEqual(await retractVote(db, "igdb:1", "voter-b"), { removed: false });
-    assert.equal((await listEntries(db, { voterHash: "voter-a" }))[0].votes, 1);
+
+    expect(await retractVote(db, "igdb:1", "voter-b")).toEqual({ removed: false });
+    expect((await listEntries(db, { voterHash: "voter-a" }))[0]?.votes).toBe(1);
   });
 
   it("limits how many entries come back", async () => {
     await castVote(db, CHAOS, "voter-a");
     await castVote(db, CONQUEROR, "voter-a");
 
-    assert.equal((await listEntries(db, { voterHash: "voter-a", limit: 1 })).length, 1);
+    expect(await listEntries(db, { voterHash: "voter-a", limit: 1 })).toHaveLength(1);
   });
 
   it("counts a voter's recent votes for the rate limit", async () => {
@@ -118,8 +120,8 @@ describe("the wishlist store", () => {
     await castVote(db, CONQUEROR, "voter-a", now);
 
     const dayAgo = Math.floor(now / 1000) - 24 * 60 * 60;
-    assert.equal(await votesSince(db, "voter-a", dayAgo), 1);
-    assert.equal(await votesSince(db, "voter-a", 0), 2);
-    assert.equal(await votesSince(db, "voter-b", 0), 0);
+    expect(await votesSince(db, "voter-a", dayAgo)).toBe(1);
+    expect(await votesSince(db, "voter-a", 0)).toBe(2);
+    expect(await votesSince(db, "voter-b", 0)).toBe(0);
   });
 });
