@@ -12,19 +12,17 @@ import {
 import { requestByContract } from "@toad-contracts/hono";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import type { WishlistBindings } from "../src/env.ts";
-import { ORIGIN, appWithBindings, stubGameDatabase, testBindings } from "./helpers/app.ts";
+import { ORIGIN, appWithBindings, stubGameDatabase } from "./helpers/app.ts";
+import type { TestApp } from "./helpers/app.ts";
 
 const realFetch = globalThis.fetch;
 
 describe("the wishlist worker", () => {
-  let env: WishlistBindings;
-  let app: ReturnType<typeof appWithBindings>;
+  let app: TestApp;
 
   beforeEach(() => {
     stubGameDatabase();
-    env = testBindings();
-    app = appWithBindings(env);
+    app = appWithBindings();
   });
 
   afterEach(() => {
@@ -32,14 +30,14 @@ describe("the wishlist worker", () => {
   });
 
   /** Casts a vote and returns the board it answered with. */
-  async function vote(id: string, as = app) {
+  async function vote(id: string, as: TestApp = app) {
     const response = await requestByContract(as, castVoteContract, { body: { id } });
     return { status: response.status, body: await response.json() };
   }
 
   /** The same worker and database, seen from a different address. */
-  function asVisitor(address: string) {
-    return appWithBindings(env, { "CF-Connecting-IP": address });
+  function asVisitor(address: string): TestApp {
+    return appWithBindings({}, { "CF-Connecting-IP": address });
   }
 
   it("answers a preflight with the allowed origin", async () => {
@@ -51,7 +49,7 @@ describe("the wishlist worker", () => {
 
   it("turns away another origin", async () => {
     const response = await requestByContract(
-      appWithBindings(env, { Origin: "https://evil.example" }),
+      appWithBindings({}, { Origin: "https://evil.example" }),
       getWishlistContract,
       {},
     );
@@ -186,20 +184,30 @@ describe("the wishlist worker", () => {
   });
 
   it("caps how much one voter can do in a day", async () => {
-    env.MAX_VOTES_PER_DAY = "1";
-    await vote("igdb:1");
+    const capped = appWithBindings({ MAX_VOTES_PER_DAY: "1" });
+    await vote("igdb:1", capped);
 
-    const { status, body } = await vote("igdb:2");
+    const { status, body } = await vote("igdb:2", capped);
     expect(status).toBe(429);
     expect((body as { error: string }).error).toMatch(/lot of votes/);
   });
 
   it("says so when it is not configured", async () => {
-    delete env.VOTER_SECRET;
-    const response = await requestByContract(app, getWishlistContract, {});
+    const misconfigured = appWithBindings({ VOTER_SECRET: undefined });
+    const response = await requestByContract(misconfigured, getWishlistContract, {});
 
     expect(response.status).toBe(500);
     expect(((await response.json()) as { error: string }).error).toMatch(/misconfigured/);
+  });
+
+  it("serves a repeated search from the edge cache", async () => {
+    const calls = stubGameDatabase();
+
+    // A term of its own: the cache is real, and outlives a single test.
+    await app.request("/search?q=cache%20probe");
+    await app.request("/search?q=cache%20probe");
+
+    expect(calls).toHaveLength(1);
   });
 
   it("404s an unknown path", async () => {

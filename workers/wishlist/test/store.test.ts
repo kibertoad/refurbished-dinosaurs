@@ -1,9 +1,8 @@
-import type { D1Database } from "@cloudflare/workers-types";
-import { beforeEach, describe, expect, it } from "vitest";
+import { env } from "cloudflare:workers";
+import { describe, expect, it } from "vitest";
 
 import type { ProviderGame } from "../src/lib/providers/index.ts";
 import { castVote, listEntries, retractVote, votesSince } from "../src/lib/store.ts";
-import { createDatabase } from "./helpers/d1.ts";
 
 const CHAOS: ProviderGame = {
   id: "igdb:1",
@@ -25,13 +24,10 @@ const CONQUEROR: ProviderGame = {
   year: 1995,
 };
 
+/** The real D1 database the worker deploys against, migrated and per-test. */
+const db = env.WISHLIST_DB;
+
 describe("the wishlist store", () => {
-  let db: D1Database;
-
-  beforeEach(() => {
-    db = createDatabase();
-  });
-
   it("puts a game on the board with its first vote", async () => {
     expect(await castVote(db, CHAOS, "voter-a")).toEqual({ added: true });
 

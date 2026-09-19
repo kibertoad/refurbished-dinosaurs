@@ -18,7 +18,7 @@ import { sendByApiContract } from "@toad-contracts/frontend-http-client";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import wretch from "wretch";
 
-import { ORIGIN, appWithBindings, stubGameDatabase, testBindings } from "./helpers/app.ts";
+import { ORIGIN, appWithBindings, stubGameDatabase } from "./helpers/app.ts";
 
 const realFetch = globalThis.fetch;
 
@@ -27,7 +27,7 @@ describe("the contract round trip", () => {
 
   beforeEach(() => {
     stubGameDatabase();
-    const app = appWithBindings(testBindings());
+    const app = appWithBindings();
 
     // The browser would reach the worker over the network and set Origin
     // itself; here fetch goes straight into the app.

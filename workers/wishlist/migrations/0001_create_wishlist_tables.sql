@@ -1,5 +1,5 @@
--- Wishlist schema. Apply with:
---   wrangler d1 execute refurbished-dinosaurs-wishlist --file=schema.sql --remote
+-- Wishlist schema. Applied with `wrangler d1 migrations apply`, and by the
+-- tests, which read this directory and run it against a real D1 database.
 
 -- One row per nominated game, filled from the game database at vote time so
 -- the board does not depend on whatever the browser sent.

@@ -7,16 +7,26 @@ on:
       - 'packages/**'
       - 'workers/**'
       - 'website/assets/js/**'
-      - 'website/package*.json'
+      - 'website/scripts/**'
+      - 'website/package.json'
       - 'website/tsconfig.json'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'turbo.json'
       - '.github/workflows/checks.yml'
   pull_request:
     paths:
       - 'packages/**'
       - 'workers/**'
       - 'website/assets/js/**'
-      - 'website/package*.json'
+      - 'website/scripts/**'
+      - 'website/package.json'
       - 'website/tsconfig.json'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'turbo.json'
       - '.github/workflows/checks.yml'
   workflow_dispatch:
 
@@ -24,8 +34,8 @@ permissions:
   contents: read
 
 jobs:
-  wishlist:
-    name: Contracts, worker and page script
+  workspace:
+    name: Typecheck, test and bundle
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -38,44 +48,16 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: '24'
-          cache: 'npm'
-          cache-dependency-path: |
-            packages/wishlist-contracts/package-lock.json
-            workers/wishlist/package-lock.json
-            website/package-lock.json
 
-      # Both consumers link this package, and its own dependencies have to be
-      # installed for either of them to resolve through it.
-      - name: Install shared contracts
-        run: npm ci
-        working-directory: ./packages/wishlist-contracts
+      # pnpm's version is the `packageManager` field in package.json, so it is
+      # stated in one place for CI and for contributors alike.
+      - name: Enable corepack
+        run: corepack enable
 
-      - name: Typecheck shared contracts
-        run: npm run typecheck
-        working-directory: ./packages/wishlist-contracts
+      - name: Install
+        run: pnpm install --frozen-lockfile
 
-      - name: Install worker
-        run: npm ci
-        working-directory: ./workers/wishlist
-
-      - name: Typecheck worker
-        run: npm run typecheck
-        working-directory: ./workers/wishlist
-
-      - name: Test worker
-        run: npm test
-        working-directory: ./workers/wishlist
-
-      - name: Install site
-        run: npm ci
-        working-directory: ./website
-
-      - name: Typecheck page script
-        run: npm run typecheck
-        working-directory: ./website
-
-      # Hugo bundles this script with its own esbuild at build time; this is
-      # the same bundle, so a broken import fails here rather than in a deploy.
-      - name: Bundle page script
-        run: npm run check:js
-        working-directory: ./website
+      # turbo runs each package's typecheck, the worker's tests (inside
+      # workerd, against a real D1 database) and the page-script bundle.
+      - name: Check
+        run: pnpm check

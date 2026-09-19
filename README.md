@@ -8,22 +8,41 @@ theme, deployed to GitHub Pages.
 
 - [Hugo Extended](https://gohugo.io/installation/) 0.158 or newer (0.166 is what CI uses)
 - [Go](https://go.dev/dl/) 1.25+ (Hugo modules)
-- [Node.js](https://nodejs.org/) 24+ (Tailwind CSS, the wishlist worker and its tests)
+- [Node.js](https://nodejs.org/) 24+ and pnpm, which `corepack enable` installs at the version
+  the root `package.json` pins
 
 ## Getting started
 
 ```bash
-cd website
-npm install
-npm run dev
+corepack enable
+pnpm install
+pnpm dev
 ```
 
 The site is served at http://localhost:1313/refurbished-dinosaurs/ (the path comes from
-`baseURL`).
+`baseURL`). Hugo hot-reloads content, layouts and the page script, so the dev server is the
+only thing that needs to be running.
 
-If `npm install` leaves Tailwind unable to find its native binding, delete `node_modules` and
-`package-lock.json` and install again. That is [an npm bug with optional
-dependencies](https://github.com/npm/cli/issues/4828).
+## Workspace
+
+A pnpm workspace with [Turborepo](https://turbo.build) over it:
+
+| Package | What it is |
+| --- | --- |
+| `website` | The Hugo site: content, layouts, page scripts, Tailwind |
+| `workers/subscribe` | Mailing-list endpoint (Cloudflare Worker, no build or deps) |
+| `workers/wishlist` | Wishlist endpoint (Hono on Cloudflare Workers, D1) |
+| `packages/wishlist-contracts` | API contracts the wishlist worker and the site share |
+
+```bash
+pnpm check        # typecheck everything, run the tests, bundle the page script
+pnpm test         # just the tests
+pnpm typecheck
+```
+
+turbo runs each package's task in dependency order and caches what has not changed, so a repeat
+`pnpm check` with nothing touched finishes in about a second. A single package is reachable
+directly: `pnpm --filter refurbished-dinosaurs-wishlist test`.
 
 ## Content structure
 
@@ -183,32 +202,36 @@ anything is stored.
 ### Working on it
 
 ```bash
-cd packages/wishlist-contracts && npm ci   # both consumers link this package
-cd ../../workers/wishlist && npm ci
-
-npm test        # vitest: the store's SQL, the providers, and the app end to end
-npm run typecheck
+pnpm --filter refurbished-dinosaurs-wishlist test
+pnpm --filter refurbished-dinosaurs-wishlist typecheck
 ```
 
-The tests need no network and no Cloudflare account. The store runs against `node:sqlite`
-through a small D1 stand-in, the game database is stubbed, and `test/roundtrip.test.ts` drives
-the real client against the real app over the contracts, which is what catches the two sides
-drifting apart.
+The tests run **inside workerd**, through
+[`@cloudflare/vitest-pool-workers`](https://developers.cloudflare.com/workers/testing/vitest-integration/):
+a real D1 database migrated from `migrations/` before each test, a real edge cache, real
+bindings. No network and no Cloudflare account — only the game database is stubbed, by
+replacing `fetch` in the isolate the app runs in.
+
+`test/roundtrip.test.ts` drives the real client against the real app over the contracts, which
+is what catches the two sides drifting apart.
 
 ### Deploying it
 
 ```bash
 cd workers/wishlist
 
-wrangler d1 create refurbished-dinosaurs-wishlist
+pnpm wrangler d1 create refurbished-dinosaurs-wishlist
 # paste the database_id it prints into wrangler.toml, then:
-wrangler d1 execute refurbished-dinosaurs-wishlist --file=schema.sql --remote
+pnpm migrate                             # wrangler d1 migrations apply --remote
 
-wrangler secret put VOTER_SECRET         # any long random string
-wrangler secret put IGDB_CLIENT_ID       # or RAWG_API_KEY, for GAME_DB_PROVIDER = "rawg"
-wrangler secret put IGDB_CLIENT_SECRET
-npm run deploy
+pnpm wrangler secret put VOTER_SECRET    # any long random string
+pnpm wrangler secret put IGDB_CLIENT_ID  # or RAWG_API_KEY, for GAME_DB_PROVIDER = "rawg"
+pnpm wrangler secret put IGDB_CLIENT_SECRET
+pnpm deploy
 ```
+
+The schema is a D1 migration (`migrations/0001_create_wishlist_tables.sql`), so the tests and
+the deployment build the same tables from the same file.
 
 `GAME_DB_PROVIDER`, `ALLOWED_ORIGIN`, `BOARD_LIMIT` and `MAX_VOTES_PER_DAY` live in
 `wrangler.toml`. Every endpoint checks the origin, so an `ALLOWED_ORIGIN` that does not match
@@ -242,13 +265,13 @@ Colours and fonts come from `website/data/theme.json`. Hugoplate compiles them f
 CSS file rather than reading the JSON at build time, so after editing it:
 
 ```bash
-npm run theme     # rewrites assets/css/generated-theme.css
+pnpm theme        # rewrites assets/css/generated-theme.css
 ```
 
 The favicon and Open Graph image are generated pixel art, placeholders until there is real art:
 
 ```bash
-npm run images    # rewrites assets/images/{favicon,og-image}.png
+pnpm images       # rewrites assets/images/{favicon,og-image}.png
 ```
 
 ## Deploying
@@ -265,7 +288,11 @@ change, or the subscribe form's POST starts getting rejected.
 
 - `hugo mod npm pack` is not used. It ignores `package.hugo.json` on Hugo 0.166 and empties
   `package.json`, so the Tailwind dependencies are declared directly in `website/package.json`
-  and CI runs `npm ci`.
+  and CI runs `pnpm install --frozen-lockfile`.
+- pnpm blocks dependency install scripts and dependencies published in the last day. The
+  bundler, the Workers runtime and the file watcher need their scripts to run, and the
+  contracts stack is new enough to trip the age policy, so both are excepted by name in
+  `pnpm-workspace.yaml` rather than by switching the policies off.
 - `hugo.toml` adds `tailwindcss` to `security.exec.allow`. Hugo 0.166 does not whitelist it by
   default and `css.TailwindCSS` shells out to it.
 - `website/layouts/_markup/render-link.html` resolves root-relative markdown links against

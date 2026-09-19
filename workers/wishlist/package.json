@@ -9,20 +9,22 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
+    "migrate": "wrangler d1 migrations apply refurbished-dinosaurs-wishlist --remote",
     "deploy": "wrangler deploy"
   },
   "dependencies": {
-    "@refurbished-dinosaurs/wishlist-contracts": "file:../../packages/wishlist-contracts",
+    "@refurbished-dinosaurs/wishlist-contracts": "workspace:*",
     "@toad-contracts/hono": "^1.0.0",
     "@toad-contracts/valibot": "^1.0.0",
     "hono": "^4.13.0"
   },
   "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.22.0",
     "@cloudflare/workers-types": "^4.20250900.0",
     "@toad-contracts/frontend-http-client": "^1.0.0",
-    "@types/node": "^26.6.2",
     "typescript": "^5.9.0",
-    "vitest": "^3.2.0",
-    "wretch": "^3.0.9"
+    "vitest": "^4.1.11",
+    "wrangler": "^4.135.0",
+    "wretch": "^3.0.0"
   }
 }

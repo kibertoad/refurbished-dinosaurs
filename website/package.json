@@ -12,7 +12,7 @@
     "theme": "node scripts/theme.js",
     "images": "node scripts/generate-images.js",
     "typecheck": "tsc --noEmit",
-    "check:js": "esbuild assets/js/wishlist.ts --bundle --format=iife --target=es2020 --minify --outfile=/dev/null"
+    "check:js": "node scripts/check-js.js"
   },
   "devDependencies": {
     "@tailwindcss/cli": "^4.3.0",
@@ -24,7 +24,7 @@
     "typescript": "^5.9.0"
   },
   "dependencies": {
-    "@refurbished-dinosaurs/wishlist-contracts": "file:../packages/wishlist-contracts",
+    "@refurbished-dinosaurs/wishlist-contracts": "workspace:*",
     "@toad-contracts/frontend-http-client": "^1.0.0",
     "wretch": "^3.0.0"
   }

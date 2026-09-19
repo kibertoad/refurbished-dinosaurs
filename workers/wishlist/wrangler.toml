@@ -1,6 +1,9 @@
 name = "refurbished-dinosaurs-wishlist"
 main = "src/worker.ts"
-compatibility_date = "2026-09-01"
+# The tests run on the workerd binary that ships with the Vitest pool, and a
+# date newer than that binary supports refuses to start. Bump it and the pool
+# together.
+compatibility_date = "2026-08-22"
 
 [vars]
 # Which game database backs search and the entry details: "igdb" or "rawg".
