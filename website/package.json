@@ -5,6 +5,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
+    "postinstall": "node scripts/link-hugo-bins.js",
     "dev": "hugo server",
     "build": "hugo --gc --minify",
     "build:stats": "hugo --templateMetrics --logLevel info",
@@ -12,7 +13,8 @@
     "theme": "node scripts/theme.js",
     "images": "node scripts/generate-images.js",
     "typecheck": "tsc --noEmit",
-    "check:js": "node scripts/check-js.js"
+    "check:js": "node scripts/check-js.js",
+    "check:bins": "node scripts/link-hugo-bins.js --check"
   },
   "devDependencies": {
     "@tailwindcss/cli": "^4.3.0",

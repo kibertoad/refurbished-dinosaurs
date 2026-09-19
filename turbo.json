@@ -3,11 +3,21 @@
   "ui": "stream",
   "tasks": {
     "typecheck": {
-      "dependsOn": ["^typecheck"],
-      "inputs": ["src/**", "test/**", "assets/js/**", "tsconfig.json", "package.json"]
+      "dependsOn": [
+        "^typecheck"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**",
+        "assets/js/**",
+        "tsconfig.json",
+        "package.json"
+      ]
     },
     "test": {
-      "dependsOn": ["^typecheck"],
+      "dependsOn": [
+        "^typecheck"
+      ],
       "inputs": [
         "src/**",
         "test/**",
@@ -19,8 +29,20 @@
       ]
     },
     "check:js": {
-      "dependsOn": ["^typecheck"],
-      "inputs": ["assets/js/**", "tsconfig.json", "package.json"]
+      "dependsOn": [
+        "^typecheck"
+      ],
+      "inputs": [
+        "assets/js/**",
+        "tsconfig.json",
+        "package.json"
+      ]
+    },
+    "check:bins": {
+      "inputs": [
+        "scripts/link-hugo-bins.js",
+        "package.json"
+      ]
     }
   }
 }

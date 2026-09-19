@@ -26,7 +26,7 @@
 - `website/layouts/` - custom layout overrides
 - `website/assets/js/` - page scripts (loaded through Hugo's asset pipeline)
 - `workers/subscribe/` - optional Cloudflare Worker for the mailing list
-- `workers/wishlist/` - Hono app on Cloudflare Workers behind the voting wishlist (D1 + game database)
+- `workers/wishlist/` - Hono app on Cloudflare Workers behind the wishlist (D1 + game database)
 - `packages/wishlist-contracts/` - API contracts shared by that worker and the page script
 
 ## Theme
@@ -77,9 +77,12 @@ page.
 
 - Do not add `hugo mod npm pack` to the build. On Hugo 0.166 it ignores `package.hugo.json` and
   wipes the Tailwind dependencies out of `package.json`.
-- pnpm's binary shims run through node, so a package whose `bin` is a native executable (esbuild
-  after its postinstall) cannot be called as a CLI from a script. Use its JS API instead, the
-  way `website/scripts/check-js.js` does.
+- pnpm writes package bins as shell shims rather than symlinks, which breaks two things in
+  opposite directions. Hugo runs `css.TailwindCSS` through node and refuses a bin that is not a
+  Node.js script, so `website/scripts/link-hugo-bins.js` relinks `tailwindcss` on postinstall
+  and `pnpm --filter refurbished-dinosaurs-website check:bins` fails CI if it is ever a shim
+  again. And a bin that is a native executable (esbuild after its postinstall) cannot be run as
+  a CLI at all, so call its JS API, the way `website/scripts/check-js.js` does.
 - `relURL`/`relLangURL` leave a leading slash alone, so root-relative paths need
   `strings.TrimPrefix "/"` first or they lose the `/refurbished-dinosaurs/` prefix.
 - Markdown links in content go through `website/layouts/_markup/render-link.html` for the same
