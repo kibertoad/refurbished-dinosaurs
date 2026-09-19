@@ -221,21 +221,35 @@ is what catches the two sides drifting apart.
 cd workers/wishlist
 
 pnpm wrangler d1 create refurbished-dinosaurs-wishlist
-# paste the database_id it prints into wrangler.toml, then:
-pnpm migrate                             # wrangler d1 migrations apply --remote
+# paste the database_id it prints into wrangler.toml (it is an identifier, not
+# a secret, and belongs in the commit), then:
+pnpm run migrate                         # wrangler d1 migrations apply --remote
+pnpm run deploy
 
 pnpm wrangler secret put VOTER_SECRET    # any long random string
 pnpm wrangler secret put IGDB_CLIENT_ID  # or RAWG_API_KEY, for GAME_DB_PROVIDER = "rawg"
 pnpm wrangler secret put IGDB_CLIENT_SECRET
-pnpm deploy
 ```
+
+`pnpm run deploy`, not `pnpm deploy`: pnpm has a `deploy` command of its own.
 
 The schema is a D1 migration (`migrations/0001_create_wishlist_tables.sql`), so the tests and
 the deployment build the same tables from the same file.
 
-`GAME_DB_PROVIDER`, `ALLOWED_ORIGIN`, `BOARD_LIMIT` and `MAX_VOTES_PER_DAY` live in
-`wrangler.toml`. Every endpoint checks the origin, so an `ALLOWED_ORIGIN` that does not match
-the site exactly makes the whole board go quiet.
+Three secrets, and nothing else is one: `VOTER_SECRET` keys the voter hash, and replacing it
+later resets deduplication, so everyone gets their votes back. The other two are the game
+database's credentials, IGDB's coming from a [Twitch
+application](https://dev.twitch.tv/console/apps) rather than from IGDB itself. The worker
+answers 500 "the wishlist is misconfigured" until all three are set.
+
+`GAME_DB_PROVIDER`, `ALLOWED_ORIGIN`, `BOARD_LIMIT` and `MAX_VOTES_PER_DAY` are plain vars in
+`wrangler.toml`. `ALLOWED_ORIGIN` is an origin, not a URL: `https://kibertoad.github.io`, with
+no `/refurbished-dinosaurs/` and no trailing slash, because that is what the browser sends.
+Every endpoint checks it, reads included, so a mismatch does not degrade the board, it empties
+it. Leaving it blank turns the check off and lets any site vote through your visitors.
+
+No GitHub Actions secrets are involved: the worker is deployed from a laptop with wrangler, and
+the Pages workflow only builds the site.
 
 Then point the site at it, in `website/config/_default/params.toml`:
 
