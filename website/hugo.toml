@@ -166,6 +166,15 @@ lazy = true
 # Hugo 0.166 does not whitelist the Tailwind CLI by default, and
 # `css.TailwindCSS` shells out to it.
 [security]
+# Hugo runs Node tools (the Tailwind CLI) under Node's permission model, which
+# by default allows reads inside this directory only, and fails the build on a
+# symlink pointing out of the allowed set. pnpm keeps every package in a store
+# at the workspace root and links into it from everywhere, including links from
+# the store back to each workspace package, so the set has to be the workspace:
+# ".." rather than a list of directories a new package would fall outside of.
+[security.node.permissions]
+allowRead = [".", ".."]
+
 [security.exec]
 allow = [
   '^(dart-)?sass$',
