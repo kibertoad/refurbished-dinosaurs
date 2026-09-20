@@ -2,7 +2,9 @@
 
 ## Development
 
-- **Never run full builds** (`hugo --gc --minify` or `pnpm build`)
+- **Never run full builds** (`hugo --gc --minify` or `pnpm build`); CI does it instead, in the
+  `site` job of `.github/workflows/checks.yml`, which is the only thing besides a deploy that
+  runs Hugo
 - The user runs `pnpm dev` (Hugo dev server) in the background
 - Hugo hot-reloads changes automatically, just edit files
 - The website source is in the `website/` directory
