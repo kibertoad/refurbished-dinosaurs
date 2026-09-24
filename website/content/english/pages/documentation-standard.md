@@ -9,7 +9,7 @@ Every restoration records a game's internals in the format below, down to file n
 
 The format borrows from projects that have done parts of this well. The layout tables follow [IESDP](https://gibberlings3.github.io/iesdp/) and the [ModdingWiki](https://moddingwiki.shikadi.net/wiki/UINT16LE), the canonical format definitions are [Kaitai Struct](https://doc.kaitai.io/user_guide.html), the formula entries follow the [OpenMW research wiki](https://wiki.openmw.org/index.php?title=Research), the bug records follow UESP's [bug template](https://en.uesp.net/wiki/Template:Bug), and the way a claim is tied to an address in a hashed binary comes from [reccmp](https://github.com/isledecomp/reccmp/blob/master/docs/annotations.md) and the [zeldaret](https://github.com/zeldaret/oot/blob/main/docs/Documenting.md) projects. None of them gives every claim a stable ID, a status from a fixed list and a link to its evidence, so this standard adds those.
 
-Our first two projects, Chaos Overlords and Dark Sun, were documented before this standard existed. Their documentation will be converted to it.
+Our first two projects, Chaos Overlords and Dark Sun, were documented before this standard existed. Their documentation will be converted to it once the check script described under [Checks](#checks) exists, since reviewing two whole specs against that list by hand would miss too much.
 
 ## Where it lives
 
@@ -57,11 +57,31 @@ Where the game keeps something is either a field of a structure, by format ID an
 
 Some of these are claims about the original: the address of a global, the order a list is kept in, the order an event's handlers run in, the order a queue drains in, and what the original reads an outside value from. Each is followed by the IDs of the findings or experiments that show it, in brackets, or by `(unknown)` until there are some. A rule whose procedure relies on one of these claims, by using the global, visiting the list, emitting the event, draining the queue or reading the value, cites that evidence in its own `evidence` field as well, so that its status covers the claim. While a claim it relies on is `(unknown)`, the rule lists it in its Open questions section, and its status is no higher than `supported`, since a reading of the files and a run of the original cannot agree on something nobody has shown yet. A term that is renamed is renamed in the same change in every rule and fixture that uses it.
 
+Three terms from the glossary the examples on this page use:
+
+```markdown
+## turn_order
+
+The players in the order they take their turns. A list the game keeps, of
+FMT-DATA-004, in seat order starting with the human player [FND-COMBAT-011],
+kept in the field `players` of FMT-SAVE-001.
+
+## GangDetected
+
+An event: the police have found a hidden gang. It carries `gang: FMT-DATA-005`.
+Its handlers are RULE-COMBAT-008 and then RULE-AI-014, run at once
+[FND-COMBAT-011].
+
+## roll
+
+A function, defined by RULE-RNG-001.
+```
+
 The front matter schemas, the fixture schema, the check script and the tool that applies save patches belong to the standard. They go in [refurbished-dinosaurs-toolkit](https://github.com/kibertoad/refurbished-dinosaurs-toolkit), the toolkit every restoration shares, and have not been added yet. They are published from there as a package of their own, the spec package, versioned apart from the toolkit's other schemas, so a change to those never forces a new version of the standard. A game repository starts from the [project template](https://github.com/kibertoad/refurbished-dinosaurs-template) and pins a version of the spec package. Its major version is the version of this standard it checks, so pinning `1.x` means following version 1, and `spec/README.md` states the same number. This page describes version 1. [Versions](#versions) says when the number changes.
 
 Each game's spec stands on its own, even when games share an engine and file formats. An entry that another game's spec already covers is written again in this one, and cites the other game's entry through a source entry like any other outside document. Until this game's own files or runs confirm it, the entry stays `sourced`.
 
-The spec describes layouts and behaviour. It may quote individual values from the original as evidence, but it does not reproduce content: names, texts, images, sounds, maps, scripts, and the per-unit or per-item statistics a designer filled in. Those stay in the player's copy of the game, even when the executable holds them. Constants the code does arithmetic with are part of the rules and are written down in full. That includes the multipliers and thresholds in a formula, and tables in the executable's data that a formula indexes by a number, such as a damage falloff curve indexed by distance or a sine table indexed by angle. A table keyed by a game entity, such as a unit type, an item or a site, holds a designer's content even when a formula reads it, so the spec describes its layout as a format entry and leaves its values in the game's files. Scripts get the same treatment. Where a game runs logic the designers wrote as bytecode in its own interpreter, the interpreter is specified like any other procedure, with rules for what each instruction does, and the script format is a format entry. The scripts themselves are not transcribed into pseudocode. A finding may name a script and say what it does as evidence about the interpreter.
+The spec describes layouts and behaviour. It may quote individual values from the original as evidence, but it does not reproduce content: names, texts, images, sounds, maps, scripts, and the per-unit or per-item statistics a designer filled in. Those stay in the player's copy of the game, even when the executable holds them. The names of individual things a designer made, such as a unit, an item, a site or a character, are content. The names the game gives its concepts and mechanics, such as Influence or Crackdown, are not, and the spec uses them as terms. Constants the code does arithmetic with are part of the rules and are written down in full. That includes the multipliers and thresholds in a formula, and tables in the executable's data that a formula indexes by a number, such as a damage falloff curve indexed by distance or a sine table indexed by angle. A table keyed by a game entity, such as a unit type, an item or a site, holds a designer's content even when a formula reads it, so the spec describes its layout as a format entry and leaves its values in the game's files. Scripts get the same treatment. Where a game runs logic the designers wrote as bytecode in its own interpreter, the interpreter is specified like any other procedure, with rules for what each instruction does, and the script format is a format entry. The scripts themselves are not transcribed into pseudocode. A finding may name a script and say what it does as evidence about the interpreter.
 
 ## Identifiers
 
@@ -110,11 +130,11 @@ Builds and sources carry no status, but they can still be wrong: a build entry c
 
 ## Notation
 
-Integer types use the [ModdingWiki names](https://moddingwiki.shikadi.net/wiki/UINT16LE): `UINT8`, `INT8`, `UINT16LE`, `INT16LE`, `UINT32LE`, `INT32LE`, and the `BE` forms where a file is big-endian. Signed types are two's complement. `FLOAT32LE` and `FLOAT64LE` are IEEE 754. `FLOAT80LE` is the x87's 80-bit extended format, stored in 10 bytes, and `REAL48LE` is Turbo Pascal's 6-byte `Real`. `char[n]` is a fixed-length string whose encoding (`CP437`, `Windows-1252`, `ASCII`) and padding are stated in the field's meaning. `char[]` is a string that ends at its first NUL byte, which belongs to the field, with its encoding stated the same way. `bits[n]` is an unsigned field of `n` bits packed inside a larger integer, with bit 0 as the least significant. `BYTE[n]` is an opaque block.
+Integer types use the [ModdingWiki names](https://moddingwiki.shikadi.net/wiki/UINT16LE): `UINT8`, `INT8`, `UINT16LE`, `INT16LE`, `UINT32LE`, `INT32LE`, `UINT64LE`, `INT64LE`, and the `BE` forms where a file is big-endian. Signed types are two's complement. `FLOAT32LE` and `FLOAT64LE` are IEEE 754. `FLOAT80LE` is the x87's 80-bit extended format, stored in 10 bytes, and `REAL48LE` is Turbo Pascal's 6-byte `Real`. `char[n]` is a fixed-length string whose encoding (`CP437`, `Windows-1252`, `ASCII`) and padding are stated in the field's meaning. `char[]` is a string that ends at its first NUL byte, which belongs to the field, with its encoding stated the same way. `bits[n]` is an unsigned field of `n` bits packed inside a larger integer, with bit 0 as the least significant. `BYTE[n]` is an opaque block.
 
 A pointer names the type it points at: `PTR16<FMT-DATA-005>` is a 16-bit near pointer, an offset into the segment the field's meaning names, `FARPTR<FMT-DATA-005>` is a 16-bit offset followed by a 16-bit segment, the order far pointers are stored in, and `PTR32<FMT-DATA-005>` is a 32-bit flat address. A pointer to a list element points at the element's type, a pointer to something not yet identified points at `BYTE`, and 0 is a null pointer. A pointer stored in a file, such as a save written by dumping memory, is described the same way, and its meaning says what the value is once it has been loaded, since the address it held when the game wrote it no longer points anywhere.
 
-Every hash in the spec is SHA-256, written in lower-case hexadecimal.
+Every hash in the spec is the 128-bit form of [xxHash3](https://xxhash.com/) (`XXH3_128bits`, which `xxhsum -H2` prints), written as 32 lower-case hexadecimal digits in the byte order of its canonical form. The hashes tell a wrong or damaged copy from the right one and name files nobody can commit. Nothing in the spec depends on them resisting a file made on purpose to match, so a fast hash is enough. The fields that hold one are called `xxh3`.
 
 File offsets and addresses are hexadecimal with a `0x` prefix and upper-case digits. File offsets are padded to at least two digits (`0x1C`). How an address in code is written depends on the executable's format, which the build entry gives for each file:
 
@@ -127,15 +147,15 @@ File offsets and addresses are hexadecimal with a `0x` prefix and upper-case dig
 
 An executable in any other format, such as a classic Mac OS application, cannot be documented until a convention for it is added to this list. Adding one raises the spec package's minor version.
 
-An executable compressed by a packer, such as PKLITE, LZEXE or EXEPACK for DOS or UPX for a DOS extender, has no usable addresses until it is unpacked, and two unpackers can give different files. Its item in the build's `files` list adds `packer`, the packer and its version where known, and `unpacked`, which gives the `size`, `sha256` and `format` of the unpacked file and, in `tool`, the unpacker and version that produced it. Addresses in it follow the convention for the unpacked file's format. A location still names the file by the `path` it ships under, and the How to reproduce section of a finding there starts by unpacking it with that tool.
+An executable compressed by a packer, such as PKLITE, LZEXE or EXEPACK for DOS or UPX for a DOS extender, has no usable addresses until it is unpacked, and two unpackers can give different files. Its item in the build's `files` list adds `packer`, the packer and its version where known, and `unpacked`, which gives the `size`, `xxh3` and `format` of the unpacked file and, in `tool`, the unpacker and version that produced it. Addresses in it follow the convention for the unpacked file's format. A location still names the file by the `path` it ships under, and the How to reproduce section of a finding there starts by unpacking it with that tool.
 
 Overlay code has no fixed load address, so it is located by the path the build entry gives for the file that holds it, which may be the executable itself, and its offset in that file padded to eight digits: `GAME.OVL+0x0003A2F0`. Sizes and counts are decimal. Ranges are half-open and written with two dots, so `0x20..0x3C` covers `0x20` up to but not including `0x3C`.
 
 Screen coordinates are pixels on the game's native canvas, with the origin at the top left. Every screen entry gives the canvas it is drawn on in its `resolution` field, which matters in a game with more than one. A rectangle is written `(x, y, w, h)`.
 
-A resource is referenced by the file that holds it, with its path as the build entry writes it, and its place in that file: `PANELS.RES#12` for the entry at index 12, counted from 0 in the order the file's format entry defines, or `PANELS.RES#COMBAT` for a file whose entries have names. A resource in the resource section of a PE or NE executable is referenced by its type, without the `RT_` prefix, and its numeric ID or name: `Chaos Overlords.exe#BITMAP/132`, `Chaos Overlords.exe#STRING/1024`. Any other resource held in an executable is referenced by its address, or by the file and offset for overlay code. An audio track on a CD is not a file, so it is referenced by its disc and its track number from the disc's table of contents, counted from 1 and written with two digits: `CD:track02`, or `CD2:track05` for a game on more than one disc. The build entry lists each track the spec uses among its files, under that reference, with `format: cdda`, and gives the size and SHA-256 of its raw audio: the track's sectors as a ripper reads them, 2352 bytes each, with no header. CD audio has one fixed layout, so a track needs no format entry. Music the game plays through its own driver, such as MIDI, XMI or MOD data, is a file or a resource like any other.
+A resource is referenced by the file that holds it, with its path as the build entry writes it, and its place in that file: `PANELS.RES#12` for the entry at index 12, counted from 0 in the order the file's format entry defines, or `PANELS.RES#COMBAT` for a file whose entries have names. A resource in the resource section of a PE or NE executable is referenced by its type, without the `RT_` prefix, and its numeric ID or name: `Chaos Overlords.exe#BITMAP/132`, `Chaos Overlords.exe#STRING/1024`. Any other resource held in an executable is referenced by its address, or by the file and offset for overlay code. An audio track on a CD is not a file, so it is referenced by its disc and its track number from the disc's table of contents, counted from 1 and written with two digits: `CD:track02`, or `CD2:track05` for a game on more than one disc. The build entry lists each track the spec uses among its files, under that reference, with `format: cdda`, and gives the size and hash of its raw audio: the track's sectors as a ripper reads them, 2352 bytes each, with no header. CD audio has one fixed layout, so a track needs no format entry. Music the game plays through its own driver, such as MIDI, XMI or MOD data, is a file or a resource like any other.
 
-Durations are in milliseconds or in ticks of a named clock. A clock is anything the game counts time with: the step of its own logic, the display refresh (70 Hz in VGA mode 13h), the BIOS timer's 18.2 Hz, or a rate it programs into the timer chip. Each clock the game uses is defined once, in a rule, with `clock` (see [Files, resources and outside values](#files-resources-and-outside-values)). the glossary gives the name with the ID of that rule, and a duration in ticks names its clock: `12 ticks of logic_tick`.
+Durations are in milliseconds or in ticks of a named clock. A clock is anything the game counts time with: the step of its own logic, the display refresh (70 Hz in VGA mode 13h), the BIOS timer's 18.2 Hz, or a rate it programs into the timer chip. Each clock the game uses is defined once, in a rule, with `clock` (see [Rules, functions, tables and clocks](#rules-functions-tables-and-clocks)). The glossary gives the name with the ID of that rule, and a duration in ticks names its clock: `12 ticks of logic_tick`.
 
 Things that have not been identified get neutral names derived from where they are: `fn_00478CD0` for a function, `unk_2A` for a field at offset `0x2A`, `g_004C1F20` for a global. In 16-bit code the colon becomes an underscore: `fn_3D72_0515`. In overlay code the file's path comes first, with every character in it other than a letter or digit, such as a dot, a space or a slash, turned into an underscore: `fn_GAME_OVL_0003A2F0`. Logic the game runs as bytecode in its own interpreter, such as SCUMM scripts or a compiled Lua chunk, sits in a data file, so an unidentified script is named from the file and its offset the same way: `scr_SCRIPTS_DAT_00001A40`. They are renamed only when a finding or experiment shows what they do. The zeldaret projects put it well: it is better to leave something unnamed than to name it wrongly.
 
@@ -165,7 +185,7 @@ Every function the sections below define is built in, and needs no glossary entr
 ### Statements and operators
 
 - Blocks are marked by indentation. `=` assigns, and `let` in front of an assignment declares a local. There is no compound assignment: a rule writes `x = x + 1`. `and`, `or` and `not` are the logical operators, and `and` and `or` stop at the first operand that decides the result, so a random draw on the right is not made when the left has already decided it. Branches are `if`, `else if` and `else`. Loops are `for each x in list`, `for i in a..b`, which counts from `a` up to but not including `b` and runs no passes when `b` is not greater than `a`, and `while`. `for each` visits a list the game keeps in the order the glossary gives for it, and any other list, such as a local or an array field, from index 0 up. A loop that counts down is written with `while`. `break` leaves the innermost loop, and `continue` starts its next pass. A line starting with `#` is a comment.
-- Integer literals are decimal, or hexadecimal with a `0x` prefix. As in C, a decimal literal has the first of the default type and `INT32` that holds it, and a hexadecimal literal the first of the default type, its unsigned form, `INT32` and `UINT32`. A decimal value too large for `INT32` is written in hexadecimal. A literal with a decimal point is a `FLOAT64`.
+- Integer literals are decimal, or hexadecimal with a `0x` prefix. As in C, a decimal literal has the first of the default type, `INT32` and `INT64` that holds it, and a hexadecimal literal the first of the default type, its unsigned form, `INT32`, `UINT32`, `INT64` and `UINT64`. A decimal value too large for `INT64` is written in hexadecimal. A literal with a decimal point is a `FLOAT64`. Where the original uses a single-precision constant, as C's `1.5f` is, the rule writes `FLOAT32(1.5)`, since a bare `1.5` would widen a `FLOAT32` operand and compute in double precision.
 - The other operators, from the tightest binding to the loosest: unary `-` and `~`; `*`, `/` and `%`; `+` and `-`; `<<` and `>>`; `&`; `^`; `|`; the comparisons `==`, `!=`, `<`, `<=`, `>` and `>=`; `not`; `and`; `or`. `&`, `|`, `^` and `~` are bitwise. Operators on the same level group from left to right. The bitwise operators bind tighter than the comparisons, as in Python, so `flags & 4 == 4` tests the bit, where C would compare first. Comparisons do not chain the way Python's do, and a rule never writes `a < b < c`. A rule adds parentheses wherever a reader coming from C could misread the grouping.
 - `a.b` is the field `b` of the structure `a`, and `list[i]` is an element of a list, counted from 0. When `b` is a pointer, `a.b.c` follows it to the field `c` of the structure it points at, and `a.b == 0` tests for a null pointer. `[3, 5, 8]` is a list written out in full, and `[]` an empty one. `true` and `false` are the results of comparisons and logical operators, and storing one in an integer gives 1 or 0. A value stored as an integer counts as true when it is not 0, unless the rule says otherwise.
 
@@ -175,10 +195,12 @@ Every function the sections below define is built in, and needs no glossary entr
 - An integer with no type given is signed and has the default width of the build being described, which the build entry gives in `int_width`: 16 for a game built for a 16-bit machine, 32 otherwise. A rule whose builds have different widths, and whose result depends on the width, is split by build.
 - Integer operands are widened before an operation the way C widens them. An operand narrower than the default width becomes a signed value of the default width. If the operands still differ in width, the narrower one takes the type of the wider one, so a `UINT16` added to an `INT32` becomes an `INT32`, as C gives when a 16-bit `unsigned int` meets a `long`. Widening uses sign extension if the value's original type is signed and zero extension if it is unsigned. When a signed and an unsigned value of the same width then meet, the signed one is converted to unsigned first, and a rule where that changes the result says so.
 - The result has the width of the widened operands and wraps on overflow at that width, as the original machine did. A rule that depends on overflow says so. Storing a value in a name or field of a narrower type keeps its low bits, so 300 stored in a `UINT8` becomes 44.
+- A rule where the original keeps the full product of a multiplication, as `imul` leaves it in EDX:EAX (or `mul` in DX:AX in 16-bit code), widens an operand first so the product has room: `INT32((INT64(a) * b) >> 16)` is a 16.16 fixed-point multiply.
 - `/` on integers truncates toward zero, and `%` takes the sign of the left operand. `>>` is an arithmetic shift on signed values and a logical shift on unsigned ones, so `x >> 1` and `x / 2` differ for negative `x`, as they did in the original. Where a shift count can reach the width of the value, the rule says what the original gives, because the 8086 uses the whole count and later processors keep only its low five bits. Where a divisor can be 0, the rule says what the original does then (a crash, a processor exception the game catches, a fixed result), or lists it as an open question until that is known. The same goes for an index that can fall outside its list: the rule says what the original reads or overwrites there, which is often the next field or the next structure in memory, or lists it as an open question.
-- Floating-point values have the width the original stores them in. When an integer and a floating-point value meet in an operation, the integer is converted to the floating-point type first, and when two floating-point widths meet, the narrower one is widened. `%` takes integers only, and a rule where the original takes a floating-point remainder, as C's `fmod` does, writes it out as a function. Converting a floating-point value to an integer truncates toward zero, and a rule where the original rounds another way uses `floor`, `ceil` or `round_even` at that point. Where the original computes in the x87's 80-bit precision and the result depends on it, the rule says so, and uses `FLOAT80` for a value the original stores at that precision. Turbo Pascal did `REAL48` arithmetic in software, with rounding of its own, so a rule that computes with `REAL48` values and whose result depends on that rounding writes out how the original rounds.
-- The x87 control word sets the precision and rounding of every floating-point operation. A rule assumes the defaults, 64-bit precision with rounding to nearest even. Where the original has changed them by the time the rule runs, for example because Direct3D set single precision when it created its device, the rule says which settings are in effect and cites the finding that shows it, and each operation's result is rounded to that precision.
-- `floor`, `ceil` and `round_even` take a floating-point value and give an integer of the default type, rounded down, up, or to the nearest integer with ties going to the even one, which is what the x87 does by default.
+- Floating-point values have the width the original stores them in. When an integer and a floating-point value meet in an operation, the integer is converted to the floating-point type first, and when two floating-point widths meet, the narrower one is widened. `%` takes integers only, and a rule where the original takes a floating-point remainder, as C's `fmod` does, writes it out as a function. Converting a floating-point value to an integer truncates toward zero, and a rule where the original rounds another way uses `floor`, `ceil` or `round_even` at that point. The x87 keeps intermediate values in its registers at the precision set in its control word and rounds a value to the width of its type only when it stores it to memory, so a rule whose result depends on which intermediate values the original stores says which, and uses `FLOAT80` for a value the original stores at full extended precision. Turbo Pascal did `REAL48` arithmetic in software, with rounding of its own, so a rule that computes with `REAL48` values and whose result depends on that rounding writes out how the original rounds.
+- The x87 control word sets the precision and rounding of every x87 operation, and which precision a game runs with depends on its compiler's runtime. The processor starts with a 64-bit significand, the 80-bit extended format, and Borland and Watcom runtimes leave it there. Microsoft's C runtime sets a 53-bit significand, the precision of `FLOAT64`, at startup. A program can change it later, as Direct3D does when it creates its device and sets a 24-bit significand. A rule whose procedure computes with floating-point values gives, in its Inputs section, the precision and rounding in effect when it runs and cites the finding that shows them, and each operation's result is rounded to that precision.
+- Code compiled for SSE, which every 64-bit Windows and Linux build uses for floating point, ignores the x87 control word. Each operation rounds to the width of its type, and the MXCSR register sets the rounding and whether denormal values are flushed to zero. A rule whose code uses SSE gives those settings in its Inputs section the same way, where they are not the defaults of rounding to nearest even with no flushing.
+- `floor`, `ceil` and `round_even` take a floating-point value and give an integer of the default type, rounded down, up, or to the nearest integer with ties going to the even one, which is the rounding the x87 and SSE start with.
 
 ### Names, structures and pointers
 
@@ -188,7 +210,7 @@ Every function the sections below define is built in, and needs no glossary entr
 - A pointer to a list element moves the way C moves one: `p + n` points `n` elements further on and `p - n` points `n` elements back, `p[n]` is the element `p + n` points at, and `p - q` between two pointers into the same list is the number of elements between them. A pointer that moves outside its list reads or overwrites whatever lies there, and the rule says what that is, the same as for an index outside its list.
 - `free(x)` gives back the memory of a structure made with `new`, at the point where the original frees it. A pointer that still points at the structure afterwards is dangling, and a rule that reads or writes through one says what the original finds there, which depends on what has reused the memory since, or lists it as an open question until that is known.
 - `new FMT-DATA-005` makes a structure of that format with every field 0, every list of fixed length at its full length with each element made the same way, every other list empty and every pointer null, and the rule then sets the fields that start with other values: `let gang = new FMT-DATA-005`, `gang.hidden = true`, `append(player.roster, gang)`. Where the original leaves a field holding whatever was in that memory before, the rule says so, and lists what that can be as an open question until it is known. A rule that has to return more than one value returns a structure made this way.
-- A value from a format's enumeration table may be written by its name from the Name column, such as `if site.kind == SITE_BAR`, and means the number in its Value column. Enumeration names are upper-case letters, digits and underscores, start with a letter, and are unique across the spec, apart from the entries of a split format, which define the same names. A name in that form always leads to one row of one format entry, and the rule lists that format in its `related` field.
+- A value from a format's enumeration table may be written by its name from the Name column, such as `if site.kind == SITE_BAR`, and means the number in its Value column. Enumeration names are upper-case letters, digits and underscores, start with a letter, and are unique across the spec, apart from the entries of a split format, which define the same names. A name describes a category in plain words, as `SITE_BAR` does. Where each value stands for one thing a designer made, such as one unit type or one named character, the names would copy the game's roster, so they are the field's name and the value instead: `UNIT_TYPE_3`. A name in that form always leads to one row of one format entry, and the rule lists that format in its `related` field.
 
 ### Rules, functions, tables and clocks
 
@@ -202,14 +224,15 @@ Every function the sections below define is built in, and needs no glossary entr
 
 ### Lists and strings
 
-- The built-in functions are `min`, `max`, `abs`, and `count(list)` for the number of elements in a list. `append(list, x)` adds `x` at the end, `insert(list, i, x)` puts it at index `i` and moves the later elements up, `remove_at(list, i)` takes out the element at `i` and moves the later ones down, and `copy(x)` gives a new list or structure with the same elements or fields. A procedure does not change a list while a `for each` loop is visiting it.
+- The built-in functions are `min`, `max`, `abs`, and `count(list)` for the number of elements in a list. `append(list, x)` adds `x` at the end, `insert(list, i, x)` puts it at index `i` and moves the later elements up, `remove_at(list, i)` takes out the element at `i` and moves the later ones down, and `copy(x)` gives a new list or structure with the same elements or fields. A procedure does not change a list while a `for each` loop is visiting it. Where the original adds to or removes from a list while walking it, which can skip the next element or visit one it just added, the rule writes that loop with `while` and an index, so the skip or the extra visit shows in the procedure.
 - `stable_sort(list, key)` puts a list in ascending order of `key(element)`, where `key` is the name of a function that returns an integer or a string, and elements with equal keys keep the order they had. Many originals sort with an unstable algorithm such as the C library's `qsort`, and then the order of equal elements depends on the algorithm. A rule that sorts either shows that no two keys can be equal, or writes out the original's algorithm as a function of its own, or lists the order of ties in its Open questions section until it knows.
 - A `char[n]` or `char[]` field is a string. The comparison operators compare two strings byte by byte as unsigned values, up to the first NUL or the end of the field, the way C's `strcmp` does. A rule where the original compares in another way, ignoring case or through a collation table, writes that comparison out as a function. Strings never appear as literals in a procedure, apart from the arguments given to `resource`, `read_file`, `write_file` and `sprintf`, since text the game shows is content.
-- `sprintf(pattern, args)` gives a `char[]` built the way C's `sprintf` builds it, from a pattern in double quotes and the values after it: `read_file(sprintf("SAVE%d.GAM", slot), FMT-SAVE-001)`. It supports `%d`, `%u`, `%x`, `%X`, `%c`, `%s` and `%%`, with C's width and zero-padding flags. It is for the file names, keys and other strings the original builds for its own use, never for text the game shows.
+- `sprintf(pattern, args)` gives a `char[]` built the way C's `sprintf` builds it, from a pattern in double quotes and the values after it: `read_file(sprintf("SAVE%d.GAM", slot), FMT-SAVE-001)`. It supports `%d`, `%u`, `%x`, `%X`, `%c`, `%s` and `%%`, with C's width and zero-padding flags. It is for the file names, keys and other strings the original builds for its own use, and for turning a number the game computes into the text a screen shows. A pattern for text the game shows holds only conversion specifications and the digits, spaces and punctuation around them, such as `"$%d"` or `"%02d:%02d"`. Any word in that text comes from a resource, and a formatting step the patterns cannot express, such as a thousands separator, is written out as a function.
 
 ### Events, randomness and interrupts
 
 - `emit Name(args)` produces an event or message. Its glossary entry lists the arguments it carries and the rules that handle it, and each handler's Parameters section lists those arguments in the same order. The handlers either run at once, one after another in the glossary's order, before the line after the `emit`, or the event waits on the queue its glossary entry names. `drain q` runs the events waiting on the queue `q` in the order they were emitted, each with its handlers in the glossary's order, and an event emitted while the queue drains joins its end. A queue the original drains in another order says so in its glossary entry. An event with no handlers, such as one that plays a sound, only records that it happened, and a test compares it with the original.
+- `show SCR-MAP-001` makes that screen the one the game draws and takes input on, at the point where the original switches to it. The screen's States table says which state it opens in, and the rule lists the screen in its `related` field.
 - `draw(gen)` is one raw value from the random number generator `gen`, exactly as the original's generator returns it. Each generator is specified once, in its own rule, and has a glossary entry under its name. A game with a single generator may leave the name out of `draw`. The ways the game reduces a raw value to a range, such as `roll(n)` for an integer from 0 to n - 1, are defined in the same rule as functions that do arithmetic on `draw`, because two reductions of the same draw give different numbers. Every draw appears explicitly and in the order the original makes it, because the order of draws decides whether a replay stays in sync. A draw whose result the original ignores is written on a line of its own, `draw(gen)` or `roll(6)`, since it still moves the generator on.
 - A procedure runs one line at a time. Code that the original runs in between, such as a timer interrupt handler in a DOS game or a second thread in a Windows game, is a rule of its own, whose When it runs section names the interrupt or the thread. A procedure that such a rule can interrupt marks each point where the interruption can change what it reads next, or draw from a generator it uses, with a comment, `# may run: RULE-TIMER-002`, and lists that rule in its `related` field. Where the result depends on where the interruption falls and that is not yet known, the rule lists it in its Open questions section.
 
@@ -238,7 +261,7 @@ Each kind adds fields of its own, and the section for each kind below shows a co
 
 Rules, formats, screens and bugs also have `evidence`, the findings, experiments and sources they rest on, and `conflicting`, the evidence that contradicts them. Both are always present. `conflicting` holds only findings and experiments, and may only be non-empty when the status is `disputed`. They also have `split_with`, which is always present and lists the other entries of a split by build, described below, or is empty.
 
-Rules, formats, bugs and screens also have `related`, links to other claims, which go one way as well. A rule lists the rules it invokes and the formats it reads or writes. A format lists the rules its tables name, such as the rule that decompresses a compressed block. A bug lists the rules, formats and screens it occurs in. A screen lists the rules and screens its effects lead to. A format's links to other formats are the types in its layout table, and the check script reads them from there. The indexes carry every link in the other direction.
+Rules, formats, bugs and screens also have `related`, links to other claims, which go one way as well. A rule lists the rules it invokes, the formats it reads or writes, and the screens it shows. A format lists the rules its tables name, such as the rule that decompresses a compressed block. A bug lists the rules, formats and screens it occurs in. A screen lists the rules and screens its effects lead to, and the rules that format the values it shows. A format's links to other formats are the types in its layout table, and the check script reads them from there. The indexes carry every link in the other direction.
 
 An entry with status `supported` or higher may list a build only if at least one finding or experiment it cites lists that build too. An `unknown` or `sourced` entry lists the builds it is believed to apply to. A finding lists a second build only when it was checked in that build as well, and then gives a location in each, or, for a finding that has no locations, says in its observation how it was checked in each. An experiment lists exactly one build. Running it in another build is a second experiment with its own fixture, and its Question section names the first.
 
@@ -260,12 +283,12 @@ files:
   - path: Chaos Overlords.exe
     format: PE            # MZ, COM, NE, PE, LE, LX, ELF, cdda for a CD audio track, or data for any other file
     size: 664576
-    sha256: a1430159bbe20869e277a5000311344f4ec141ab77c96b385336617149e97d89
-  # every file the spec uses, with its format, size and SHA-256
+    xxh3: a82da6843188901e1d4fce1c76a925ef
+  # every file the spec uses, with its format, size and hash
   # a packed executable adds packer: and unpacked: (see Notation)
 ```
 
-A `path` uses forward slashes and is relative to the directory the game is installed to. A file the game reads from its CD and never installs is written `CD:` followed by its path on the disc, or `CD1:`, `CD2:` and so on for a game on more than one disc. `int_width` is the width of the executable that runs the game's rules, where a build also ships a setup program or launcher of another width.
+A `path` uses forward slashes and is relative to the directory the game is installed to. A file the game reads from its CD and never installs is written `CD:` followed by its path on the disc, or `CD1:`, `CD2:` and so on for a game on more than one disc. `int_width` is the width of the executable that runs the game's rules, where a build also ships a setup program or launcher of another width. A build has one such executable. An installation that ships two, such as a CD with a DOS and a Windows version of the game over the same data files, is two builds, one for each executable, and both list the data files they share.
 
 Body sections:
 
@@ -284,7 +307,7 @@ superseded_by: []
 author: New World Computing
 date: "1996"
 location: https://archive.org/details/example   # URL or archive location
-sha256: null              # set when the source is a file
+xxh3: null                # set when the source is a file
 licence: null             # set when it limits what may be quoted
 ```
 
@@ -315,11 +338,12 @@ locations:
     file: Chaos Overlords.exe
     address: 0x00472775..0x00472A10   # or offset: for data files and overlay code
 tool: Ghidra 12.1.3
+environment: null         # what a dynamic finding ran in, in the form experiments use; null for a static one
 ```
 
 `recorded_by` and `reproduced_by` hold GitHub usernames. The check script compares them, so it can tell that a `reproduced` finding was repeated by someone else.
 
-A `static` finding comes from reading the original's files without running them: disassembly, decompilation, or a data file in a hex editor. A `dynamic` finding comes from the original running: a breakpoint, a memory watch, a trace. Dynamic findings also give the `environment`, in the same form as experiments. A run set up to answer a question, with a fixed starting state and repetitions, is an experiment and gets its own entry.
+A `static` finding comes from reading the original's files without running them: disassembly, decompilation, or a data file in a hex editor. A `dynamic` finding comes from the original running: a breakpoint, a memory watch, a trace. A dynamic finding gives its `environment` in the same form as an experiment, and a static finding sets it to `null`. A run set up to answer a question, with a fixed starting state and repetitions, is an experiment and gets its own entry.
 
 Body sections:
 
@@ -330,7 +354,9 @@ Body sections:
 
 A location is a build, a file in that build and a range within it: an `address` range in the notation for the executable's format, or an `offset` range for a data file or for overlay code. A static finding has at least one location for each build it lists, and one for each separate range it describes, such as each function in an order of calls. Memory the game allocates while it runs has no fixed address, so a dynamic finding about it gives the address of the code that reads or writes it, and its observation names the structure and the field, by format entry ID once one exists. Line numbers from a decompiler listing are never used as locations, because they change with the tool version and the analysis settings.
 
-A dynamic finding about what the player sees or hears, such as a frame count measured from a video capture, may have an empty `locations` list. Its observation then says how it was captured in each build it lists and gives the SHA-256 of each capture, and describes what was measured closely enough that someone else can record it again. The capture is not committed if it shows the game's images or plays its sound (see [Licence](#licence)). It remains a single observation: once the question needs a fixed starting state or repeated runs, it becomes an experiment.
+A dynamic finding about what the player sees or hears, such as a frame count measured from a video capture, may have an empty `locations` list. Its observation then says how it was captured in each build it lists and gives the hash of each capture, and describes what was measured closely enough that someone else can record it again. The capture is not committed if it shows the game's images or plays its sound (see [Licence](#licence)). It remains a single observation: once the question needs a fixed starting state or repeated runs, it becomes an experiment.
+
+A capture of the screen, for a finding or an experiment, is taken at the size of the canvas in the screen entry's `resolution`, with no scaling, filtering or aspect correction, and in the colours the game set in its palette, so that a test can compare it with the rebuild pixel for pixel. DOSBox's own screenshot saves the emulated video memory that way, and a wrapper such as DxWnd needs its scaling and filtering turned off. The entry that records a capture says which tool took it and with what settings.
 
 ### Experiments
 
@@ -362,11 +388,74 @@ Body sections:
 
 Running the same save again only gives a different result if the generator's state differs between runs. Many games store that state in the save, and reloading them gives the same outcome every time. The Setup section says how the state varies: the game reseeds itself from the clock when it loads, or the experimenter writes a chosen value into it before each run.
 
-Almost every save holds content copied from the game's data, such as the names of units or places, so a save can almost never be committed (see [Licence](#licence)). The usual starting state is a save patch instead: a JSON file in `saves/`, following the standard's fixture schema, that lists writes to make to a base save. Each write gives the format ID of a structure in the save, a record index where the structure repeats, a field path, and the value. A field path is a field name from that format's layout table, followed by `.` and a field name for each nested structure it goes into, with an index in brackets for an array element: `stats.strength`, `members[3].rank`. A group of bits is named like any other field. The spec package's patch tool applies a patch through the save format's Kaitai definition, so a patch needs that definition (a save in a text format cannot be patched, and its experiment's Setup section gives the edits to make by hand), and every field it writes must be `supported` or `established` in its layout table, since a guessed layout would put the value in the wrong bytes. The Setup section says how to make the base save, usually by starting a new game with stated choices and saving at once, and the patch sets every field the experiment depends on. A patch never writes names, text or anything else that counts as content, so it can always be committed. A save is committed only when it holds none of the game's content. `starting_state` is `null` when there is neither, for example while the save format is not yet understood well enough to patch, and then the Setup section is the only way to recreate the starting state.
+Almost every save holds content copied from the game's data, such as the names of units or places, so a save can almost never be committed (see [Licence](#licence)). The usual starting state is a save patch instead: a JSON file in `saves/`, following the standard's fixture schema, that lists writes to make to a base save.
 
-The fixture is a JSON file that follows the standard's fixture schema. It holds the starting state with the SHA-256 of the save the runs started from (for a patch, the save after patching), the SHA-256 of the recording for an experiment that has one, the inputs, the expected events by their glossary names, and the expected end state. Each value in the end state is addressed the way a patch addresses a write, by format ID, record index and field path, or by glossary name for a value the game keeps in a global. Where the generator's state can be read, it records the state at the start of each run, so a test can replay single runs as well as compare the distribution. For random outcomes it also holds the tolerance: the statistical test a comparison uses and its significance level. Like a patch, a fixture never records names, text or other content. Where an event or the end state involves a named thing, the fixture identifies it by its index or ID in the game's files, and it leaves out any field of the end state that holds content. A save recreated from the Setup section and a patch will usually differ from that hash in fields the patch does not set. The hash identifies the save the recorded runs used, and a test compares only what the fixture lists. An experiment that starts from a new game has `starting_state: new-game` and no save hash, and its Setup section gives every choice made on the way into the game. The implementation's test suite reads the fixture directly.
+Each write gives the format ID of a structure in the save, a record index where the structure repeats (`null` where it does not), a field path, and the value. A field path is a field name from that format's layout table, followed by `.` and a field name for each nested structure it goes into, with an index in brackets for an array element: `stats.strength`, `members[3].rank`. A group of bits is named like any other field. The patch for the example experiment, `saves/EXP-COMBAT-004.patch.json`, turns Crackdown on and hides one gang of each player:
 
-Some originals record play themselves, as a demo that plays back on the title screen or a replay file the player saves. A recording like that is an experiment whose inputs come from the file, and the fixture holds the states and events the original reaches as it plays back, the same as for any other experiment. The recording's own layout is a format entry. A demo that ships with the game is one of the build's files, so `recording` gives its path as the build entry writes it, and a test finds it with the game's other files. A recording made for the experiment usually holds only a starting seed and the player's inputs. Then it is committed to `recordings/`, `recording` gives that path, and `spec/LICENSE` lists it as covered by neither licence. One that holds any of the game's content is not committed. The maintainer keeps it with the captures, named by its SHA-256 (see [Parity matrix](#parity-matrix)), and `recording` gives it as `captures/` followed by that hash. The Setup section says how a recording was made or where it comes from.
+```json
+{
+  "writes": [
+    { "format": "FMT-SAVE-001", "record": null, "field": "crackdown", "value": 1 },
+    { "format": "FMT-DATA-005", "record": 4, "field": "hidden", "value": 1 },
+    { "format": "FMT-DATA-005", "record": 9, "field": "hidden", "value": 1 },
+    { "format": "FMT-DATA-005", "record": 9, "field": "detection_chance", "value": 40 }
+  ]
+}
+```
+
+The spec package's patch tool applies a patch through the save format's Kaitai definition, so a patch needs that definition, and every field it writes must be `supported` or `established` in its layout table, since a guessed layout would put the value in the wrong bytes. A save in a text format cannot be patched, and its experiment's Setup section gives the edits to make by hand. A patch never writes names, text or anything else that counts as content, so it can always be committed.
+
+The Setup section says how to make the base save, usually by starting a new game with stated choices and saving at once, and the patch sets every field the experiment depends on. The base save holds content, so it is not committed. The maintainer keeps it with the captures, named by its hash (see [Parity matrix](#parity-matrix)), and keeps the patched save there too, which is where a test finds them. A save is committed to `saves/` only when it holds none of the game's content. `starting_state` is `null` when there is neither a patch nor a save that can be committed, for example while the save format is not yet understood well enough to patch. The Setup section is then the only way for a person to recreate the starting state, and a test finds the save the runs started from in the captures.
+
+The fixture is a JSON file that follows the standard's fixture schema. It holds the starting state with the hash of the save the runs started from (for a patch, the base save's hash as well as the patched one's), the hash of the recording for an experiment that has one, the inputs, the expected events by their glossary names, and the expected end state. Each value in the end state is addressed the way a patch addresses a write, by format ID, record index and field path, or by glossary name for a value the game keeps in a global. An experiment that starts from a new game has `starting_state: new-game` and no save hash, and its Setup section gives every choice made on the way into the game. The implementation's test suite reads the fixture directly.
+
+Where the generator's state can be read, the fixture records the state at the start of each run, so a test can replay single runs as well as compare the distribution. For random outcomes it also holds the tolerance: the statistical test a comparison uses and its significance level. A test that compares a distribution runs the rebuild from the states the fixture records, or, where the original's state could not be read, from the list of states in the fixture's `seeds`. It then gets the same result on every run, and a correct rebuild never fails it by chance, which a test drawing fresh random states would do once in every twenty runs at a significance level of 0.05.
+
+Like a patch, a fixture never records names, text or other content. Where an event or the end state involves a named thing, the fixture identifies it by its index or ID in the game's files, and it leaves out any field of the end state that holds content.
+
+A save recreated from the Setup section and a patch will usually differ from the recorded hash in fields the patch does not set. The hash identifies the save the recorded runs used, and a test compares only what the fixture lists.
+
+The fixture for the example experiment, with one of its 200 runs:
+
+```json
+{
+  "experiment": "EXP-COMBAT-004",
+  "build": "BLD-GOG-EN-1.1",
+  "starting_state": {
+    "patch": "saves/EXP-COMBAT-004.patch.json",
+    "base_xxh3": "3c1f0e5a9b7d42e68a0c5d1f2b4e6a80",
+    "xxh3": "e7b24d91c06f3a58b1d2c4e6f8091a3b"
+  },
+  "recording_xxh3": null,
+  "clock": "logic_tick",
+  "inputs": [
+    { "tick": 0, "name": "key_down", "value": "Enter" }
+  ],
+  "seeds": [],
+  "runs": [
+    {
+      "rng_state": 2851206427,
+      "events": [
+        { "tick": 1, "event": "GangDetected", "args": [{ "format": "FMT-DATA-005", "record": 9 }] }
+      ],
+      "end_state": [
+        { "format": "FMT-DATA-005", "record": 4, "field": "hidden", "value": 1 },
+        { "format": "FMT-DATA-005", "record": 9, "field": "hidden", "value": 0 }
+      ]
+    }
+  ],
+  "comparison": {
+    "outcome": "record of the gang in the first GangDetected event, or none",
+    "counts": { "4": 97, "9": 61, "none": 42 },
+    "test": "chi-squared",
+    "significance": 0.01
+  }
+}
+```
+
+The schema in the spec package is the authority on these files once it exists. The examples show the fields this page requires.
+
+Some originals record play themselves, as a demo that plays back on the title screen or a replay file the player saves. A recording like that is an experiment whose inputs come from the file, and the fixture holds the states and events the original reaches as it plays back, the same as for any other experiment. Its `starting_state` is what playback starts from: `new-game` for a recording that holds its own starting choices and seed, or the save or patch for one that the original plays back from a save. The recording's own layout is a format entry. A demo that ships with the game is one of the build's files, so `recording` gives its path as the build entry writes it, and a test finds it with the game's other files. A recording made for the experiment usually holds only a starting seed and the player's inputs. Then it is committed to `recordings/`, `recording` gives that path, and `spec/LICENSE` lists it as covered by neither licence. One that holds any of the game's content is not committed. The maintainer keeps it with the captures, named by its hash, and `recording` gives it as `captures/` followed by that hash. The Setup section says how a recording was made or where it comes from.
 
 ### Formats
 
@@ -443,7 +532,7 @@ Body sections:
 1. Summary: one or two sentences a player would understand.
 2. When it runs: the phase, event or input that triggers it.
 3. Parameters: the values a `call` passes to it, in order, with their types.
-4. Inputs: the state it reads, by glossary name.
+4. Inputs: the state it reads, by glossary name, and for a procedure that computes with floating-point values, the precision and rounding in effect (see [Types and arithmetic](#types-and-arithmetic)).
 5. Procedure: the rule in pseudocode, including every random draw in order.
 6. Outputs: the value it returns and its type, then the state it changes and the events, messages and sounds it produces, in order.
 7. Edge cases: limits, ties, empty sets, overflow.
@@ -451,9 +540,71 @@ Body sections:
 9. Differences between builds.
 10. Open questions.
 
+The whole of `rules/RULE-COMBAT-007.md`:
+
+````markdown
+---
+id: RULE-COMBAT-007
+title: Police detection visits gangs in player order, then roster order
+status: established
+builds: [BLD-GOG-EN-1.1]
+superseded_by: []
+evidence: [FND-COMBAT-011, EXP-COMBAT-004]
+conflicting: []
+split_with: []
+related: [RULE-RNG-001, FMT-DATA-004, FMT-DATA-005]
+---
+
+## Summary
+
+At the start of each police phase, the police may find each hidden gang. They check the players in turn order, and each player's gangs in roster order.
+
+## When it runs
+
+At the start of each police phase, as the first handler of `PolicePhaseStarted`.
+
+## Parameters
+
+None.
+
+## Inputs
+
+`turn_order`, each player's `roster`, each gang's `hidden` and `detection_chance`, and the state of `rng` through `roll`.
+
+## Procedure
+
+```text
+for each player in turn_order:
+    for each gang in player.roster:
+        if gang.hidden and roll(100) < gang.detection_chance:
+            gang.hidden = false
+            emit GangDetected(gang)
+```
+
+## Outputs
+
+No return value. Sets `hidden` to false on each gang found, and emits `GangDetected(gang)` for each, in the order they are found. Makes one draw from `rng` for each hidden gang and none for a gang that is not hidden.
+
+## Edge cases
+
+A `detection_chance` of 0 never finds the gang and one of 100 or more always does, since `roll(100)` gives 0 to 99. The draw is made either way.
+
+## What the sources say
+
+SRC-MANUAL-1996, in the chapter on the police, says hidden gangs can be found each turn and gives neither the chance nor the order.
+
+## Differences between builds
+
+None known.
+
+## Open questions
+
+None known.
+````
+
 ### Bugs
 
-A bug entry records a defect in the original: behaviour the game's own design plainly did not intend. The format follows UESP's bug template, with fields added for what a rebuild needs to decide.
+A bug entry records a defect in the original: behaviour the game's own design does not appear to intend. The format follows UESP's bug template, with fields added for what a rebuild needs to decide.
 
 ```yaml
 id: BUG-COMBAT-002
@@ -504,7 +655,7 @@ related: [RULE-COMBAT-012, SCR-MAP-001]
 
 Body sections, each table with an `Evidence` column as its last:
 
-1. Drawn elements: `Element | Resource | Position | Shown when`.
+1. Drawn elements: `Element | Resource | Shows | Position | Shown when`.
 2. Mouse input: `Region | Rectangle | Enabled when | Effect`.
 3. Keyboard input: `Key | Enabled when | Effect`.
 4. Other input: `Device | Input | Enabled when | Effect`, for joysticks and anything else that is not the mouse or keyboard.
@@ -514,7 +665,7 @@ Body sections, each table with an `Evidence` column as its last:
 8. Differences between builds.
 9. Open questions.
 
-An effect names a rule or another screen. A key is named by what is printed on it on a US keyboard (`A`, `F1`, `Enter`, `Left`), with modifiers joined by `+` (`Ctrl+S`). Keys that work on every screen are described in a rule, and a game that reads scan codes, or behaves differently with another keyboard layout, says so in that rule. Text shown on the screen is referenced as a resource, in the [notation](#notation) for resources, and never copied into the entry.
+An effect names a rule or another screen. A key is named by what is printed on it on a US keyboard (`A`, `F1`, `Enter`, `Left`), with modifiers joined by `+` (`Ctrl+S`). Keys that work on every screen are described in a rule, and a game that reads scan codes, or behaves differently with another keyboard layout, says so in that rule. Text shown on the screen is referenced as a resource, in the [notation](#notation) for resources, and never copied into the entry. An element that draws a value the game computes, such as the player's cash or the turn number, gives in its Shows cell the value by glossary name and the rule that turns it into text, and its Resource cell gives the font it is drawn in. An element that draws only a resource says `None` in Shows. Every rule a Shows cell names is in the screen's `related` field.
 
 ## Checks
 
@@ -537,9 +688,10 @@ The script, or until then the reviewer, checks that:
 - every superseded entry names what replaced or disproved it, and no chain of `superseded_by` links leads back to where it started;
 - a finding's or experiment's `superseded_by` names only findings and experiments, a build's only builds, a source's only sources, and a source appears in any other kind's `superseded_by` only in a bug's;
 - `conflicting` holds only findings and experiments and is empty unless the status is `disputed`, and `related` links only to the kinds allowed for the entry;
-- a rule's `related` field holds every rule its procedure calls, takes a function or table from, or names in a `# may run:` comment (all the entries of a split rule), every format whose structures it reads, writes, makes with `new` or passes to `read_file` or `write_file`, and every format whose enumeration names it uses;
-- every rule a format's tables name is in the format's `related` field, every rule and screen a screen's effects name is in the screen's `related` field, and every bug's `related` field names at least one rule, format or screen;
+- a rule's `related` field holds every rule its procedure calls, takes a function or table from, or names in a `# may run:` comment (all the entries of a split rule), every format whose structures it reads, writes, makes with `new` or passes to `read_file` or `write_file`, every format whose enumeration names it uses, and every screen it names with `show`;
+- every rule a format's tables name is in the format's `related` field, every rule and screen a screen's effects or Shows cells name is in the screen's `related` field, and every bug's `related` field names at least one rule, format or screen;
 - every entry in a `split_with` list names the others back and lists none of their builds, and every build an entry lists is listed by one entry of each split rule it calls or relates to and of each split format it names;
+- every finding has `environment`, set for a dynamic finding and `null` for a static one;
 - every glossary entry gives what the table under [Where it lives](#where-it-lives) asks of its kind of term, and every address, order and outside source it claims is followed by evidence IDs that resolve to entries that are not superseded, or by `(unknown)`;
 - every rule cites in its `evidence` the evidence of each glossary claim its procedure relies on, lists in its Open questions section each such claim that is `(unknown)`, and is not `established` while any of them is;
 - every name in a procedure that has the form of a neutral name for a function, global or script, every name it assigns without `let` that is not a local, every value from outside the game it reads, every function, table, clock and generator it uses other than the built-in ones, every queue it drains, and every event it emits has a glossary entry;
@@ -552,10 +704,10 @@ The script, or until then the reviewer, checks that:
 - every resource a screen or procedure references, and every file a procedure reads or writes, is in a file that a format entry lists, apart from CD audio tracks, which the build entry lists;
 - every binary format entry's `definition` exists unless the status is `unknown`, and every text format entry's `definition`, `size` and `byte_order` are null;
 - every Kaitai file belongs to the format entry its name and `meta/id` give, compiles, names the licence in `meta/license`, and has fixed sizes that match the layout table in its entry;
-- every experiment's `fixture` exists and validates against the fixture schema, every event it names has a glossary entry, and every format, field path and glossary name in its end state exists;
+- every experiment's `fixture` exists and validates against the fixture schema, every event it names has a glossary entry, every format, field path and glossary name in its end state exists, it gives the hash of the save its runs started from unless `starting_state` is `new-game`, and, for a patch, the hash of the base save as well;
 - every `starting_state` that names a save or a patch points to one in `saves/`, and every patch validates against the fixture schema and names formats and field paths that exist in their layout tables with status `supported` or `established`;
 - every save in `saves/` and every file in `recordings/` matches the hash in its fixture, is named by some experiment, and is listed in `spec/LICENSE` as covered by neither licence;
-- every `recording` that gives a path outside `recordings/` and `captures/` names a file in the experiment's build, and every experiment with a `recording` has that recording's SHA-256 in its fixture;
+- every `recording` that gives a path outside `recordings/` and `captures/` names a file in the experiment's build, and every experiment with a `recording` has that recording's hash in its fixture;
 - the standard version in `spec/README.md` is the major version of the spec package the repository pins;
 - the four indexes in `spec/index/` are regenerated and up to date.
 
@@ -595,7 +747,19 @@ It has one row for every rule, format and screen entry in the spec that is not s
 | `RULE-COMBAT-012` | Detailed combat resolution | supported | partial | None | `DEV-COMBAT-001`, `DEV-COMBAT-002` | supported | Hit chance is a placeholder until an experiment measures it. |
 | `SCR-COMBAT-003` | Combat results panel | sourced | missing | None | None | sourced | None |
 
-Spec ID, Title and Spec status are copied from the spec entry. Code is `missing`, `partial` or `complete`, and `complete` means the rebuild does everything the entry describes. A row whose spec status is `unknown` cannot be `complete`, since the entry does not describe anything yet. A placeholder in the code, such as a guessed formula, is marked with a `PLACEHOLDER: <spec ID>` comment, and a row whose ID appears in one cannot be `complete`. Tests lists test files by their path from the repository root, and only files whose tests compare the rebuild with evidence from the original: experiment fixtures, including those whose inputs come from a recording the original made, and distributions measured in it. A test that replays a fixture runs against the experiment's build. For a format row, the evidence is the original files themselves: a test counts if it decodes every file the entry lists from every build the entry lists, reads every byte, and gets the same value for every field as the entry's Kaitai definition. A format with no files, a memory structure or a message, is compared with what was recorded from the original running: the state in an experiment fixture, or memory dumps and captured messages, which a test decodes the same way it would decode a file. For a screen row, the evidence is captures of the original that the screen entry's findings and experiments record by SHA-256. A test counts if it brings the rebuild to the state a capture shows, from the same starting state and inputs, and compares each frame with the capture pixel for pixel. Sound is compared by which resource starts playing and on which tick, from the events in an experiment fixture, since a recording of the mixed output differs with the sound card and the emulator. A dump or capture that holds content is kept with the maintainer's copy of the game and found through `GAME_DIR`, as described below. Decoder tests on synthetic files, which cover edge cases the shipped files never reach, compare the rebuild with the spec rather than with the original, and are left out of the column along with tests that compare the rebuild with an earlier version of itself. Listed tests run with every deviation that has a setting switched off. Deviations lists every deviation log entry that has not been dropped and whose Departs from names the row's ID, and no others. Notes says in plain words what is missing or wrong.
+Spec ID, Title and Spec status are copied from the spec entry. Notes says in plain words what is missing or wrong.
+
+Code is `missing`, `partial` or `complete`, and `complete` means the rebuild does everything the entry describes. A row whose spec status is `unknown` cannot be `complete`, since the entry does not describe anything yet. A placeholder in the code, such as a guessed formula, is marked with a `PLACEHOLDER: <spec ID>` comment, and a row whose ID appears in one cannot be `complete`.
+
+Tests lists test files by their path from the repository root, and only files whose tests compare the rebuild with evidence from the original: experiment fixtures, including those whose inputs come from a recording the original made, and distributions measured in it. A test that replays a fixture runs against the experiment's build, and a test that compares a distribution runs from the generator states the fixture gives (see [Experiments](#experiments)). Listed tests run with every deviation that has a setting switched off.
+
+For a format row, the evidence is the original files themselves: a test counts if it decodes every file the entry lists from every build the entry lists, reads every byte, and gets the same value for every field as the entry's Kaitai definition. A format with no files, a memory structure or a message, is compared with what was recorded from the original running: the state in an experiment fixture, or memory dumps and captured messages, which a test decodes the same way it would decode a file.
+
+For a screen row, the evidence is captures of the original that the screen entry's findings and experiments record by hash. A test counts if it brings the rebuild to the state a capture shows, from the same starting state and inputs, and compares each frame with the capture pixel for pixel. Sound is compared by which resource starts playing and on which tick, from the events in an experiment fixture, since a recording of the mixed output differs with the sound card and the emulator. A dump or capture that holds content is kept with the maintainer's copy of the game and found through `GAME_DIR`, as described below.
+
+Decoder tests on synthetic files, which cover edge cases the shipped files never reach, compare the rebuild with the spec rather than with the original, and are left out of the column along with tests that compare the rebuild with an earlier version of itself.
+
+Deviations lists every deviation log entry that has not been dropped and whose Departs from names the row's ID, and no others.
 
 Status is worked out from the other columns:
 
@@ -615,7 +779,7 @@ The spec check script also checks `PARITY.md`: every eligible spec entry has exa
 
 It checks the rest of the implementation's references too. Every spec ID and deviation ID in the code, the tests, `PARITY.md` and `DEVIATIONS.md` must resolve, and a citation of a superseded spec entry fails the check until it is moved to what replaced it, so code does not keep pointing at a claim that was withdrawn. The Departs from item of a dropped deviation is the one exception. Deviation IDs are unique and follow the ID form, every deviation has its list items in order, every deviation that has not been dropped departs from at least one entry that has a row, its Default follows the rules for deviations above, and no deviation heading that exists on the main branch is removed.
 
-Most listed tests need the original game's files, which cannot be committed: the art for a screen, the per-unit statistics a combat fixture depends on, the files a decoder reads. Tests find them under the directory named by the `GAME_DIR` environment variable. It holds one directory per build, named by the build's ID, with the files laid out as the build entry's paths give them and a file from a disc under a directory named after the disc (`CD`, `CD2`): `GAME_DIR/BLD-GOG-EN-1.1/Chaos Overlords.exe`. An audio track is the raw audio the build entry hashes, in that directory under its track name with a `.cdda` extension: `GAME_DIR/BLD-GOG-EN-1.1/CD/track02.cdda`. Next to them, `GAME_DIR/captures/` holds the dumps, captures and recordings that cannot be committed, each named by its SHA-256. A test checks every file it reads against the hash its build entry or its finding gives. A test that needs a build or a capture that is not there reports itself as skipped. A format test needs every build its entry lists, and a test that replays a fixture needs the experiment's build, so the copy on the main branch's runner holds every build that a `validated` row's tests use.
+Most listed tests need the original game's files, which cannot be committed: the art for a screen, the per-unit statistics a combat fixture depends on, the files a decoder reads. Tests find them under the directory named by the `GAME_DIR` environment variable. It holds one directory per build, named by the build's ID, with the files laid out as the build entry's paths give them and a file from a disc under a directory named after the disc (`CD`, `CD2`): `GAME_DIR/BLD-GOG-EN-1.1/Chaos Overlords.exe`. An audio track is the raw audio the build entry hashes, in that directory under its track name with a `.cdda` extension: `GAME_DIR/BLD-GOG-EN-1.1/CD/track02.cdda`. Next to them, `GAME_DIR/captures/` holds the dumps, captures, recordings and saves that cannot be committed, each named by its hash. A test checks every file it reads against the hash its build entry or its finding gives. A test that needs a build or a capture that is not there reports itself as skipped. A format test needs every build its entry lists, and a test that replays a fixture needs the experiment's build, so the copy on the main branch's runner holds every build that a `validated` row's tests use.
 
 The test suite runs on every change and writes a report of which tests passed, failed or were skipped. A failing test fails the build. On the main branch, CI runs with a copy that a maintainer owns, kept on a self-hosted runner or in storage only the maintainers can read, never in the repository or a published build artifact, and the check fails if any test listed for a `validated` row was skipped. A pull request from a fork runs without a copy, and there the check lists those rows as unverified without failing, so the merge to main is what confirms them.
 
