@@ -1,0 +1,5 @@
+{{/* Replaces the theme's favicon partial, which tags every file as image/png and reuses it as the Apple touch icon.
+  The .ico gets sizes="32x32" rather than "any": Chrome picks an "any" .ico over the SVG. */}}
+<link rel="icon" href="{{ "favicon.ico" | relURL }}" sizes="32x32">
+<link rel="icon" href="{{ "favicon.svg" | relURL }}" type="image/svg+xml">
+<link rel="apple-touch-icon" href="{{ "apple-touch-icon.png" | relURL }}">
