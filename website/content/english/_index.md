@@ -1,7 +1,7 @@
 ---
 banner:
   title: "Old games do not have to go extinct"
-  content: "Refurbished Dinosaurs digs up obscure strategy and RPG titles from the 90s and rebuilds them so they run, and play, on machines that did not exist when they shipped. No emulator wrappers, no DOSBox duct tape: the rules get reconstructed, the assets stay yours."
+  content: "Refurbished Dinosaurs dig up obscure PC game titles from the 90s and rebuilds them so they run on machines that did not exist when they shipped. No emulator wrappers, no duct tape."
   button:
     enable: true
     label: "See what is playable"
