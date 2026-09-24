@@ -39,7 +39,7 @@ Every statement carries its evidence and a status saying how well established it
 
 ## Checking the rebuild
 
-The input files must match the known hashes of a supported edition. The decoders must read every byte of every file into the right value, which we test on synthetic files because original files cannot be committed. The same starting state and inputs must produce the same state changes as in the original, and the same state must produce the same screen and sound. A pass at one of these levels says nothing about the next.
+The input files must match the known hashes of a supported edition. The decoders must read every byte of every file into the right value. Original files cannot be committed, so those tests read a copy a maintainer owns when CI runs on the main branch, and synthetic files cover the edge cases the shipped files never reach. The same starting state and inputs must produce the same state changes as in the original, and the same state must produce the same screen and sound. A pass at one of these levels says nothing about the next.
 
 The simulation is deterministic: the same inputs and seed give the same result on every platform. Where the original records replays or writes deterministic saves, we check that the rebuild reaches the same states from recordings made in the original. Where it does neither, tests come from controlled experiments, each with a starting state, an input and the expected result. Random outcomes are checked against distributions measured in the original, with a stated tolerance. A game that seems to play fine proves little, so we test against the original executable.
 
