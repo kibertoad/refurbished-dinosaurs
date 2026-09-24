@@ -47,6 +47,55 @@ Each game is one file in `website/content/english/games/`. `status` in the front
 a key from `website/data/game_status.json`, which drives the badge and the grouping on the games
 page.
 
+## Writing style
+
+This covers every piece of text a visitor can read: pages and posts in `website/content/`, front
+matter (titles, descriptions, banner and principle copy), `params.toml` strings, i18n files,
+button labels, form messages, error text shown by the page script, and emails the workers send.
+It should read like one person who restores old games wrote it for other people who like them.
+Text that reads as machine-generated is a bug. Fix it when you touch the file, even if you were
+there for something else.
+
+How to write:
+
+- Say the concrete thing: the year, the engine, the platform, the mechanic, what works and what
+  does not yet. "Runs on Windows, Linux and macOS" beats any claim about being modern or
+  accessible.
+- Plain words and ordinary sentences. Vary sentence length the way people do when they talk.
+- Be honest about the state of a project. If something is missing, say what is missing. Do not
+  inflate "playable" into "complete" or "faithful".
+- Dry humour is fine when it comes from the subject matter. Forced jokes and wordplay in every
+  heading are not.
+- Stop when it is said. A section that has made its point does not need a closing line.
+
+Banned outright:
+
+- Em-dashes (`—`), and dashes used for a dramatic pause. Use a period, comma, colon or
+  parentheses. Straight quotes only.
+- "It's not just X, it's Y", "not only... but also", and "X, not Y" slogans ("Rebuilt, not
+  repackaged"). Say what the thing is and does.
+- Lists of three padded out for rhythm ("fast, faithful, and future-proof"). Keep the words that
+  carry information.
+- Rhetorical questions as transitions ("So what does this mean for you?"), and "whether you're
+  X or Y" framing.
+- Throat-clearing: "It's worth noting", "It's important to remember", "Keep in mind", "Simply
+  put", "At its core", "When it comes to".
+- Wrap-ups that repeat the page: "In summary", "Overall", "Ultimately", "At the end of the day".
+- Hype and marketing filler: "journey", "passion project", "labor of love", "breathe new life",
+  "timeless", "iconic", "beloved classic", "nostalgia trip", "reimagined", "experience" as a
+  verb, "take it to the next level".
+- LLM vocabulary: delve, tapestry, realm, landscape, navigate (figurative), leverage, robust,
+  seamless, elevate, underscore, testament, boasts, nestled, vibrant, unlock, unleash, empower,
+  foster, facilitate, utilize, myriad, plethora, crucial, vital, pivotal, intricate, meticulous,
+  comprehensive, holistic, game-changer, cutting-edge, ever-evolving.
+- Empty intensifiers (very, really, truly, incredibly) and hedges (perhaps, arguably) that are
+  not reporting a real uncertainty.
+- Emoji, bold used for emphasis inside a sentence, and headings or bullet lists where a short
+  paragraph would do.
+
+Before committing copy, read it aloud. If a sentence sounds like a product launch, a cover
+letter, or a chatbot, rewrite it.
+
 ## Wishlist
 
 - `/wishlist` is a voting board. The page is `website/layouts/wishlist.html` +
