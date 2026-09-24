@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "license": "MIT",
   "private": true,
-  "packageManager": "pnpm@11.27.0",
+  "packageManager": "pnpm@12.6.0",
   "scripts": {
     "dev": "pnpm --filter refurbished-dinosaurs-website dev",
     "theme": "pnpm --filter refurbished-dinosaurs-website theme",
@@ -14,6 +14,6 @@
     "check": "turbo run typecheck test check:js check:bins"
   },
   "devDependencies": {
-    "turbo": "^2.10.13"
+    "turbo": "^2.11.3"
   }
 }
