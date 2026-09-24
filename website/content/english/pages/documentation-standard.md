@@ -275,6 +275,8 @@ A build entry identifies one exact set of original files. Every other entry list
 id: BLD-GOG-EN-1.1
 title: Chaos Overlords 1.1, English, GOG release
 superseded_by: []
+developer: Stick Man Games  # the studio that made the game
+publisher: New World Computing  # the company that released the game
 publisher_version: "1.1"
 distribution: GOG
 languages: [en]          # ISO 639-1 codes of the languages the build can be played in
@@ -290,6 +292,8 @@ files:
 
 A `path` uses forward slashes and is relative to the directory the game is installed to. A file the game reads from its CD and never installs is written `CD:` followed by its path on the disc, or `CD1:`, `CD2:` and so on for a game on more than one disc. `int_width` is the width of the executable that runs the game's rules, where a build also ships a setup program or launcher of another width. A build has one such executable. An installation that ships two, such as a CD with a DOS and a Windows version of the game over the same data files, is two builds, one for each executable, and both list the data files they share.
 
+`developer` is the studio that made the game and `publisher` the company that released the build, which are often different companies. A re-release keeps the original developer, and its `publisher` names the company that published the original, with the re-release's seller in `distribution`. Where several studios made the game, `developer` names each of them, in the order the game's credits give them.
+
 Body sections:
 
 1. Obtaining: how to get the build.
@@ -304,7 +308,8 @@ A source entry records a document or tool from outside the project: the manual, 
 id: SRC-MANUAL-1996
 title: Chaos Overlords manual
 superseded_by: []
-author: New World Computing
+author: Stick Man Games   # who wrote it
+publisher: New World Computing  # who published it, or null when the author did
 date: "1996"
 location: https://archive.org/details/example   # URL or archive location
 xxh3: null                # set when the source is a file
