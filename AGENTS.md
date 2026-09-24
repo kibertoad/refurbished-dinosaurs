@@ -92,6 +92,13 @@ Banned outright:
   not reporting a real uncertainty.
 - Emoji, bold used for emphasis inside a sentence, and headings or bullet lists where a short
   paragraph would do.
+- Ad-copy cadence: runs of short verbless fragments, a label followed by a colon and a list, and
+  a clipped reassurance at the end ("nothing else", "no spam", "no fluff", "that's it"). Each
+  piece sounds punchy on its own; together they read like a template. Write full sentences with
+  a subject and a verb, and let the facts do the reassuring. Instead of "A few emails a year: new
+  restorations, playable releases, nothing else. Unsubscribe link in every message.", write "We
+  email when a restoration comes out or becomes playable, which has been a few times a year.
+  Every email has an unsubscribe link."
 
 Before committing copy, read it aloud. If a sentence sounds like a product launch, a cover
 letter, or a chatbot, rewrite it.
