@@ -25,7 +25,7 @@ Every finding names the exact build it came from: the edition, the version and t
 
 The executable has the final word on what the shipped game does. We read it in [Ghidra](https://github.com/NationalSecurityAgency/ghidra) and watch it run under a debugger. Functions and variables keep neutral names until their behaviour is confirmed, because a wrong name given early steers every later reading.
 
-An experiment starts from a saved state, changes one input, and records what follows. It is repeated from the same save. Anything that involves random numbers needs many repetitions and a recorded distribution, since a formula inferred from one roll is a guess.
+An experiment starts from a saved state, changes one input, and records what follows. It is repeated from the same save, with the random number generator's state varied between runs. Anything that involves random numbers needs many repetitions and a recorded distribution, since a formula inferred from one roll is a guess.
 
 The manual tells us what the designers intended and is often wrong about what shipped. FAQs, wikis and tools written by other fans are leads, which we credit and re-check. A rule stays provisional until two independent kinds of evidence agree: a reading of the executable or data files, and an observation of the original running.
 
