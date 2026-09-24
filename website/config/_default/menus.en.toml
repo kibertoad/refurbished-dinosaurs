@@ -12,14 +12,24 @@ url = "/wishlist"
 weight = 2
 
 [[main]]
+name = "Methodology"
+url = "/methodology"
+weight = 3
+
+[[main]]
+name = "Philosophy"
+url = "/philosophy"
+weight = 4
+
+[[main]]
 name = "Blog"
 url = "/blog"
-weight = 3
+weight = 5
 
 [[main]]
 name = "Contacts"
 url = "/contact"
-weight = 4
+weight = 6
 
 
 # footer menu
@@ -34,16 +44,26 @@ url = "/wishlist"
 weight = 2
 
 [[footer]]
+name = "Methodology"
+url = "/methodology"
+weight = 3
+
+[[footer]]
+name = "Philosophy"
+url = "/philosophy"
+weight = 4
+
+[[footer]]
 name = "Blog"
 url = "/blog"
-weight = 3
+weight = 5
 
 [[footer]]
 name = "Contacts"
 url = "/contact"
-weight = 4
+weight = 6
 
 [[footer]]
 name = "Privacy"
 url = "/privacy-policy"
-weight = 5
+weight = 7
