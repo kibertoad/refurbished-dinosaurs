@@ -80,6 +80,9 @@ Banned outright:
   X or Y" framing.
 - Throat-clearing: "It's worth noting", "It's important to remember", "Keep in mind", "Simply
   put", "At its core", "When it comes to".
+- Signposting: sentences that announce what the next paragraphs will cover, how many items
+  follow, or how they rank ("There are three approaches, and they are not equal", "This section
+  explains where that point is"). Start with the first actual claim.
 - Wrap-ups that repeat the page: "In summary", "Overall", "Ultimately", "At the end of the day".
 - Hype and marketing filler: "journey", "passion project", "labor of love", "breathe new life",
   "timeless", "iconic", "beloved classic", "nostalgia trip", "reimagined", "experience" as a
