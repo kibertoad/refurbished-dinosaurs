@@ -45,7 +45,7 @@ The simulation is deterministic: the same inputs and seed give the same result o
 
 ## The parity matrix
 
-Every game repository has a parity matrix, `PARITY.md`, kept apart from the spec. The spec says what the original does. The matrix says how much of that the rebuild does and how we know, with one row per rule, file format and screen in the spec. A row starts with the spec entry's status (unknown, sourced, supported, established or disputed). It becomes implemented when the code does everything the entry describes, and validated when an automated test compares the rebuild with evidence from the original and passes. Manual play never makes a row validated, and neither does code that still contains a placeholder formula. The exact format is in the [documentation standard](/documentation-standard/#parity-matrix).
+Every game repository has a parity matrix, `PARITY.md`, kept apart from the spec. The spec says what the original does. The matrix says how much of that the rebuild does and how we know, with one row per rule, file format and screen in the spec. A row starts with the spec entry's status (unknown, sourced, supported, established or disputed). It becomes implemented when the code does everything the entry describes, and validated when the entry rests on evidence from the original (supported or established) and an automated test compares the rebuild with that evidence and passes. Manual play never makes a row validated, and neither does code that still contains a placeholder formula. The exact format is in the [documentation standard](/documentation-standard/#parity-matrix).
 
 The matrix is our answer to "how accurate is it", published so readers can check the answer.
 
