@@ -37,9 +37,9 @@ jobs:
         uses: actions/configure-pages@v6
 
       - name: Setup Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@v7
         with:
-          go-version: '1.25'
+          go-version: '1.27'
           cache: false
 
       - name: Setup Hugo
@@ -49,7 +49,7 @@ jobs:
           extended: true
 
       - name: Setup Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: '24'
 
@@ -81,11 +81,14 @@ jobs:
       - name: Generate hugo_stats.json
         run: hugo --gc
 
+      # Pages knows the domain it serves (the custom domain, when one is set),
+      # so the asset URLs come from there rather than from hugo.toml.
       - name: Build site
         env:
           HUGO_ENVIRONMENT: production
           NODE_ENV: production
-        run: hugo --gc --minify
+          PAGES_BASE_URL: ${{ steps.pages.outputs.base_url }}
+        run: hugo --gc --minify --baseURL "${PAGES_BASE_URL}/"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5

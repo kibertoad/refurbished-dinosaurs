@@ -8,7 +8,7 @@ compatibility_date = "2026-08-22"
 [vars]
 # Which game database backs search and the entry details: "igdb" or "rawg".
 GAME_DB_PROVIDER = "igdb"
-ALLOWED_ORIGIN = "https://kibertoad.github.io"
+ALLOWED_ORIGIN = "http://dinorefurb.com"
 # Entries a board read returns, and how many votes one voter gets per day.
 BOARD_LIMIT = "100"
 MAX_VOTES_PER_DAY = "25"

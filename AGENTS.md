@@ -86,9 +86,14 @@ page.
   again. And a bin that is a native executable (esbuild after its postinstall) cannot be run as
   a CLI at all, so call its JS API, the way `website/scripts/check-js.js` does.
 - `relURL`/`relLangURL` leave a leading slash alone, so root-relative paths need
-  `strings.TrimPrefix "/"` first or they lose the `/refurbished-dinosaurs/` prefix.
+  `strings.TrimPrefix "/"` first or they drop any path `baseURL` carries.
 - Markdown links in content go through `website/layouts/_markup/render-link.html` for the same
   reason.
+- The site lives at the custom domain `dinorefurb.com`, set in the repository's Pages settings
+  (there is no `CNAME` file). The deploy passes Pages' own `base_url` to Hugo as `--baseURL`, so
+  asset URLs follow whatever domain Pages serves. `baseURL` in `website/hugo.toml` is what the
+  dev server and the CI build use; keep it on the same domain. A stale path there is what 404s
+  every stylesheet in production.
 
 ## Troubleshooting
 

@@ -19,8 +19,7 @@ pnpm install
 pnpm dev
 ```
 
-The site is served at http://localhost:1313/refurbished-dinosaurs/ (the path comes from
-`baseURL`). Hugo hot-reloads content, layouts and the page script, so the dev server is the
+The site is served at http://localhost:1313/. Hugo hot-reloads content, layouts and the page script, so the dev server is the
 only thing that needs to be running.
 
 ## Workspace
@@ -243,8 +242,8 @@ application](https://dev.twitch.tv/console/apps) rather than from IGDB itself. T
 answers 500 "the wishlist is misconfigured" until all three are set.
 
 `GAME_DB_PROVIDER`, `ALLOWED_ORIGIN`, `BOARD_LIMIT` and `MAX_VOTES_PER_DAY` are plain vars in
-`wrangler.toml`. `ALLOWED_ORIGIN` is an origin, not a URL: `https://kibertoad.github.io`, with
-no `/refurbished-dinosaurs/` and no trailing slash, because that is what the browser sends.
+`wrangler.toml`. `ALLOWED_ORIGIN` is an origin: `http://dinorefurb.com`, with no path and
+no trailing slash, because that is what the browser sends.
 Every endpoint checks it, reads included, so a mismatch does not degrade the board, it empties
 it. Leaving it blank turns the check off and lets any site vote through your visitors.
 
