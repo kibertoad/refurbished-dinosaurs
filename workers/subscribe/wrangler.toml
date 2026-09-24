@@ -5,8 +5,8 @@ compatibility_date = "2026-09-01"
 [vars]
 FROM_EMAIL = "news@refurbished-dinosaurs.org"
 FROM_NAME = "Refurbished Dinosaurs"
-SITE_URL = "http://dinorefurb.com"
-ALLOWED_ORIGIN = "http://dinorefurb.com"
+SITE_URL = "https://dinorefurb.com"
+ALLOWED_ORIGIN = "https://dinorefurb.com"
 # Optional: segment confirmed contacts join, for targeting Broadcasts.
 RESEND_SEGMENT_ID = ""
 

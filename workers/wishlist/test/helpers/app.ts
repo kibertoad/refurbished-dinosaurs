@@ -13,7 +13,7 @@ import { env } from "cloudflare:workers";
 import { createApp } from "../../src/app.ts";
 import type { WishlistBindings } from "../../src/env.ts";
 
-export const ORIGIN = "http://dinorefurb.com";
+export const ORIGIN = "https://dinorefurb.com";
 
 /** Games the stubbed IGDB knows about. Anything else is "not eligible". */
 export const IGDB_GAMES: Record<string, Record<string, unknown>> = {

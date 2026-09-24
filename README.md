@@ -242,7 +242,7 @@ application](https://dev.twitch.tv/console/apps) rather than from IGDB itself. T
 answers 500 "the wishlist is misconfigured" until all three are set.
 
 `GAME_DB_PROVIDER`, `ALLOWED_ORIGIN`, `BOARD_LIMIT` and `MAX_VOTES_PER_DAY` are plain vars in
-`wrangler.toml`. `ALLOWED_ORIGIN` is an origin: `http://dinorefurb.com`, with no path and
+`wrangler.toml`. `ALLOWED_ORIGIN` is an origin: `https://dinorefurb.com`, with no path and
 no trailing slash, because that is what the browser sends.
 Every endpoint checks it, reads included, so a mismatch does not degrade the board, it empties
 it. Leaving it blank turns the check off and lets any site vote through your visitors.
