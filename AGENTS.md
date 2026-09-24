@@ -71,7 +71,7 @@ hugo mod get -u ./...
 
 ## Subscription
 
-Email goes through Resend, not SendGrid. The mailing list block is
+Email goes through Resend. The mailing list block is
 `website/layouts/_partials/subscribe.html`, configured under `[subscription]` in `params.toml`.
 Default is `provider = "endpoint"`: the site's own form posts to `workers/subscribe`, a
 Cloudflare Worker that creates the Resend contact as `unsubscribed` and flips it to subscribed
