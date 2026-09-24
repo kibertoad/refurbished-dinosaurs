@@ -19,7 +19,7 @@ We write a new engine from documentation of the original. A rebuild written agai
 
 No original code goes into a repository. Decompiler output, disassembly listings, byte dumps and analysis databases stay on the researcher's machine. What gets committed is a description of behaviour in our own words, such as a formula, a table layout or a state diagram, and the implementation is written from that description.
 
-Every finding names the exact build it came from: the edition, the version and the SHA-256 of the file it was observed in. Supported editions are listed by hash, and the importer refuses files it does not recognise instead of guessing.
+Every finding names the exact build it came from: the edition, the version and the SHA-256 of the file it was found in. Supported editions are listed by hash, and the importer refuses files it does not recognise instead of guessing.
 
 ## Studying the original
 
@@ -27,7 +27,7 @@ The executable has the final word on what the shipped game does. We read it in [
 
 An experiment starts from a saved state, changes one input, and records what follows. It is repeated from the same save. Anything that involves random numbers needs many repetitions and a recorded distribution, since a formula inferred from one roll is a guess.
 
-The manual tells us what the designers intended and is often wrong about what shipped. FAQs, wikis and tools written by other fans are leads, which we credit and re-check. A finding stays provisional until two independent kinds of evidence agree, normally a static reading and a controlled observation.
+The manual tells us what the designers intended and is often wrong about what shipped. FAQs, wikis and tools written by other fans are leads, which we credit and re-check. A rule stays provisional until two independent kinds of evidence agree: a reading of the executable or data files, and an observation of the original running.
 
 We have not settled on a runtime tool yet. It has to take text commands and print text back, so that scripts and language models can run the same experiment the same way every time. We are trying [Frida](https://frida.re), cdb from [WinDbg](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/), Ghidra's own debugger, and [DOSBox-X](https://dosbox-x.com) for DOS games, and will write up what worked.
 
@@ -45,7 +45,7 @@ The simulation is deterministic: the same inputs and seed give the same result o
 
 ## The parity matrix
 
-Every game repository has a parity matrix, `PARITY.md`, kept apart from the spec. The spec says what the original does. The matrix says how much of that the rebuild does and how we know, with one row per rule, file format and screen in the spec. A row starts with the spec entry's status (unknown, documented, observed, established). It becomes implemented when the code does everything the entry describes, and validated when an automated test compares the rebuild with evidence from the original and passes. Manual play never makes a row validated, and neither does code that still contains a placeholder formula. The exact format is in the [documentation standard](/documentation-standard/#parity-matrix).
+Every game repository has a parity matrix, `PARITY.md`, kept apart from the spec. The spec says what the original does. The matrix says how much of that the rebuild does and how we know, with one row per rule, file format and screen in the spec. A row starts with the spec entry's status (unknown, sourced, supported, established or disputed). It becomes implemented when the code does everything the entry describes, and validated when an automated test compares the rebuild with evidence from the original and passes. Manual play never makes a row validated, and neither does code that still contains a placeholder formula. The exact format is in the [documentation standard](/documentation-standard/#parity-matrix).
 
 The matrix is our answer to "how accurate is it", published so readers can check the answer.
 

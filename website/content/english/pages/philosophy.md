@@ -21,7 +21,7 @@ If we shipped a playable rebuild without the documentation, nobody could check i
 
 ## Using what we publish
 
-The runtimes, their source code and the technical documentation are published under the MIT licence. Anyone can use them however they like without asking us, including in commercial products.
+The runtimes and their source code are published under the MIT licence. The technical documentation is published under Creative Commons Attribution 4.0, except for its machine-readable parts (format definitions, test fixtures and schemas), which are under MIT like the code. Anyone can use all of it without asking us, including in commercial products, as long as they credit the project.
 
 One thing is forbidden: distributing a runtime from this project together with copyrighted assets from the original game, such as its art, audio, text, data tables or executables. That covers installers, archives, disk images and any other bundle. Our licence cannot permit this, because the assets were never ours to license. They belong to the game's copyright holders, and the only people who may bundle them are those holders and anyone who has their written permission. Everyone else ships the runtime alone, and players supply the game from a copy they own.
 
