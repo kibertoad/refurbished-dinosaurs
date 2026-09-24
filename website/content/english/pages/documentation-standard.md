@@ -309,7 +309,6 @@ id: SRC-MANUAL-1996
 title: Chaos Overlords manual
 superseded_by: []
 author: Stick Man Games   # who wrote it
-publisher: New World Computing  # who published it, or null when the author did
 date: "1996"
 location: https://archive.org/details/example   # URL or archive location
 xxh3: null                # set when the source is a file
