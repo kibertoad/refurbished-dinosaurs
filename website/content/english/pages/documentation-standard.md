@@ -35,13 +35,15 @@ Every entry is one Markdown file named after its ID, with YAML front matter hold
 
 `spec/README.md` holds, in this order: the scope, the version of this standard the spec follows, the default integer width if the game was built for a 16-bit machine, the area list as a table with the columns `Area | Covers`, and the generated indexes. `spec/glossary.md` has one `##` heading per term, spelled the way the pseudocode spells it, followed by what the term means and, where the game shows the concept to the player, the name the game uses for it.
 
-The front matter schemas, the fixture schema and the check script belong to the standard. They go in [toad-discovery-center](https://github.com/kibertoad/toad-discovery-center), the toolkit every restoration shares, next to the schemas it already has, and have not been added yet. A game repository starts from the [project template](https://github.com/kibertoad/refurbished-dinosaurs-template) and pins a version of them. This page describes version 1. A change that would make a spec that passes the version 1 checks fail them gets a new version number, listed on this page with what changed and how to convert an existing spec. A clarification that no check notices keeps the number.
+The front matter schemas, the fixture schema and the check script belong to the standard. They go in [toad-discovery-center](https://github.com/kibertoad/toad-discovery-center), the toolkit every restoration shares, next to the schemas it already has, and have not been added yet. A game repository starts from the [project template](https://github.com/kibertoad/refurbished-dinosaurs-template) and pins a version of them. The toolkit's major version is the version of this standard it checks, so pinning `1.x` means following version 1, and `spec/README.md` states the same number. This page describes version 1. A change that would make a spec that passes the version 1 checks fail them gets a new version number, listed on this page with what changed and how to convert an existing spec. A clarification that no check notices keeps the number.
 
 The spec describes layouts and behaviour. It may quote individual values from the original as evidence, but it does not reproduce whole content tables, texts or images: those stay in the player's copy of the game. Constants found in the executable's code, such as the multipliers and thresholds in a formula, are part of the rules and are written down in full.
 
 ## Identifiers
 
-Every entry has an ID of the form `KIND-AREA-NNN`, for example `RULE-COMBAT-007`. `KIND` is one of the directory prefixes above. `AREA` is a short upper-case subsystem name from the area list in `spec/README.md`, such as `RNG`, `COMBAT`, `AI` or `SAVE`. `NNN` is a three-digit number, unique within its kind and area. Builds and sources use a short alias in place of area and number: `BLD-GOG-EN-1.1`, `SRC-MANUAL-1996`.
+Every entry has an ID of the form `KIND-AREA-NNN`, for example `RULE-COMBAT-007`. `KIND` is one of the directory prefixes above. `AREA` is a short upper-case subsystem name from the area list in `spec/README.md`, such as `RNG`, `COMBAT`, `AI` or `SAVE`. `NNN` is a three-digit number, unique within its kind and area. Builds and sources use a short alias in place of area and number: `BLD-GOG-EN-1.1`, `SRC-MANUAL-1996`. An alias starts with an upper-case letter and contains only upper-case letters, digits, dots and hyphens.
+
+Areas are added to the list and never removed or renamed, because renaming an area would rename every ID in it. An area whose name turns out to be a poor fit keeps it, and its row in the area list says what it covers.
 
 An ID is never reused or renumbered once it is on the main branch. An entry that turns out to be wrong stays in place with status `superseded`, and its `superseded_by` field names what took its place: the corrected entry, the parts it was split into, or the entry it was merged into. When nothing takes its place, because a bug turns out to be intended or a mechanic turns out not to exist, `superseded_by` names the findings or experiments that show it. Anything that cited the old ID can still find out what happened to it. If two branches create the same ID, the one merged second renumbers its entry before it is merged.
 
@@ -58,7 +60,9 @@ Rules, formats, screens and bugs describe the original, and each carries one of 
 | `disputed` | Pieces of evidence contradict each other. The body says which and how. | At least one entry in `conflicting`. |
 | `superseded` | Replaced, or shown to be wrong, by the entries in `superseded_by`. | Nothing further. |
 
-The first four form a scale, from `unknown` up to `established`. Evidence cited in support of a claim must not itself be superseded.
+The first four form a scale, from `unknown` up to `established`. An entry that is not superseded must not cite a superseded entry in its `evidence`, `conflicting` or `related` fields. A superseded entry keeps the links it had when it was replaced, so its history stays readable.
+
+Status is not tracked per build. An entry's status is what its evidence shows for the build it was studied in most closely, and another build it lists may rest on less evidence. The entry's Differences between builds section says what was checked in each build.
 
 The spec records how well the original is understood. How well our rebuild matches it is recorded in the [parity matrix](#parity-matrix), which uses the same statuses and adds `implemented` and `validated`. [OpenMW](https://wiki.openmw.org/index.php?title=Template:Formula) keeps the same split between analysis status and implementation status.
 
@@ -69,7 +73,7 @@ Findings and experiments are evidence rather than claims, so they have a shorter
 | Status | Meaning |
 |---|---|
 | `recorded` | Written down by the person who found it. |
-| `reproduced` | Repeated by someone else from the entry's own instructions, with the same result. For a random outcome, the same result means a distribution that passes the experiment's own comparison with the recorded one. |
+| `reproduced` | Repeated by someone other than the person in `recorded_by`, from the entry's own instructions, with the same result, and that person is named in `reproduced_by`. For a random outcome, the same result means a distribution that passes the experiment's own comparison with the recorded one. |
 | `superseded` | Shown to be wrong. `superseded_by` names the entries that show it. |
 
 Builds and sources carry no status.
@@ -80,9 +84,10 @@ Integer types use the [ModdingWiki names](https://moddingwiki.shikadi.net/wiki/U
 
 File offsets and addresses are hexadecimal with a `0x` prefix and upper-case digits. File offsets are padded to at least two digits (`0x1C`). How an address in code is written depends on the executable's format, which the build entry gives for each file:
 
-- PE (32-bit Windows): the full virtual address, eight digits (`0x00478CD0`).
+- PE (32-bit Windows): the full virtual address with the file loaded at the image base its header gives, eight digits (`0x00478CD0`). A DLL that Windows moves elsewhere at run time is still addressed from its header's image base.
 - LE and LX (32-bit DOS extenders such as DOS/4GW): the address the code has when each object is placed at the relocation base address its object table gives, in the same eight-digit form.
 - MZ (16-bit DOS): `segment:offset` with four digits on each side and no prefix. The segment is the one the code has when the load image is placed at segment `0x1000`, which is where Ghidra puts it by default, so an address can be pasted straight into a Ghidra project (`3D72:0515`).
+- COM (16-bit DOS, a program with no header): `segment:offset` in the same form, with the file's first byte at `1000:0100`, where DOS puts it after the program segment prefix. Ghidra imports a COM file as a raw binary, so that address is set as the base when importing it.
 - NE (16-bit Windows): `segment:offset` in the same form, with the segment number from the segment table (`0003:0034`).
 
 Overlay code has no fixed load address, so it is located by the name of the file that holds it, which may be the executable itself, and its offset in that file padded to eight digits: `GAME.OVL+0x0003A2F0`. Sizes and counts are decimal. Ranges are half-open and written with two dots, so `0x20..0x3C` covers `0x20` up to but not including `0x3C`.
@@ -93,17 +98,21 @@ Durations are in milliseconds or in ticks. A tick is one step of the game's own 
 
 Things that have not been identified get neutral names derived from where they are: `fn_00478CD0` for a function, `unk_2A` for a field at offset `0x2A`, `g_004C1F20` for a global. In 16-bit code the colon becomes an underscore: `fn_3D72_0515`. In overlay code the file name comes first, with its dot also turned into an underscore: `fn_GAME_OVL_0003A2F0`. They are renamed only when their purpose is established. The zeldaret projects put it well: it is better to leave something unnamed than to name it wrongly.
 
+A neutral name belongs to one build, since the same function or global usually sits at a different address in another. When a rule has to use something that has not been identified, the glossary gets an entry under its neutral name, giving the build the address comes from and the neutral names it has in other builds, and the rule lists it in its Open questions section. When its purpose is established, the glossary entry and every rule that uses it are renamed in the same change.
+
 ## Formulas and procedures
 
 Rules are written in a small pseudocode whose behaviour is fixed:
 
-- Blocks are marked by indentation. `=` assigns and `==` compares. `and`, `or` and `not` are the logical operators, and `and` and `or` stop at the first operand that decides the result, so a random draw on the right is not made when the left has already decided it. Loops are `for each x in list`, which visits the list in its own order as the glossary defines it, and `while`. `emit Name(args)` produces an event or message. A line starting with `#` is a comment.
+- Blocks are marked by indentation. `=` assigns and `==` compares. `and`, `or` and `not` are the logical operators, and `and` and `or` stop at the first operand that decides the result, so a random draw on the right is not made when the left has already decided it. Branches are `if`, `else if` and `else`. Loops are `for each x in list`, which visits the list in its own order as the glossary defines it, and `while`. `emit Name(args)` produces an event or message. A line starting with `#` is a comment.
+- `a.b` is the field `b` of the structure `a`, and `list[i]` is an element of a list, counted from 0. `true` and `false` are the results of comparisons and logical operators. A value stored as an integer counts as true when it is not 0, unless the rule says otherwise.
+- `call RULE-COMBAT-012(attacker, defender)` runs another rule, whose Inputs section lists the values it takes, in that order. `return x` ends a procedure and gives `x` as its result, so `damage = call RULE-COMBAT-012(attacker, defender)` uses it. Every rule a procedure calls is listed in its `related` field.
 - A type is given after a name, using the notation's types without the byte order: `count: UINT16`. Integers are signed 32-bit unless a type is given. Games built for 16-bit machines state their default in `spec/README.md`. Arithmetic wraps on overflow the way the original machine did, and any rule that depends on overflow says so.
 - A narrower value is widened by sign extension if its type is signed and by zero extension if it is unsigned. When a signed and an unsigned value of the same width meet in an operation or a comparison, the signed one is converted to unsigned first, as in C, and a rule where that changes the result says so.
-- `/` on integers truncates toward zero, and `%` takes the sign of the left operand. `>>` is an arithmetic shift on signed values and a logical shift on unsigned ones, so `x >> 1` and `x / 2` differ for negative `x`, as they did in the original.
+- `/` on integers truncates toward zero, and `%` takes the sign of the left operand. `>>` is an arithmetic shift on signed values and a logical shift on unsigned ones, so `x >> 1` and `x / 2` differ for negative `x`, as they did in the original. Where a divisor can be 0, the rule says what the original does then (a crash, a processor exception the game catches, a fixed result), or lists it as an open question until that is known.
 - Floating-point values have the width the original stores them in. Converting a floating-point value to an integer truncates toward zero unless the rule names another rounding at that point. Where the original computes in the x87's 80-bit precision and the result depends on it, the rule says so.
 - `draw(gen)` is one raw value from the random number generator `gen`, exactly as the original's generator returns it. Each generator is specified once, in its own rule, and a game with a single generator may leave out the name. The ways the game reduces a raw value to a range, such as `roll(n)` for an integer from 0 to n - 1, are defined in the same rule as arithmetic on `draw`, because two reductions of the same draw give different numbers. Every draw appears explicitly and in the order the original makes it, because the order of draws decides whether a replay stays in sync.
-- Names come from the glossary. Constants from the executable appear by value, with the address they were found at in the rule's evidence.
+- Names come from the glossary, including the neutral names of things not yet identified. Constants from the executable appear by value, with the address they were found at in the rule's evidence.
 
 A procedure in this pseudocode reads like this (the rule is illustrative):
 
@@ -118,27 +127,31 @@ for each player in turn_order:
 
 Only hidden gangs cost a draw here, which is exactly the kind of detail the order of draws depends on.
 
-The pseudocode describes what the game does in the spec's own terms. It is never a cleaned-up copy of decompiler output, and it never contains addresses, decompiler variable names or the structure of the original function.
+The pseudocode describes what the game does in the spec's own terms. It is never a cleaned-up copy of decompiler output, and it never contains decompiler variable names, the structure of the original function, or addresses other than those inside the neutral names from the glossary.
 
 ## Entry types
 
-Body sections appear in the order given for each type, each under a `##` heading with the name given before the colon in the lists below. The examples use Chaos Overlords. The file size and hash in the build example are the real ones for the GOG release, and the other IDs, statuses, addresses and values are illustrative. A section with nothing to say is kept and says `None known.`, so a reader can tell an empty section from a forgotten one.
+Body sections appear in the order given for each type, each under a `##` heading with the name given before the colon in the lists below, or the whole item without its full stop where it has no colon. The examples use Chaos Overlords. The file size and hash in the build example are the real ones for the GOG release, and the other IDs, statuses, addresses and values are illustrative. A section with nothing to say is kept and says `None known.`, so a reader can tell an empty section from a forgotten one.
 
 Links between entries go one way: a claim cites its evidence, and evidence does not list the claims that use it. The check script generates the reverse lists into the indexes. Every entry except builds and sources has these fields, and `superseded_by` is always present, as an empty list unless the status is `superseded`:
 
 ```yaml
-id: RULE-COMBAT-007
-title: Police detection visits gangs in player order, then roster order
-status: established
+id: FND-COMBAT-011
+title: Police detection loop visits gangs in player order, then roster order
+status: recorded
 builds: [BLD-GOG-EN-1.1]
 superseded_by: []
 ```
 
+Each kind adds fields of its own, and the section for each kind below shows a complete example.
+
 Rules, formats, screens and bugs also have `evidence`, the findings, experiments and sources they rest on, and `conflicting`, the evidence that contradicts them. Both are always present, and `conflicting` may only be non-empty when the status is `disputed`.
 
-Rules, bugs and screens also have `related`, links to other claims, which go one way as well. A rule lists the rules it invokes and the formats it reads or writes. A bug lists the rules, formats and screens it occurs in. A screen lists the rules and screens its effects lead to. Formats have no `related` field, and the indexes carry every link in the other direction.
+Rules, bugs and screens also have `related`, links to other claims, which go one way as well. A rule lists the rules it invokes and the formats it reads or writes. A bug lists the rules, formats and screens it occurs in. A screen lists the rules and screens its effects lead to. Formats have no `related` field: a format's links to other formats are the types in its layout table, and the check script reads them from there. The indexes carry every link in the other direction.
 
-An entry with status `supported` or higher may list a build only if at least one finding or experiment it cites lists that build too. An `unknown` or `sourced` entry lists the builds it is believed to apply to. A finding lists a second build only when it was checked in that build as well, and when the address differs, its observation gives the address for each build.
+An entry with status `supported` or higher may list a build only if at least one finding or experiment it cites lists that build too. An `unknown` or `sourced` entry lists the builds it is believed to apply to. A finding lists a second build only when it was checked in that build as well, and then gives a location in each.
+
+When builds differ in a way that changes what an entry says (a different procedure, a different layout, a different set of states), the entry is split into one entry per group of builds that behave alike, and no build is listed in two of them. Each one's Differences between builds section names the others. That section otherwise records the differences that leave the entry true for every build it lists, such as code or data at another address.
 
 ### Builds
 
@@ -151,11 +164,13 @@ publisher_version: "1.1"
 distribution: GOG
 files:
   - path: Chaos Overlords.exe
-    format: PE            # MZ, NE, PE, LE, LX, or data for a file that is not an executable
+    format: PE            # MZ, COM, NE, PE, LE, LX, or data for a file that is not an executable
     size: 664576
     sha256: a1430159bbe20869e277a5000311344f4ec141ab77c96b385336617149e97d89
   # every file the spec uses, with its format, size and SHA-256
 ```
+
+A `path` uses forward slashes and is relative to the directory the game is installed to. A file the game reads from its CD and never installs is written `CD:` followed by its path on the disc, or `CD1:`, `CD2:` and so on for a game on more than one disc.
 
 Body sections:
 
@@ -171,7 +186,7 @@ A source entry records a document or tool from outside the project: the manual, 
 id: SRC-MANUAL-1996
 title: Chaos Overlords manual
 author: New World Computing
-date: 1996
+date: "1996"
 location: https://archive.org/details/example   # URL or archive location
 sha256: null              # set when the source is a file
 licence: null             # set when it limits what may be quoted
@@ -196,12 +211,17 @@ title: Police detection loop visits gangs in player order, then roster order
 status: recorded
 builds: [BLD-GOG-EN-1.1]
 superseded_by: []
+recorded_by: kibertoad
+reproduced_by: []
 method: static          # static or dynamic
-location:
-  file: Chaos Overlords.exe
-  address: 0x00472775..0x00472A10   # or offset: for data files and overlay code
+locations:
+  - build: BLD-GOG-EN-1.1
+    file: Chaos Overlords.exe
+    address: 0x00472775..0x00472A10   # or offset: for data files and overlay code
 tool: Ghidra 12.1.3
 ```
+
+`recorded_by` and `reproduced_by` hold GitHub usernames. The check script compares them, so it can tell that a `reproduced` finding was repeated by someone else.
 
 A `static` finding comes from reading the original's files without running them: disassembly, decompilation, or a data file in a hex editor. A `dynamic` finding comes from the original running: a breakpoint, a memory watch, a trace. Dynamic findings also give the `environment`, in the same form as experiments. A run set up to answer a question, with a fixed starting state and repetitions, is an experiment and gets its own entry.
 
@@ -212,7 +232,9 @@ Body sections:
 3. Alternatives: other readings that were considered and why they were ruled out, or that they have not been.
 4. How to reproduce: enough for someone else with the same build to find the same thing, such as the function's entry address and the constant or string reference that leads to it.
 
-A location is a file in the named build and a range within it: an `address` range in the notation for the executable's format, or an `offset` range for a data file or for overlay code. Memory the game allocates while it runs has no fixed address, so a dynamic finding about it gives the address of the code that reads or writes it, and its observation names the structure and the field, by format entry ID once one exists. Line numbers from a decompiler listing are never used as locations, because they change with the tool version and the analysis settings.
+A location is a build, a file in that build and a range within it: an `address` range in the notation for the executable's format, or an `offset` range for a data file or for overlay code. A static finding has one location for each build it lists. Memory the game allocates while it runs has no fixed address, so a dynamic finding about it gives the address of the code that reads or writes it, and its observation names the structure and the field, by format entry ID once one exists. Line numbers from a decompiler listing are never used as locations, because they change with the tool version and the analysis settings.
+
+A dynamic finding about what the player sees or hears, such as a frame count measured from a video capture, may have an empty `locations` list. Its observation then says how it was captured and gives the hash of the capture. It remains a single observation: once the question needs a fixed starting state or repeated runs, it becomes an experiment.
 
 ### Experiments
 
@@ -224,8 +246,10 @@ title: Detection rate for a single hidden gang under Crackdown
 status: recorded
 builds: [BLD-GOG-EN-1.1]
 superseded_by: []
+recorded_by: kibertoad
+reproduced_by: []
 environment: Windows 11 24H2, DxWnd 2.06.10 preset "chaos-16bit"
-starting_state: saves/EXP-COMBAT-004-before.sav   # null when the save cannot be shared
+starting_state: saves/EXP-COMBAT-004-before.sav   # new-game, or null when the save cannot be shared
 repetitions: 200
 fixture: EXP-COMBAT-004.json
 ```
@@ -241,7 +265,7 @@ Body sections:
 
 Running the same save again only gives a different result if the generator's state differs between runs. Many games store that state in the save, and reloading them gives the same outcome every time. The Setup section says how the state varies: the game reseeds itself from the clock when it loads, or the experimenter writes a chosen value into it before each run.
 
-The fixture is a JSON file that follows the standard's fixture schema. It holds the starting state with the SHA-256 of its save, the inputs, and the expected events and end state. Where the generator's state can be read, it records the state at the start of each run, so a test can replay single runs as well as compare the distribution. For random outcomes it also holds the tolerance: the statistical test a comparison uses and its significance level. When the save cannot be shared, `starting_state` is `null`, the fixture still records the hash, and the Setup section is the only way to recreate the save. The implementation's test suite reads the fixture directly.
+The fixture is a JSON file that follows the standard's fixture schema. It holds the starting state with the SHA-256 of its save, the inputs, and the expected events and end state. Where the generator's state can be read, it records the state at the start of each run, so a test can replay single runs as well as compare the distribution. For random outcomes it also holds the tolerance: the statistical test a comparison uses and its significance level. When the save cannot be shared, `starting_state` is `null`, the fixture still records the hash, and the Setup section is the only way to recreate the save. An experiment that starts from a new game has `starting_state: new-game` and no save hash, and its Setup section gives every choice made on the way into the game. The implementation's test suite reads the fixture directly.
 
 ### Formats
 
@@ -255,7 +279,7 @@ builds: [BLD-GOG-EN-1.1]
 superseded_by: []
 files: ["SITES.DAT"]      # names or patterns, empty for a memory structure
 byte_order: little
-size: 26                  # record size, or null when variable
+size: 28                  # record size, or null when variable
 definition: fmt_data_002.ksy
 evidence: [FND-DATA-002, FND-DATA-004, EXP-DATA-001, SRC-MANUAL-1996]
 conflicting: []
@@ -277,15 +301,29 @@ In the layout table, fields are never grouped into one row, and unknown bytes an
 | `0x14` | 2 | `INT16LE` | `id` | Site number, 0 to 21 | established | FND-DATA-002, EXP-DATA-001 |
 | `0x16` | 2 | `INT16LE` | `resistance` | Starting resistance to Influence | supported | FND-DATA-004 |
 | `0x18` | 2 | `INT16LE` | `support` | Support gained when the site is influenced | sourced | SRC-MANUAL-1996 |
-| `0x1A` | | | | Total size 26 | | |
+| `0x1A` | 2 | `INT16LE` | `unk_1A` | Purpose unknown. 0 in every record of the shipped file, and never read by the executable | established | FND-DATA-002, EXP-DATA-001 |
+| `0x1C` | | | | Total size 28 | | |
 
-Each row's status follows the same table as a whole entry, so the two `established` rows cite a static finding and an experiment. The entry's own status is the lowest status among its rows, which is why the example is `sourced`, and it is `disputed` if any row is. Its `evidence` lists every ID cited in its tables.
+Each row's status follows the same table as a whole entry, so the `established` rows cite a static finding and an experiment. A row's status covers what the row claims. A row whose purpose is unknown claims its offset, size and type, and whatever has been observed about its values and use, so it can be `established` while its purpose stays in the Open questions section, as `unk_1A` is here. Padding claims that the original never reads the bytes. The entry's own status is the lowest status among its rows, which is why the example is `sourced`, and it is `disputed` if any row is. Its `evidence` lists every ID cited in its tables.
+
+A field that holds another structure has that structure's format ID as its type (`FMT-DATA-003`). An array gives the element type and the count, either a number or the name of an earlier field that holds it (`INT16LE[22]`, `FMT-DATA-003[site_count]`). A field whose size depends on the data has that size in the Size column as an expression in the pseudocode's terms (`name_length`, `site_count * 28`). Every row after such a field leaves the Offset column empty, because its position follows from the rows before it, and the total row gives the size as an expression. A field that exists only under a condition has the condition after its size: `2 if version > 1`.
 
 The `.ksy` file next to the entry is the machine-readable definition, in [Kaitai Struct](https://doc.kaitai.io/user_guide.html). Kaitai only accepts lower-case identifiers with underscores, so the file and its `meta/id` use the entry ID in that form: `FMT-DATA-002` becomes `fmt_data_002.ksy`, and a definition that uses another one imports it by that name. Its `doc` fields carry the meanings, its `doc-ref` fields carry the entry and finding IDs, and `meta/license` names the licence. Kaitai can generate parsers in more than a dozen languages and a diagram of the layout from the same file, which is why the standard uses it for every format.
 
 ### Rules
 
-A rule entry describes one piece of game behaviour: a formula, a procedure, the order in which something is resolved. Its front matter holds the common fields, `evidence`, `conflicting` and `related`.
+A rule entry describes one piece of game behaviour: a formula, a procedure, the order in which something is resolved.
+
+```yaml
+id: RULE-COMBAT-007
+title: Police detection visits gangs in player order, then roster order
+status: established
+builds: [BLD-GOG-EN-1.1]
+superseded_by: []
+evidence: [FND-COMBAT-011, EXP-COMBAT-004]
+conflicting: []
+related: [RULE-RNG-001, FMT-DATA-005]
+```
 
 Body sections:
 
@@ -330,7 +368,7 @@ What our rebuild does about the bug belongs in the implementation's deviation lo
 
 ### Screens
 
-A screen entry describes one screen, panel or dialog: the resources it draws with their positions, its input, its sounds, its states and the transitions between them. Its front matter holds the common fields, `evidence`, `conflicting` and `related`.
+A screen entry describes one screen, panel or dialog: the resources it draws with their positions, its input, its sounds, its states and the transitions between them. Its front matter holds the same fields as a rule's.
 
 Body sections, each table with an `Evidence` column as its last:
 
@@ -351,13 +389,13 @@ A script in each repository checks the spec on every change, and the build fails
 - every file's front matter validates against the schema for its kind, its file name is its ID, and it sits in the directory for its kind;
 - every body has its sections, under the headings given here, in order;
 - every ID has the form for its kind and an area from the area list, every ID cited anywhere resolves to an entry, and no ID is used twice;
-- no entry that exists on the main branch has been deleted or renamed;
-- every status is from the list for its kind, and every entry cites what its status requires;
-- every build a `supported` or `established` entry lists is covered by the evidence it cites;
-- no claim cites superseded evidence in support, every superseded entry names what replaced or disproved it, and no chain of `superseded_by` links leads back to where it started;
-- `conflicting` is empty unless the status is `disputed`, and `related` links only to the kinds allowed for the entry;
+- no entry that exists on the main branch has been deleted or renamed, and no area has been removed from the area list or renamed;
+- every status is from the list for its kind, every entry cites what its status requires, and every `reproduced` entry names someone in `reproduced_by` other than its `recorded_by`;
+- every build a `supported` or `established` entry lists is covered by the evidence it cites, and every static finding has a location for each build it lists;
+- no entry that is not superseded cites a superseded entry, every superseded entry names what replaced or disproved it, and no chain of `superseded_by` links leads back to where it started;
+- `conflicting` is empty unless the status is `disputed`, `related` links only to the kinds allowed for the entry, and every rule a procedure calls is in its `related` field;
 - a format entry's status matches its rows, and its `evidence` covers every ID in its tables;
-- every Kaitai file compiles, and its sizes match the layout table in its entry;
+- every Kaitai file compiles, and its fixed sizes match the layout table in its entry;
 - every fixture validates against the fixture schema, and every save in `saves/` matches the hash in its fixture;
 - the indexes in `spec/README.md` (by kind, by area, by status, and for each entry the entries that cite or relate to it) are regenerated and up to date.
 
@@ -367,7 +405,7 @@ The status index doubles as a progress report: how much of the game is establish
 
 The implementation keeps three things that refer to the spec without being part of it. Code comments and tests cite the spec IDs they implement or check, so a search for an ID finds everything that depends on it. The deviation log records every place the rebuild departs from the spec on purpose. The parity matrix records how much of the spec the rebuild does.
 
-The deviation log is `DEVIATIONS.md` at the root of the game repository. It has one `##` heading per deviation, its `DEV-AREA-NNN` ID, using the same area list as the spec. Under it come the spec IDs it departs from, the reason, and the name of the setting that controls it, or `none` for a deviation that is always on. A deviation that is always on may only add to the interface. It must not change game state, or anything a test compares with the original. A deviation that would needs a setting.
+The deviation log is `DEVIATIONS.md` at the root of the game repository. It has one `##` heading per deviation, its `DEV-AREA-NNN` ID, using the same area list as the spec. Under it come the spec IDs it departs from, the reason, and the name of the setting that controls it, or `none` for a deviation that is always on. A deviation that is always on may only add to the interface. It must not change game state, or anything a test compares with the original. A deviation that would needs a setting. Deviation IDs are never reused or renumbered, the same as spec IDs. A deviation that is dropped keeps its heading and says when and why it was dropped, so a comment or row that cited it can still find out what happened.
 
 ### Parity matrix
 
@@ -397,10 +435,12 @@ Manual play never counts as a test. The spec check script also checks `PARITY.md
 
 ## Licence
 
-The Markdown entries are published under [Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0/) (CC BY 4.0). Anyone can copy and adapt them, commercially or not, as long as they credit the project. That includes adding them to a wiki under CC BY-SA, the licence many community wikis use. The licence covers our own text. Short quotations from manuals and other sources, and values quoted from the original, remain under their owners' terms.
+The Markdown files in `spec/`, entries as well as `README.md` and `glossary.md`, are published under [Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0/) (CC BY 4.0). Anyone can copy and adapt them, commercially or not, as long as they credit the project. That includes adding them to a wiki under CC BY-SA, the licence many community wikis use. The licence covers our own text. Short quotations from manuals and other sources, and values quoted from the original, remain under their owners' terms.
 
 The machine-readable parts (Kaitai definitions, experiment fixtures, schemas and scripts) are code, and are published under the MIT licence, the same as the rebuild, so they can go into another engine's source tree without a second licence to track.
 
 Save files in `saves/` are written by the original game, so neither licence covers them. A save that contains the game's own text or images is not committed.
 
 `spec/LICENSE` holds both texts and says which files each covers, and which are covered by neither, so the `spec/` directory keeps its licence when it is copied to a community wiki or into another project.
+
+`PARITY.md` and `DEVIATIONS.md` describe the rebuild and sit outside `spec/`, so they are under the game repository's own licence, the same as the code.
