@@ -17,19 +17,24 @@ url = "/methodology"
 weight = 3
 
 [[main]]
+name = "Technology"
+url = "/technology"
+weight = 4
+
+[[main]]
 name = "Philosophy"
 url = "/philosophy"
-weight = 4
+weight = 5
 
 [[main]]
 name = "Blog"
 url = "/blog"
-weight = 5
+weight = 6
 
 [[main]]
 name = "Contacts"
 url = "/contact"
-weight = 6
+weight = 7
 
 
 # footer menu
@@ -49,21 +54,26 @@ url = "/methodology"
 weight = 3
 
 [[footer]]
+name = "Technology"
+url = "/technology"
+weight = 4
+
+[[footer]]
 name = "Philosophy"
 url = "/philosophy"
-weight = 4
+weight = 5
 
 [[footer]]
 name = "Blog"
 url = "/blog"
-weight = 5
+weight = 6
 
 [[footer]]
 name = "Contacts"
 url = "/contact"
-weight = 6
+weight = 7
 
 [[footer]]
 name = "Privacy"
 url = "/privacy-policy"
-weight = 7
+weight = 8

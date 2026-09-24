@@ -42,12 +42,6 @@
                   <dd class="text-text-dark dark:text-darkmode-text-dark">{{ . }}</dd>
                 </div>
               {{ end }}
-              {{ with $.Params.engine }}
-                <div>
-                  <dt class="text-text-light dark:text-darkmode-text-light text-sm">Rebuilt on</dt>
-                  <dd class="text-text-dark dark:text-darkmode-text-dark">{{ . }}</dd>
-                </div>
-              {{ end }}
               {{ with $.Params.platforms }}
                 <div>
                   <dt class="text-text-light dark:text-darkmode-text-light text-sm">Runs on</dt>
