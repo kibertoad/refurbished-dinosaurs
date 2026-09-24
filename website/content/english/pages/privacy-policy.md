@@ -16,6 +16,12 @@ If you subscribe, your email address is stored by [Resend](https://resend.com/le
 
 Subscriptions are double opt-in. Entering your address stores it in a state that cannot receive anything, and only confirming from the link we email marks you as a subscriber. If you never confirm, you never hear from us again. Every message carries an unsubscribe link, and unsubscribing stops the mail immediately. You can also ask for removal or a copy of what is stored by emailing us; see [Contacts](/contact).
 
+## The wishlist
+
+Voting needs no account and sets no cookie. To keep one browser to one vote per game, the endpoint takes your IP address and user agent, hashes them together with a secret key, and stores only that hash next to the vote. The address itself is never written down, and the hash cannot be turned back into one without the key. The game titles, years and cover art on the board come from a game database ([IGDB](https://www.igdb.com/) by default), which sees the search terms the endpoint forwards but nothing about you.
+
+Ask us to drop a vote and we will; see [Contacts](/contact).
+
 ## The games
 
 The restorations are desktop applications, not part of this website. They read game assets from your own machine and do not send anything anywhere, except for the online multiplayer coordination service where a project documents one.

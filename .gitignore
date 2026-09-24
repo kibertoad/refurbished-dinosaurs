@@ -1,3 +1,6 @@
+# Turborepo
+.turbo/
+
 # Hugo
 website/public/
 website/resources/

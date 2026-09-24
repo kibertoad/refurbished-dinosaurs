@@ -1,0 +1,145 @@
+{{/* Voting wishlist. Configured under [wishlist] in
+     config/_default/params.toml.
+
+     The board and the search suggestions are filled in by
+     assets/js/wishlist.ts from the endpoint in workers/wishlist, which is what
+     holds the game database credentials and counts the votes. Both sides call
+     it through the contracts in packages/wishlist-contracts. The markup for a
+     row lives in the <template> elements at the bottom: Tailwind's purge reads
+     classes out of the rendered HTML, so markup built by script has to come
+     from here rather than from strings in the script. */}}
+{{ $wishlist := site.Params.wishlist }}
+{{ $issues := printf "%s/issues" (site.Params.contact.github | default "https://github.com") }}
+
+{{ if and $wishlist.enable $wishlist.endpoint }}
+  <div
+    data-wishlist
+    data-endpoint="{{ $wishlist.endpoint }}">
+
+    {{/* ------------------------------------------------------- search */}}
+    <div class="bg-light dark:bg-darkmode-light mb-10 rounded-xl px-6 py-8 md:px-8">
+      <h2 class="h5 mb-2">{{ $wishlist.search_title | default "Add a game" }}</h2>
+      <p class="text-text-light dark:text-darkmode-text-light mb-5 text-sm">
+        {{ $wishlist.search_help | default "Type a title. Suggestions come from the game database, PC releases from before 2010 only." | markdownify }}
+      </p>
+
+      <div class="relative">
+        <label class="sr-only" for="wishlist-search">Search the game database</label>
+        <input
+          class="form-input w-full"
+          id="wishlist-search"
+          data-wishlist-input
+          type="search"
+          role="combobox"
+          aria-expanded="false"
+          aria-controls="wishlist-suggestions"
+          aria-autocomplete="list"
+          autocomplete="off"
+          placeholder="{{ $wishlist.placeholder | default `Chaos Overlords, Darklands, Conqueror...` }}" />
+
+        <ul
+          class="bg-body dark:bg-darkmode-body border-border dark:border-darkmode-border absolute z-20 mt-2 hidden max-h-96 w-full overflow-y-auto rounded-lg border shadow-lg"
+          id="wishlist-suggestions"
+          data-wishlist-suggestions
+          role="listbox"
+          aria-label="Matching games"></ul>
+      </div>
+
+      <p
+        class="text-text-dark dark:text-darkmode-text-dark mt-4 hidden text-sm"
+        data-wishlist-search-status
+        role="status"
+        aria-live="polite"></p>
+    </div>
+
+    {{/* -------------------------------------------------------- board */}}
+    <h2 class="h5 mb-6">{{ $wishlist.board_title | default "Votes so far" }}</h2>
+    <ol class="mb-6 space-y-4" data-wishlist-board></ol>
+    <p
+      class="text-text-light dark:text-darkmode-text-light hidden"
+      data-wishlist-status
+      role="status"
+      aria-live="polite"></p>
+
+    {{ with $wishlist.note }}
+      <p class="text-text-light dark:text-darkmode-text-light mt-8 text-sm">
+        {{ . | markdownify }}
+      </p>
+    {{ end }}
+
+    {{/* ---------------------------------------------------- templates */}}
+    <template data-template="entry">
+      <li
+        class="bg-body dark:bg-darkmode-body border-border dark:border-darkmode-border flex items-center gap-4 rounded-xl border p-4">
+        <span
+          class="text-text-light dark:text-darkmode-text-light w-8 shrink-0 text-center text-lg font-semibold"
+          data-rank></span>
+        <img
+          class="bg-light dark:bg-darkmode-light hidden h-20 w-14 shrink-0 rounded object-cover sm:block"
+          data-cover
+          alt=""
+          loading="lazy"
+          width="56"
+          height="80" />
+        <div class="grow">
+          <h3 class="h6 mb-1">
+            <a
+              class="hover:text-primary dark:hover:text-darkmode-primary"
+              data-title
+              target="_blank"
+              rel="noopener"></a>
+          </h3>
+          <p class="text-text-light dark:text-darkmode-text-light mb-0 text-sm" data-meta></p>
+          <p class="mt-1 mb-0 text-sm" data-summary></p>
+        </div>
+        <button class="btn btn-outline-primary btn-sm shrink-0" type="button" data-vote>
+          <span data-vote-label>Vote</span>
+          <span class="block text-xs font-normal" data-votes></span>
+        </button>
+      </li>
+    </template>
+
+    <template data-template="suggestion">
+      <li
+        class="hover:bg-light dark:hover:bg-darkmode-light aria-selected:bg-light dark:aria-selected:bg-darkmode-light flex cursor-pointer items-center gap-3 p-3"
+        role="option">
+        <img
+          class="bg-light dark:bg-darkmode-light h-14 w-10 shrink-0 rounded object-cover"
+          data-cover
+          alt=""
+          loading="lazy"
+          width="40"
+          height="56" />
+        <span class="grow">
+          <span class="block font-medium" data-title></span>
+          <span class="text-text-light dark:text-darkmode-text-light block text-sm" data-meta></span>
+        </span>
+        <span class="text-primary dark:text-darkmode-primary shrink-0 text-sm font-medium">Add</span>
+      </li>
+    </template>
+  </div>
+
+  {{/* esbuild bundles the entry with the contracts and the typed client it
+       imports from node_modules; js.Build handles the TypeScript. */}}
+  {{ with resources.Get "js/wishlist.ts" }}
+    {{ $script := . | js.Build (dict
+      "minify" hugo.IsProduction
+      "target" "es2020"
+      "format" "iife")
+    }}
+    {{ if hugo.IsProduction }}
+      {{ $script = $script | fingerprint }}
+    {{ end }}
+    <script defer src="{{ $script.RelPermalink }}"></script>
+  {{ end }}
+{{ else }}
+  {{/* Voting off, or no endpoint deployed yet: say so instead of rendering a
+       board that cannot load. */}}
+  <div class="bg-light dark:bg-darkmode-light rounded-xl px-6 py-8 md:px-8">
+    <p class="mb-0">
+      Voting is not wired up yet. Until it is, nominations go
+      <a class="text-primary dark:text-darkmode-primary" href="{{ $issues }}" target="_blank" rel="noopener">
+        in a GitHub issue</a>.
+    </p>
+  </div>
+{{ end }}

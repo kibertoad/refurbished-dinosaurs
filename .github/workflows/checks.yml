@@ -1,0 +1,111 @@
+name: Checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  workspace:
+    name: Typecheck, test and bundle
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
+      # pnpm's version is the `packageManager` field in package.json, so it is
+      # stated in one place for CI and for contributors alike.
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      # turbo runs each package's typecheck, the worker's tests (inside
+      # workerd, against a real D1 database) and the page-script bundle.
+      - name: Check
+        run: pnpm check
+
+  site:
+    name: Hugo build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      HUGO_CACHEDIR: /tmp/hugo_cache
+      # Fills in the wishlist endpoint the committed config leaves empty, so
+      # the board renders and `js.Build` bundles the page script. Without it
+      # that branch is dead code here and only a deploy would find out. It is
+      # set for the stats run too, which is what Tailwind purges against.
+      HUGO_PARAMS_WISHLIST_ENDPOINT: https://wishlist.example.invalid/
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: '1.25'
+          cache: false
+
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@2752ce1d29631191ea3f27c23495fa06139a5b78 # v3.2.1
+        with:
+          hugo-version: '0.166.0'
+          extended: true
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Cache Hugo modules
+        uses: actions/cache@v6
+        with:
+          path: |
+            /tmp/hugo_cache
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-hugo-${{ hashFiles('website/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-hugo-
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Get Hugo modules
+        run: hugo mod get
+        working-directory: ./website
+
+      - name: Generate hugo_stats.json
+        run: hugo --gc
+        working-directory: ./website
+
+      # The same build the deploy runs.
+      - name: Build site
+        run: hugo --gc --minify --destination /tmp/site
+        working-directory: ./website
+        env:
+          HUGO_ENVIRONMENT: production
+          NODE_ENV: production
+
+      - name: Check the wishlist made it into the build
+        run: |
+          test -s /tmp/site/wishlist/index.html
+          grep -q 'data-endpoint=' /tmp/site/wishlist/index.html
+          ls /tmp/site/js/wishlist.*.js

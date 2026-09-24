@@ -103,6 +103,26 @@ email = "info@refurbished-dinosaurs.org"
 github = "https://github.com/kibertoad/refurbished-dinosaurs"
 
 
+
+############################ Wishlist ############################
+# Voting wishlist: visitors nominate a PC game released before 2010
+# and vote for what is already on the board.
+#
+# `endpoint` is the Cloudflare Worker in ../../../workers/wishlist. It
+# proxies the game database (so its credentials stay off the page) and
+# stores the votes. Until it is set, the page says so and points at
+# GitHub issues instead.
+#
+# See ../../../README.md ("Wishlist") for setup.
+[wishlist]
+enable = true
+endpoint = ""
+search_title = "Add a game"
+search_help = "Type a title. Suggestions come from the game database, PC releases from before 2010 only."
+placeholder = "Chaos Overlords, Darklands, Conqueror..."
+board_title = "Votes so far"
+note = "One vote per game per browser, and you can take a vote back by clicking it again. No accounts, no cookies: votes are tied to a hashed fingerprint of the connection, which cannot be read back."
+
 ########################## Subscription ##########################
 # Mailing list for release announcements, backed by Resend.
 #

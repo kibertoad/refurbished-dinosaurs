@@ -1,0 +1,19 @@
+{
+  "name": "refurbished-dinosaurs",
+  "description": "Refurbished Dinosaurs: the site, the wishlist worker and what they share",
+  "version": "1.0.0",
+  "license": "MIT",
+  "private": true,
+  "packageManager": "pnpm@11.27.0",
+  "scripts": {
+    "dev": "pnpm --filter refurbished-dinosaurs-website dev",
+    "theme": "pnpm --filter refurbished-dinosaurs-website theme",
+    "images": "pnpm --filter refurbished-dinosaurs-website images",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "check": "turbo run typecheck test check:js check:bins"
+  },
+  "devDependencies": {
+    "turbo": "^2.10.13"
+  }
+}

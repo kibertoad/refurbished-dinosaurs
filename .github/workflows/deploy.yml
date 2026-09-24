@@ -52,8 +52,11 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: '24'
-          cache: 'npm'
-          cache-dependency-path: website/package-lock.json
+
+      # pnpm's version is the `packageManager` field in the root package.json.
+      - name: Enable corepack
+        run: corepack enable
+        working-directory: .
 
       - name: Cache Hugo modules
         uses: actions/cache@v6
@@ -68,8 +71,12 @@ jobs:
       - name: Get Hugo modules
         run: hugo mod get
 
-      - name: Install npm dependencies
-        run: npm ci
+      # One install for the workspace. Hugo's esbuild resolves the page
+      # script's imports through the linked contracts package, which pnpm
+      # installs alongside the site's own dependencies.
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: .
 
       - name: Generate hugo_stats.json
         run: hugo --gc

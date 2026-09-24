@@ -1,0 +1,17 @@
+{{ define "main" }}
+  {{ partial "page-header" . }}
+
+  <section class="section-sm">
+    <div class="container">
+      <div class="row justify-center">
+        <div class="lg:col-9">
+          {{ with .Content }}
+            <div class="content mb-10">{{ . }}</div>
+          {{ end }}
+
+          {{ partial "wishlist" . }}
+        </div>
+      </div>
+    </div>
+  </section>
+{{ end }}
