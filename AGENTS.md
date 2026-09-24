@@ -141,6 +141,7 @@ letter, or a chatbot, rewrite it.
 - pnpm writes package bins as shell shims rather than symlinks, which breaks two things in
   opposite directions. Hugo runs `css.TailwindCSS` through node and refuses a bin that is not a
   Node.js script, so `website/scripts/link-hugo-bins.js` relinks `tailwindcss` on postinstall
+  (on Windows it rewrites `tailwindcss.CMD` instead, the only file Hugo finds there)
   and `pnpm --filter refurbished-dinosaurs-website check:bins` fails CI if it is ever a shim
   again. And a bin that is a native executable (esbuild after its postinstall) cannot be run as
   a CLI at all, so call its JS API, the way `website/scripts/check-js.js` does.
