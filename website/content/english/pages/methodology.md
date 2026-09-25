@@ -30,6 +30,7 @@ An experiment starts from a saved state, changes one input, and records what fol
 The manual tells us what the designers intended and is often wrong about what shipped. FAQs, wikis and tools written by other fans are leads, which we credit and re-check. A rule stays provisional until a complete reading of the code shows everything it says, or, where the outcome depends on something the code does not decide, such as timing, interrupts or the operating system, until a reading of the files and an observation of the original running agree. Evidence that only fits a rule, such as sizes that divide or a manual's description, never makes it more than a lead.
 
 To check what a single function of the executable computes, we call it in the [Unicorn](https://www.unicorn-engine.org) CPU emulator on inputs we choose, with no window and no timing involved, and record each set of calls as an experiment. The [work protocol](/work-protocol/#emulated-calls) gives the procedure. It confirms only what the code decides, since the emulator stands in for the operating system.
+
 ## Writing it down
 
 The documentation is written to be read without the code. For each game it covers every file format field by field, the rules and formulas with the order they resolve in and the points where random numbers are drawn, the AI as far as it can be reconstructed, and timing and input where they affect play. The original's bugs go into a catalogue, each with the conditions that trigger it.
