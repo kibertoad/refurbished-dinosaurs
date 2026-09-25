@@ -31,7 +31,7 @@ The manual tells us what the designers intended and is often wrong about what sh
 
 To check what a single function of the executable computes, we call it in the [Unicorn](https://www.unicorn-engine.org) CPU emulator on inputs we choose, with no window and no timing involved, and record each set of calls as an experiment. The [work protocol](/work-protocol/#emulated-calls) gives the procedure. It confirms only what the code decides, since the emulator stands in for the operating system.
 
-For runs of the whole game, we have not settled on a runtime tool yet. It has to take text commands and print text back, so that scripts and language models can run the same experiment the same way every time. We are trying [Frida](https://frida.re), cdb from [WinDbg](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/), Ghidra's own debugger, and [DOSBox-X](https://dosbox-x.com) for DOS games, and will write up what worked.
+For runs of the whole game, we have not settled on a runtime tool yet. It has to take text commands and print text back, so that scripts and language models can run the same experiment the same way every time. The tools we still want to try, and anything else we have not proven, are tracked in [an issue](https://github.com/kibertoad/refurbished-dinosaurs/issues/8), and move onto this page and the work protocol once they work.
 
 ## Writing it down
 
