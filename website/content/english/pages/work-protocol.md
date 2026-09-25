@@ -23,7 +23,7 @@ From outside the project, the structure borrows from the way [Anthropic describe
 
 ## Working files
 
-Four kinds of file track the work. They sit in the game repository next to the spec and describe the work, never the original, so the spec's rule against naming the rebuild does not apply to them. Each one says what is true now. What was true before is in git, and none of them repeats it.
+The files that track the work sit in the game repository next to the spec. They describe the work, never the original, so the spec's rule against naming the rebuild does not apply to them. Each one says what is true now. What was true before is in git, and none of them repeats it.
 
 | File | Holds | Never holds |
 |---|---|---|
@@ -32,15 +32,15 @@ Four kinds of file track the work. They sit in the game repository next to the s
 | `docs/HANDOVER.md` | Where the work stands: the branch and whether it is pushed, the last gate result, the goals running, work left unfinished, blockers, and what to pick up next. At most 200 lines, rewritten at the end of every session. | History. The previous session's notes are replaced, not kept below the new ones. |
 | `docs/goals/NAME.md` | One file per long-running goal while it runs: its condition, its scope, what it must not touch, and the dead ends found so far. Deleted when the goal is met or dropped. | Progress reports. The queue and the commits show progress. |
 
-Decisions the owner makes go in `docs/DECISIONS.md`, dated and newest first. A decision that departs from the original is a deviation as well, in `deviations/`.
+Decisions the owner makes go in `docs/DECISIONS.md`, dated and newest first. A decision that departs from the original is a deviation as well, in `deviations/`. When the file would pass the size limit below, its oldest entries move to a numbered file in `docs/decisions/`, starting at `001.md`, filled up to the limit and never changed after. `docs/DECISIONS.md` keeps the newest entries and opens with links to the numbered files, and a decision is never renumbered or reworded when it moves.
 
-Every file here is at most 1,000 lines, the same limit the standard sets for its own files. A queue file that would pass it has too many open questions in one area, and the area's items are split into `queue/AREA/KIND.md` by the kind of evidence they need.
+Every file here is at most 1,000 lines, the same limit the standard sets for its own files. A queue file that would pass it becomes a directory of the same name with one file per kind of evidence that has items, named after the section in lower case with a hyphen for the space: `queue/COMBAT/static.md`, `queue/COMBAT/agent-run.md`. Each file opens with the area and the section as a `#` heading, `# COMBAT: Static`. A file that would still pass is split by the kind of the first entry each item names, `queue/COMBAT/static/RULE.md`, the same way the standard splits its own files.
 
 Tool paths, installed versions and the pitfalls of the local setup go in `docs/GHIDRA.md` and `docs/DEVELOPMENT.md`, so that nobody searches for them twice.
 
 ## Stages
 
-A project passes through five stages in order. The plan records the stage it is in, and a stage ends when its exit criteria hold, which a script or a reviewer can check without asking anyone. Work from a later stage may start early, but it does not count towards that stage's exit until the earlier stages have ended.
+The plan records the stage the project is in. The stages come in the order below, and a stage ends when its exit criteria hold, which a script or a reviewer can check without asking anyone. Work from a later stage may start early, but it does not count towards that stage's exit until the earlier stages have ended.
 
 ### Intake
 
@@ -50,7 +50,7 @@ Exit: eligibility and the latest version are recorded, the analysis build has a 
 
 ### Survey
 
-Map the whole game shallowly before studying any part of it deeply. List every file the build ships and give each file format an entry, `unknown` where nothing is known yet. Take an inventory of the executable's functions. Write down the screens the manual or a playthrough shows, and the rules the manual states, as `sourced` entries. Fix the area list, since areas can never be renamed. Seed the queue with the questions this turns up.
+Map the whole game shallowly before studying any part of it deeply. List every file the build ships and give each file format an entry, `unknown` where nothing is known yet. Take an inventory of the executable's functions, as [Measuring progress](#measuring-progress) describes. Write down the screens the manual or a playthrough shows, and the rules the manual states, as `sourced` entries. Fix the area list, since areas can never be renamed. Seed the queue with the questions this turns up.
 
 Exit: every file in the build manifest is named by a format entry, every screen the manual mentions has a screen entry, a coverage report of the executable exists (see [Measuring progress](#measuring-progress)), and every area has a queue file.
 
@@ -58,7 +58,7 @@ A survey keeps later work from being planned around the one subsystem somebody h
 
 ### Harness
 
-Build what every later experiment and test depends on. That is four things: the random number generator specified as a rule, the save format understood well enough to patch the fields experiments need, a way to observe the original running that takes text commands and prints text back (the methodology's requirement), and a headless run of the rebuild that replays an experiment fixture.
+Build what every later experiment and test depends on: the random number generator specified as a rule, the save format understood well enough to patch the fields experiments need, a way to observe the original running that takes text commands and prints text back (the methodology's requirement), and a headless run of the rebuild that replays an experiment fixture.
 
 Exit: one experiment has been run on the original from a save patch, recorded with its fixture, and replayed by a test of the rebuild that compares the result. If the tool for observing the original cannot be run by an agent, the exit also needs one maintainer session carried out under [Maintainer sessions](#maintainer-sessions).
 
@@ -98,7 +98,7 @@ It gives the entries, the question as a question, what would settle it, and the 
 
 An item is closed by recording its answer in the spec (a finding or an experiment, and the status of the entries it concerns) and deleting the item in the same commit. An item that turns out to be two questions becomes two items. A new question found along the way becomes a new item at once, even if nobody will look at it for months.
 
-Nobody works an item twice without new evidence. After two attempts that end in the same place, the item moves to Blocked with what was tried and what would change the outcome, such as a tool, a capture or a second edition.
+An attempt that does not settle an item records what it tried under `Tried:`, and the item is taken up again only with something the first attempt did not have: new evidence, a new tool, or a reading of the code nobody has tried. If the second attempt ends in the same place, the item moves to Blocked with what was tried and what would change the outcome, such as a tool, a capture or a second edition.
 
 ### Order of work
 
@@ -106,7 +106,7 @@ Items are picked in this order:
 
 1. Items that block the current slice.
 2. Items that others depend on: the random number generator, the main loop and the order of its phases, the save format and the structures the game keeps. Most other experiments need these.
-3. Items where one piece of evidence raises the most entries. A single run of the original beside a static finding that already exists moves an entry to `established`, and that is often the cheapest progress available.
+3. Items where one piece of evidence raises the most entries. An entry that already has a static finding often needs only an experiment on the original to reach `established`, and that is often the cheapest progress available. The experiment has to cover everything the entry says, every branch of a procedure and, for a random outcome, enough repetitions for its comparison, and a rule stays below `established` while any glossary claim it relies on is `(unknown)`. Where the experiment covers only part of the entry, the entry stays `supported` and its Open questions say which part is left.
 4. Items with the cheapest evidence: a data file before a static reading, a static reading before an agent run, an agent run before a maintainer run.
 
 ## Batches
@@ -115,13 +115,13 @@ A batch is one unit of work and ends in one commit, or one pull request where th
 
 ### Research batches
 
-A research batch settles one queue item, or a few items about the same entry. It states the question, forms the competing readings, looks for the evidence that could rule each one out, and records the result as findings or experiments under the standard. The entries the evidence concerns take the status it supports, the item is deleted or updated with what was tried, and new questions become new items. Code is not changed, apart from tools in `tools/` the research needed.
+A research batch settles one queue item, or a few items about the same entry. It states the question, forms the competing readings, looks for the evidence that could rule each one out, and records the result as findings or experiments under the standard. The entries the evidence concerns take the status it supports, the item is deleted or updated with what was tried, and new questions become new items. Where an entry's status changes, the batch updates the Spec status and Status columns of its parity row to match, so the documentation check still passes. Code is not changed, apart from tools in `tools/` the research needed.
 
 ### Implementation batches
 
-An implementation batch brings parity rows of the current slice up to `implemented` or `validated`. It works from the spec only. It does not open Ghidra, a decompiler listing, a debugger log or research notes, and it learns what the original does by reading spec entries. Where the spec does not say enough to write the code, the batch stops at that point, adds the gap to the entry's Open questions and a queue item, and either leaves the row `partial` or writes the code with a `PLACEHOLDER:` comment citing the entry.
+An implementation batch brings parity rows of the current slice up to `implemented` or `validated`. It works from the spec only. It does not open Ghidra, a decompiler listing, a debugger log or research notes, and it learns what the original does by reading spec entries. Where the spec does not say enough to write the code, the batch stops at that point, adds a queue item for the entry that says what the code needs to know, and either leaves the row `partial` or writes the code with a `PLACEHOLDER:` comment citing the entry.
 
-This keeps the clean-room separation that the methodology asks for, and it is also a test of the spec. The standard's aim is that someone could build a second engine from the documentation alone, and every implementation batch tries exactly that on a small scale. With coding agents the separation costs little: an implementation batch runs in a fresh session, or a subagent, that is given the entry IDs and nothing from the research that produced them.
+This keeps the clean-room separation that the methodology asks for, and it is also a test of the spec. The standard's aim is that someone could build a second engine from the documentation alone, and every implementation batch tries exactly that on a small scale. The batch changes nothing under `spec/`: the research batch that takes up the queue item adds the gap to the entry's Open questions if it cannot settle it. With coding agents the separation costs little: an implementation batch runs in a fresh session, or a subagent, that is given the entry IDs and nothing from the research that produced them.
 
 Implementation that is not part of a parity row, such as the installer, online play, an optional improved AI or an accessibility setting, is ordinary engineering. It still goes in its own batches, and a decision in `docs/DECISIONS.md` says why the project takes it on. It never counts towards a slice's exit.
 
@@ -138,7 +138,7 @@ The resolver calls the attacker's roll before the defender's, and a run of
 Spec: RULE-COMBAT-012, FND-COMBAT-031, EXP-COMBAT-009
 ```
 
-An implementation batch uses the same trailer for the entries it implemented, and adds `Parity:` with the rows whose status it changed.
+An implementation batch uses the same trailer for the entries it implemented. A batch of either kind that changes parity rows adds `Parity:` with the rows whose status it changed.
 
 ## Sessions
 
@@ -162,9 +162,11 @@ Progress is measured by numbers a script computes from the repository, never by 
 
 - the parity totals in `PARITY.md`, by Status and by Code;
 - the spec's entries by status, from the status index;
-- the share of the executable's functions, and of its bytes, that some entry cites, measured against a function inventory from the build's analysis database;
+- the share of the executable's functions, and of its bytes, that some entry cites, measured against the function inventory;
 - the share of the build's files whose format entry is `supported` or higher;
 - the number of queue items of each kind of evidence.
+
+The function inventory is `coverage/BLD-ALIAS.tsv`, one file for each build whose executable is analysed, named after the build's ID. A script in `tools/` exports it from the analysis database, which stays on the researcher's machine as the methodology requires. Each line gives a function's start address and size in bytes, and a function recorded as out of scope adds the reason in a third column. It holds no names, code or bytes from the original, so it is committed, and the coverage script reads only this file and the spec. The inventory is exported again whenever the analysis finds functions it had missed or merged.
 
 A test count is not progress, and neither are lines of code or the number of assets the importer extracts. A percentage of completion is taken from the parity matrix or not given at all.
 
@@ -173,8 +175,6 @@ A test count is not progress, and neither are lines of code or the number of ass
 The owner decides eligibility and the supported editions, the scope and the non-goals, any deviation whose default is `on` or `mandatory`, any work outside the parity matrix such as online play, when a release goes out, and when maintainer sessions happen. Anything else goes ahead without approval, and the owner reviews the result. A question only the owner can answer goes in the plan's owner questions, and the work that depends on it waits under Blocked in the queue.
 
 ## Coding agents and long-running goals
-
-The protocol does not change for an agent, but three things help an agent follow it.
 
 A long-running goal, such as Claude Code's [`/goal`](https://code.claude.com/docs/en/goal), keeps an agent working until a condition holds. In Claude Code a second model judges that condition after every turn from what the conversation shows, without running anything itself. A good condition therefore names a state the agent can demonstrate by running something, has a scope, and has a limit:
 
@@ -186,8 +186,9 @@ batch ended with a status block; or stop after 40 turns.
 
 ```text
 Every parity row that slice 3 of docs/IMPLEMENTATION-PLAN.md names has Code
-complete, the fast validation gate and the documentation check pass on the last
-commit, and no file under spec/ changed; or stop after 60 turns.
+complete, or is partial with a queue item saying what the spec is missing, the
+fast validation gate and the documentation check pass on the last commit, and no
+file under spec/ changed; or stop after 60 turns.
 ```
 
 A goal as broad as "finish the combat system" gives the judge nothing to check and the agent no reason to stop. The goal's file in `docs/goals/` holds the same condition with its scope and the areas it must not touch, so a second session can see that the areas are taken.
