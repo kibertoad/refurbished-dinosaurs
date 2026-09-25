@@ -41,7 +41,7 @@ Exit: eligibility and the latest version are recorded, the analysis build has a 
 
 ### Runtime access
 
-Find out what can be done with the original running, before any plan depends on it. Evidence from the original comes from three places. Reading the executable and the data files is the main one for every game. People who play, in live sessions and in the testing that [reports](#reports-from-testing) come from, see what the original and the rebuild do on screen. Runs an agent drives on its own come last, since many of these games cannot be controlled by an agent at all, and where one can, the run is the most fragile evidence the project has (see [Running the original](#running-the-original)).
+Find out what can be done with the original running, before any plan depends on it. Evidence from the original comes from four places. Reading the executable and the data files is the main one for every game. Calling single functions of the executable in a CPU emulator checks those readings for everything the code decides, with no window and no timing involved (see [Emulated calls](#emulated-calls)). People who play, in live sessions and in the testing that [reports](#reports-from-testing) come from, see what the original and the rebuild do on screen. Runs an agent drives on its own come last, since many of these games cannot be controlled by an agent at all, and where one can, the run is the most fragile evidence the project has (see [Running the original](#running-the-original)).
 
 `docs/RUNTIME.md` records, for each build that will be run, how it runs (natively, under Wine, in DOSBox-X or another emulator, in a virtual machine), and whether an agent can do each of the following alone, only while a person runs the game, or not at all:
 
@@ -50,13 +50,14 @@ Find out what can be done with the original running, before any plan depends on 
 - read its memory, set breakpoints and dump structures while it runs;
 - load a patched save;
 - capture frames and sound;
-- play back a recording the original made.
+- play back a recording the original made;
+- call a single function of the executable in the emulator harness (see [Emulated calls](#emulated-calls)).
 
 Finding the answers is the one time the original is run before the static work is done, and it takes the run lock like any other run. Each answer names the tool and version that was tried and what happened, and, where the answer is no, what would change it. The record says what is true now, and it is updated whenever a tool, a machine or an emulator changes the answer. The methodology asks for a runtime tool that takes text commands and prints text back, and where one works the record says which.
 
 Exit: `docs/RUNTIME.md` answers every capability for the analysis build, and each answer names the attempt it comes from.
 
-The answers decide where a run goes in the queue: an agent run where an agent can make it, a live session where it needs a person. They also set what the project can reach. An entry reaches `established` through a [complete reading](/documentation-standard/#complete-readings) of the code alone, unless what it says depends on something the code does not decide, such as timing, an interrupt or the operating system, and only then does it need a run that agrees with the reading. A rule or screen row reaches `validated` only through tests that compare the rebuild with evidence recorded from the original running. A format row whose entry lists files can reach `validated` without any runs, because its evidence is the original files. A format with no files, a memory structure or a message, is compared with what was recorded from the original running, so it needs a run the same way a rule does. A project whose record says no agent can run the game plans its slices around that, and keeps the rest for live sessions and for what testers' captures of the original turn up.
+The answers decide where a run goes in the queue: an agent run where an agent can make it, a live session where it needs a person. They also set what the project can reach. An entry reaches `established` through a [complete reading](/documentation-standard/#complete-readings) of the code alone, unless what it says depends on something the code does not decide, such as timing, an interrupt or the operating system, and only then does it need a run that agrees with the reading. A reading that an emulated call agrees with, over everything the entry says, establishes it as well. A rule or screen row reaches `validated` only through tests that compare the rebuild with evidence recorded from the original running. An emulated call is such evidence, so a rule the code decides can reach `validated` even where nobody can run the game. A format row whose entry lists files can reach `validated` without any runs, because its evidence is the original files. A format with no files, a memory structure or a message, is compared with what was recorded from the original running, so it needs a run the same way a rule does. A project whose record says no agent can run the game plans its slices around that, and keeps the rest for live sessions and for what testers' captures of the original turn up.
 
 ### Survey
 
@@ -83,10 +84,11 @@ The queue holds the research questions still open. Every item names the spec ent
 A queue file opens with the area as a `#` heading and a line giving the ID the next new item takes, `Next ID: Q-COMBAT-013`, and has one `##` section for each kind of evidence, in this order:
 
 1. Static: a reading of the executable or data files settles it.
-2. Agent run: a run of the original that the runtime record says an agent can make alone.
-3. Live session: a run that needs a person to run the original while an agent measures it (see [Live sessions](#live-sessions)).
-4. Source: a document that has to be found, bought or read.
-5. Blocked: work stopped until something else changes.
+2. Emulated call: a call of one function of the original in the emulator harness settles it (see [Emulated calls](#emulated-calls)).
+3. Agent run: a run of the original that the runtime record says an agent can make alone.
+4. Live session: a run that needs a person to run the original while an agent measures it (see [Live sessions](#live-sessions)).
+5. Source: a document that has to be found, bought or read.
+6. Blocked: work stopped until something else changes.
 
 An item is a single list entry:
 
@@ -103,13 +105,13 @@ When the runtime record changes, the items it affects move between Agent run and
 
 An item is closed by recording its answer in the spec (a finding or an experiment, and the status of the entries it concerns) and deleting the item in the same commit. An item that turns out to be two questions becomes two items. A new question found along the way becomes a new item at once, even if nobody will look at it for months.
 
-A static reading that settles an item raises its entries as far as the reading goes. A complete reading, as the standard defines it, makes an entry `established` with no run, and that is how most entries are meant to get there. A reading that settles the question without being complete leaves the entry `supported`, and the same commit adds a Static item for what the reading still has to cover, such as a caller nobody has found or an indirect call nobody has resolved. Only an entry that depends on something the code does not decide needs a run. For such an entry, where the runtime record says an agent or a person can make the run, the same commit adds an item under Agent run or Live session for the experiment that would confirm the reading. Where nobody can, it adds none, and the entry's Open questions section says which observation of the original would confirm it, so that a capture that arrives later with a report can.
+A static reading that settles an item raises its entries as far as the reading goes. A complete reading, as the standard defines it, makes an entry `established` with no run, and that is how most entries are meant to get there. A reading that settles the question without being complete leaves the entry `supported`, and the same commit adds a Static item for what the reading still has to cover, such as a caller nobody has found or an indirect call nobody has resolved, and an Emulated call item where the harness can reach the functions the reading covers. Only an entry that depends on something the code does not decide needs a run. For such an entry, where the runtime record says an agent or a person can make the run, the same commit adds an item under Agent run or Live session for the experiment that would confirm the reading. Where nobody can, it adds none, and the entry's Open questions section says which observation of the original would confirm it, so that a capture that arrives later with a report can.
 
-An attempt that does not settle an item records what it tried under `Tried:`, and the item is taken up again only with something the first attempt did not have: new evidence, a new tool, or a reading of the code nobody has tried. If the second attempt ends in the same place, the item moves to the section of the evidence that would change the outcome, with what was tried: Agent run or Live session for a run, Source for a document. It goes to Blocked only when that evidence is out of reach for now, such as a tool nobody has, a second edition the owner does not own, or a run the runtime record says nobody can make, and its `Waiting on:` names what is missing.
+An attempt that does not settle an item records what it tried under `Tried:`, and the item is taken up again only with something the first attempt did not have: new evidence, a new tool, or a reading of the code nobody has tried. If the second attempt ends in the same place, the item moves to the section of the evidence that would change the outcome, with what was tried: Emulated call, Agent run or Live session for a run, Source for a document. It goes to Blocked only when that evidence is out of reach for now, such as a tool nobody has, a second edition the owner does not own, or a run the runtime record says nobody can make, and its `Waiting on:` names what is missing.
 
 ### Order of work
 
-Items are picked in this order, from every section alike. Within each step, an item under Static comes before one that needs a run, and [Running the original](#running-the-original) says when a run item can be taken up at all.
+Items are picked in this order, from every section alike. Within each step, an item under Static comes first, then one under Emulated call, then one that needs a run of the game, and [Running the original](#running-the-original) says when a run item can be taken up at all.
 
 1. Items that block the current slice.
 2. Items that others depend on: the random number generator, the main loop and the order of its phases, the save format and the structures the game keeps. Most other experiments need these.
@@ -126,7 +128,7 @@ Research then forms the competing readings. A reading is plausible while the evi
 
 When direct evidence, the code that produces the behaviour, rules out every reading but one, that reading becomes the entry's description at `supported`, and the readings ruled out move to the Alternatives section of the finding that ruled them out. A description says no more than its evidence shows. What the evidence does not reach stays in Open questions, as readings or as questions. A source that disagrees with the findings stays cited, with the disagreement written in the entry's body and in the source's Known errors section, as the standard says.
 
-The entry is corroborated, and reaches `established`, when the reading of the code is complete: every branch, every caller and every write to what it reads, every indirect call resolved, and nothing left to timing, interrupts or the operating system. Most entries get there by reading alone, and the entry lists the findings of that reading in `complete_reading`. An entry that does depend on something the code does not decide gets there only when a run of the original agrees with the reading, and the run can be an agent run, a live session, or a capture a tester sent with a report. A parity row still reaches `validated` only through tests against evidence recorded from the original running, as the standard requires, so a rule or screen row established by reading alone stops at `implemented` until such evidence exists.
+The entry is corroborated, and reaches `established`, when the reading of the code is complete: every branch, every caller and every write to what it reads, every indirect call resolved, and nothing left to timing, interrupts or the operating system. Most entries get there by reading alone, and the entry lists the findings of that reading in `complete_reading`. A reading that is not complete gets there when an [emulated call](#emulated-calls) agrees with it over everything the entry says. An entry that does depend on something the code does not decide gets there only when a run of the original agrees with the reading, and the run can be an agent run, a live session, or a capture a tester sent with a report. A parity row still reaches `validated` only through tests against evidence recorded from the original running, as the standard requires, so a rule or screen row established by reading alone stops at `implemented` until such evidence exists. For a rule the code decides, that evidence is usually an emulated call's fixture.
 
 Evidence that contradicts the description makes the entry `disputed` at any point, even after its row was `validated`, and the row shows `disputed` until the dispute is settled. If the contradicting finding or experiment turns out to be wrong, it is superseded, and the entry goes back to the status its remaining evidence supports. If the description turns out to be wrong, the entry is superseded by a corrected entry, by the parts it splits into, or, when the mechanic does not exist, by the findings that show it, and citations and code follow `superseded_by` as [Research batches](#research-batches) describes. A superseded entry is never deleted, and it keeps the links it had.
 
@@ -163,7 +165,7 @@ A feature that is not part of a parity row, such as online play, an optional imp
 
 ### Tooling batches
 
-A tooling batch builds something the stages need that has no parity row of its own: the extractor, the Ghidra scripts, the export of the function inventories, the scripts a live session measures with, the rebuild's headless runner and the test harness that replays fixtures. It needs no decision and no approval, because this page already asks for it. A tool that reads the original belongs to the research side, and one that runs the rebuild to the implementation side, and each is built in a session of that side.
+A tooling batch builds something the stages need that has no parity row of its own: the extractor, the Ghidra scripts, the emulator harness, the export of the function inventories, the scripts a live session measures with, the rebuild's headless runner and the test harness that replays fixtures. It needs no decision and no approval, because this page already asks for it. A tool that reads the original belongs to the research side, and one that runs the rebuild to the implementation side, and each is built in a session of that side.
 
 ### Commits
 
@@ -192,7 +194,7 @@ At the end: stop every process the session started (Ghidra, the original game, t
 
 ## Running the original
 
-Runs of the original that an agent drives are the last resort for each question. They are fragile: an old game loses window focus, depends on timing, behaves differently under an emulator's automation, and stops at a dialog nobody expected, and a result that cannot be repeated is not evidence. They are kept to the questions nothing else can answer, and every agent run is scripted, starts from a fixed state, and records enough to be repeated. An item under Agent run or Live session is taken up only after a static reading of its own question has been tried and recorded under `Tried:`, or when it asks for the run that confirms a static reading of an entry that depends on something the code does not decide. A question that a static reading can settle is settled that way, even where a run could settle it too. Runs do not wait for the rest of the queue to be empty. They take their place in the [order of work](#order-of-work), where a run that blocks the current slice comes before static work that does not, and within one step of the order the static items come first.
+Runs of the original that an agent drives are the last resort for each question. They are fragile: an old game loses window focus, depends on timing, behaves differently under an emulator's automation, and stops at a dialog nobody expected, and a result that cannot be repeated is not evidence. An [emulated call](#emulated-calls) starts no process of the game, so none of this section applies to it, and it comes before any run in the order of work. Runs of the game are kept to the questions nothing else can answer, and every agent run is scripted, starts from a fixed state, and records enough to be repeated. An item under Agent run or Live session is taken up only after a static reading of its own question has been tried and recorded under `Tried:`, or when it asks for the run that confirms a static reading of an entry that depends on something the code does not decide. A question that a static reading can settle is settled that way, even where a run could settle it too. Runs do not wait for the rest of the queue to be empty. They take their place in the [order of work](#order-of-work), where a run that blocks the current slice comes before static work that does not, and within one step of the order the static items come first.
 
 Several agents usually work on different games on the same machine at once, under one account or several, and two runs at the same time take each other's window focus, input, emulator or debugger. An agent therefore runs an original only while it holds the machine's run lock. That is one file for the whole machine, shared by every game repository and every account on it: `C:\ProgramData\refurbished-dinosaurs\run.lock` on Windows and `/var/tmp/refurbished-dinosaurs/run.lock` elsewhere, unless the environment variable `REFURBISHED_DINOSAURS_RUN_LOCK` names another path, which the owner then sets the same way for every account. The owner creates the directory once, so that every account that runs sessions can create and delete files in it.
 
@@ -211,6 +213,37 @@ An agent writes a request once the rules above let each Live session item it wou
 The script lists steps. Each step gives the entries it concerns, how to reach the starting state (a save patch, or the choices on the way into a new game), the one input to vary, the moment the maintainer signals, what the agent measures then and in which form, and where captures go (`GAME_DIR/captures/`, named by hash). The measurements are written and tried beforehand as far as the original allows without a person, the addresses to read and the breakpoints to set come from the static readings, and steps from the same starting state follow each other. Nobody should need to ask a question during the session.
 
 After the session, the request's Status becomes `held` with the date. The recordings are turned into findings and experiments with fixtures, as the standard describes, in one research batch per area, and each batch deletes the items of its area that the recordings settle. The last of those batches deletes the request file. What the session showed about the tools, such as a measurement that a person has to trigger or one that works unattended after all, goes into the runtime record in the first of them.
+
+## Emulated calls
+
+An emulated call runs one function of the original executable in a CPU emulator, on arguments and memory the experimenter chooses, and records what the function returns and what it writes. Nothing else of the game runs: there is no window, no timer, no input and no sound, so none of the fragility of the runs above applies. An emulated call starts no process of the game and needs no run lock, and any number of sessions can make them at once. A call takes well under a millisecond, so one experiment can cover thousands of cases, and every run repeats exactly from its fixture.
+
+The emulator is [Unicorn](https://www.unicorn-engine.org), driven through its Python bindings. It emulates the CPU and nothing else, which for x86 covers 16-bit real mode, the 386 instructions that 16-bit compilers emitted, and 32-bit code, and it lets the harness stop at any address. We tried Qiling and Ghidra's p-code emulator on the same functions. Qiling loaded a DOS executable without applying its relocations, and for Win32 code it needed hand-written stubs and ran twenty times slower. Ghidra's emulator needed two fixes before it ran 16-bit code, and ran two hundred times slower. It gave the same result as Unicorn on every case, and it is kept as the second emulator that step 6 of the protocol below uses.
+
+### What an emulated call can settle
+
+An emulated call is a run of the original for everything the code decides. It checks what a function computes from its inputs: a formula, the order of its draws from the random number generator, its arithmetic at the edges of its types, the fields of a structure it builds, the bytes a decoder produces. It is recorded as an experiment, as the standard's [Experiments](/documentation-standard/#experiments) section describes, so it counts wherever the standard asks for a run of the original. An entry whose reading agrees with an emulated call over everything the entry says reaches `established`, and a rule row whose tests replay the fixture reaches `validated`. Every rule the code decides and whose functions the harness can reach therefore gets an Emulated call item once its reading is recorded, even when a complete reading has already established it, because that item's fixture is what its row's tests need.
+
+It settles nothing the code does not decide. The harness supplies the operating system, the interrupts and the clock, so an entry that depends on them still needs an agent run, a live session or a capture. It covers only the functions it calls: which callers reach a function, and with what state, is a question for the static reading or for a run of the whole game. Where the rules live in a script or bytecode that an interpreter in the executable runs, as in SCI or SCUMM games, calling the interpreter settles nothing about a rule, and overlay code settles nothing until the harness loads the overlay the way the game does.
+
+### The harness
+
+Each game repository keeps its harness in `tools/emu/`, built in a tooling batch on the research side. The harness has a loader for the executable's format (MZ, NE, LE or PE) that checks the file's hash against the build entry, maps its segments or sections, and applies the file's own relocations. It has a stub for each import or interrupt that a function under test reaches, and every other import or interrupt stops the run with an error that names it. A stub does only what the call needs, such as handing out heap memory or reading a file, because each stub is our model of the operating system and adds nothing from the original. A function that reaches the screen, sound, input or the timer cannot be settled by an emulated call.
+
+The harness is committed. It reads the executable from `GAME_DIR` the way a test does, and holds no bytes, disassembly or strings from it. `docs/RUNTIME.md` records the Unicorn version, the builds the harness loads, and the stubs it has.
+
+### Protocol
+
+An item under Emulated call names the function a static finding has located and the entries whose reading it tests. One research batch settles it:
+
+1. It states the reading under test from the entry's description, or the competing readings from its Open questions, each written in `tools/emu/` as a procedure that takes the same inputs as the function.
+2. It sets up the state the function reads: its arguments, the globals it reads, such as the generator's state, and the structures it follows pointers into. The harness starts from the memory the executable initialises when it loads and changes only what the experiment needs. A structure is written through its format entry's layout table, and every field written must be `supported` or `established`, the same as for a save patch.
+3. It chooses the cases: the values the reading treats specially, the edges of each type (zero, one, negative values, the largest signed and unsigned values, and ranges that overflow the width the code computes in), inputs that take every branch the entry describes, and random cases drawn from a seed the experiment records. The harness records the instructions each run executed, and the experiment gives the share of the function's branches its cases reached. A branch no case reached is not covered, and the entry's Open questions say so.
+4. It runs every case in the emulator and in each reading, and compares the results exactly. A reading that disagrees on any case is ruled out, and the case goes in the Alternatives section of the finding that rules it out.
+5. It records the experiment and moves the entries along [the life of a claim](#the-life-of-a-claim): `established` where the one reading left covers everything the entry says, `disputed` where the results contradict its description.
+6. Before a result disputes or supersedes an entry, it replays the same cases in Ghidra's p-code emulator and records in the experiment that both emulators agree. When they disagree, the harness or an emulator has a defect, and it is fixed before anything in the spec changes.
+
+A function whose results do not settle an entry, because a stub or a structure the harness would need is missing, keeps its item, with `Tried:` naming what was missing.
 
 ## Reports from testing
 
@@ -277,7 +310,7 @@ Every batch ends by printing a status block, which is the evidence the judge rea
 Status
 Goal: docs/goals/combat-static.md
 Batch: research, RULE-COMBAT-012 supported -> established
-Queue COMBAT: static 3, agent run 1, live session 4, source 0, blocked 2
+Queue COMBAT: static 3, emulated call 2, agent run 1, live session 4, source 0, blocked 2
 Checks: documentation check passed, fast gate passed
 Commit: 3f2a9c1 (not pushed)
 Next: Q-COMBAT-015, RULE-COMBAT-014, the retaliation roll

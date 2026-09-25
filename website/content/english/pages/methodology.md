@@ -29,7 +29,9 @@ An experiment starts from a saved state, changes one input, and records what fol
 
 The manual tells us what the designers intended and is often wrong about what shipped. FAQs, wikis and tools written by other fans are leads, which we credit and re-check. A rule stays provisional until a complete reading of the code shows everything it says, or, where the outcome depends on something the code does not decide, such as timing, interrupts or the operating system, until a reading of the files and an observation of the original running agree. Evidence that only fits a rule, such as sizes that divide or a manual's description, never makes it more than a lead.
 
-We have not settled on a runtime tool yet. It has to take text commands and print text back, so that scripts and language models can run the same experiment the same way every time. We are trying [Frida](https://frida.re), cdb from [WinDbg](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/), Ghidra's own debugger, and [DOSBox-X](https://dosbox-x.com) for DOS games, and will write up what worked.
+To check what a single function of the executable computes, we call it in the [Unicorn](https://www.unicorn-engine.org) CPU emulator on inputs we choose, with no window and no timing involved, and record each set of calls as an experiment. The [work protocol](/work-protocol/#emulated-calls) gives the procedure. It confirms only what the code decides, since the emulator stands in for the operating system.
+
+For runs of the whole game, we have not settled on a runtime tool yet. It has to take text commands and print text back, so that scripts and language models can run the same experiment the same way every time. We are trying [Frida](https://frida.re), cdb from [WinDbg](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/), Ghidra's own debugger, and [DOSBox-X](https://dosbox-x.com) for DOS games, and will write up what worked.
 
 ## Writing it down
 

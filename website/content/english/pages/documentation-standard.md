@@ -417,7 +417,7 @@ superseded_by: []
 recorded_by: kibertoad
 reproduced_by: []
 environment: Windows 11 24H2, DxWnd 2.06.10 preset "chaos-16bit"
-starting_state: saves/EXP-COMBAT-004.patch.json   # a save patch, a save, new-game, or null
+starting_state: saves/EXP-COMBAT-004.patch.json   # a save patch, a save, new-game, emulated-call, or null
 recording: null           # the path of a demo or replay the original recorded (see below), or null
 repetitions: 200
 fixture: EXP-COMBAT-004.json
@@ -502,6 +502,8 @@ The fixture for the example experiment, with one of its 200 runs:
 The schema in the spec package is the authority on these files once it exists. The examples show the fields this page requires.
 
 Some originals record play themselves, as a demo that plays back on the title screen or a replay file the player saves. A recording like that is an experiment whose inputs come from the file, and the fixture holds the states and events the original reaches as it plays back, the same as for any other experiment. Its `starting_state` is what playback starts from: `new-game` for a recording that holds its own starting choices and seed, or the save or patch for one that the original plays back from a save. The recording's own layout is a format entry. A demo that ships with the game is one of the build's files, so `recording` gives its path as the build entry writes it, and a test finds it with the game's other files. A recording made for the experiment usually holds only a starting seed and the player's inputs. Then it is committed to `recordings/`, `recording` gives that path, and `spec/LICENSE` lists it as covered by neither licence. One that holds any of the game's content is not committed. The maintainer keeps it with the captures, named by its hash, and `recording` gives it as `captures/` followed by that hash. The Setup section says how a recording was made or where it comes from.
+
+An experiment can also call one function of the original in a CPU emulator, following the [work protocol](/work-protocol/#emulated-calls). Its `environment` names the emulator and its version and the commit of the harness that loaded the executable, its `starting_state` is `emulated-call`, and its Setup section names the function by address, the memory the harness writes before each call, and each stub the harness supplies in place of the operating system. Its fixture has no save hash and no inputs. Each run gives the arguments and the memory written before the call, with the generator's state in `rng_state`, and its end state gives what the function returned, under `return`, and the memory read back after it, addressed by format ID and field path or by glossary name like any other end state. The experiment gives the share of the function's branches its runs reached, and it covers only those. An emulated call is a run of the original only for what the code decides. It never confirms a reading of something that depends on an interrupt, timing or the operating system, because the harness supplies those itself.
 
 ### Formats
 
@@ -754,7 +756,7 @@ The script, or until then the reviewer, checks that:
 - every resource a screen or procedure references, and every file a procedure reads or writes, is in a file that a format entry lists, apart from CD audio tracks, which the build entry lists;
 - every binary format entry's `definition` exists unless the status is `unknown`, and every text format entry's `definition`, `size` and `byte_order` are null;
 - every Kaitai file belongs to the format entry its name and `meta/id` give, compiles, names the licence in `meta/license`, and has fixed sizes that match the layout table in its entry;
-- every experiment's `fixture` exists and validates against the fixture schema, every event it names has a glossary entry, every format, field path and glossary name in its end state exists, it gives the hash of the save its runs started from unless `starting_state` is `new-game`, and, for a patch, the hash of the base save as well;
+- every experiment's `fixture` exists and validates against the fixture schema, every event it names has a glossary entry, every format, field path and glossary name in its end state exists, it gives the hash of the save its runs started from unless `starting_state` is `new-game` or `emulated-call`, and, for a patch, the hash of the base save as well;
 - every `starting_state` that names a save or a patch points to one in `saves/`, and every patch validates against the fixture schema and names formats and field paths that exist in their layout tables with status `supported` or `established`;
 - every save in `saves/` and every file in `recordings/` matches the hash in its fixture, is named by some experiment, and is listed in `spec/LICENSE` as covered by neither licence;
 - every `recording` that gives a path outside `recordings/` and `captures/` names a file in the experiment's build, and every experiment with a `recording` has that recording's hash in its fixture;
