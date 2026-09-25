@@ -7,7 +7,7 @@ draft: false
 
 Every restoration follows the rules on this page. Where our own repositories fall short of them, we change the repositories.
 
-The project has two goals, described under [Philosophy](/philosophy/): a game people can play, and documentation complete enough that anyone can check that game or build their own. Most of these rules serve the second goal, because without it nobody can verify the first.
+The project has two goals, described under [Philosophy](/philosophy/): a game people can play, and documentation complete enough that anyone can check that game or build their own. Most of these rules serve the second goal, because without it nobody can verify the first. How the work is planned, tracked and handed on is set out in the [work protocol](/work-protocol/).
 
 ## Ground rules
 

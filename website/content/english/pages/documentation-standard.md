@@ -5,7 +5,7 @@ description: "The exact structure every restoration uses to record what reverse 
 draft: false
 ---
 
-Every restoration records a game's internals in the format below, down to file names, field lists and number formatting, so that the documentation of one game reads like the documentation of any other and tools can check it. What has to be documented, and why, is covered in [Methodology](/methodology/).
+Every restoration records a game's internals in the format below, down to file names, field lists and number formatting, so that the documentation of one game reads like the documentation of any other and tools can check it. What has to be documented, and why, is covered in [Methodology](/methodology/). How the work that produces it is planned and tracked is covered in the [work protocol](/work-protocol/).
 
 The format borrows from projects that have done parts of this well. The layout tables follow [IESDP](https://gibberlings3.github.io/iesdp/) and the [ModdingWiki](https://moddingwiki.shikadi.net/wiki/UINT16LE), the canonical format definitions are [Kaitai Struct](https://doc.kaitai.io/user_guide.html), the formula entries follow the [OpenMW research wiki](https://wiki.openmw.org/index.php?title=Research), the bug records follow UESP's [bug template](https://en.uesp.net/wiki/Template:Bug), and the way a claim is tied to an address in a hashed binary comes from [reccmp](https://github.com/isledecomp/reccmp/blob/master/docs/annotations.md) and the [zeldaret](https://github.com/zeldaret/oot/blob/main/docs/Documenting.md) projects. None of them gives every claim a stable ID, a status from a fixed list and a link to its evidence, so this standard adds those.
 
