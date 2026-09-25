@@ -7,20 +7,6 @@ draft: false
 
 The [methodology](/methodology/) says what counts as evidence and what the rebuild may change. The [documentation standard](/documentation-standard/) says how each finding is written down. Neither says what to do first, where open questions are tracked, how big a piece of work is, or what the next person or agent needs to pick it up. The rules here apply to people and coding agents alike, and to every restoration started from the [project template](https://github.com/kibertoad/refurbished-dinosaurs-template).
 
-## Where it comes from
-
-Six restorations were planned and tracked in six different ways before this page existed, and the same problems came up in most of them.
-
-Plans turned into logs. Implementation plans grew dated checkpoint sections and paragraph-long "next action" items until they passed a thousand lines, and handover notes were appended to after every batch until one reached two thousand. A research log in one project passed 36,000 lines. Nobody could read the current state out of any of them, so each session rebuilt it from the git history instead.
-
-Code ran ahead of evidence, and plans assumed runs of the original that nobody could make. Large parts of several games were implemented and tested before any run of the original confirmed them. In one project, work had started on all nine milestones and none of their gates had passed, because the first gate needed a recorded run of the original and the tool to make one was not available. Most of these games cannot be started, driven and read by an agent without a person at the machine, and nobody found that out until the plan depended on it.
-
-Every project invented its own confidence scale (Confirmed and Provisional in one, low to verified in another, documented to validated in a third), and each project that has moved to the standard so far had to translate every claim into its statuses and IDs.
-
-Some things worked and are kept here. Chaos Overlords split its open questions into those a static reading can settle and those that need someone to run the game, and it closed an item by recording the finding and deleting the item. It also measured how much of the executable the documentation covers, which gave it a number nobody could argue with. Wages Due kept live hypotheses with the test that would settle each, and told long-running agents to stop repeating a dead end without new evidence.
-
-From outside the project, the structure borrows from the way [Anthropic describes long-running coding agents](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents): a list of work whose state is ground truth, one item at a time, and a short progress note and a commit at the end of every session. [Chocolate Doom](https://www.chocolate-doom.org/wiki/index.php/Statcheck) shows the value of a regression corpus recorded from the original, and [decomp.dev](https://decomp.dev/projects) shows progress published as a number a script computes. The split between research and implementation below is the classic clean-room arrangement, in which the people who study the original write a specification and other people implement it from that alone.
-
 ## Working files
 
 The files that track the work sit in the game repository next to the spec. They describe the work, never the original, so the spec's rule against naming the rebuild does not apply to them. Each one says what is true now. What was true before is in git, and none of them repeats it.
@@ -30,7 +16,8 @@ The files that track the work sit in the game repository next to the spec. They 
 | `docs/IMPLEMENTATION-PLAN.md` | The game profile, scope and non-goals, the stage the project is in, the slices with their exit criteria, the risks, and the questions only the owner can answer. | Dated checkpoints, status narration, research questions, lists of what was done. |
 | `queue/AREA.md` | One file per spec area: the open research questions of that area, grouped by the kind of evidence each one needs. | Anything already answered. An item is deleted when it is settled. |
 | `docs/RUNTIME.md` | What can be done with the original running, and who can do it (see [Runtime access](#runtime-access)). | Findings. What a run showed goes in the spec. |
-| `docs/HANDOVER.md` | Where the work stands: the branch and whether it is pushed, the last gate result, the goals running, work left unfinished, blockers, and what to pick up next, naming queue items and entries by ID. At most 200 lines, rewritten at the end of every session. | History. The previous session's notes are replaced, not kept below the new ones. What research found or tried, which belongs in the spec and the queue. |
+| `docs/live-sessions/NAME.md` | One file per live session an agent has asked for: its status, the items it would settle, how long it takes, and its script (see [Live sessions](#live-sessions)). Deleted when the session's recordings are in the spec. | Results. What the session showed goes in the spec. |
+| `docs/HANDOVER.md` | Where the work stands: the branch and whether it is pushed, the last gate result, the goals running, work left unfinished, blockers, open live session requests, and what to pick up next, naming queue items and entries by ID. At most 200 lines, rewritten at the end of every session. | History. The previous session's notes are replaced, not kept below the new ones. What research found or tried, which belongs in the spec and the queue. |
 | `docs/goals/NAME.md` | One file per long-running goal while it runs: its condition, its scope, what it must not touch, and the dead ends found so far. Deleted when the goal is met or dropped. | Progress reports. The queue and the commits show progress. |
 
 Decisions the owner makes go in `docs/DECISIONS.md`, dated and newest first. A decision that departs from the original is a deviation as well, in `deviations/`. When the file would pass the size limit below, its oldest entries move to a numbered file in `docs/decisions/`, starting at `001.md`, filled up to the limit and never changed after. `docs/DECISIONS.md` keeps the newest entries and opens with links to the numbered files, and a decision is never renumbered or reworded when it moves.
@@ -39,7 +26,7 @@ Every file here is at most 1,000 lines, the same limit the standard sets for its
 
 Tool paths, installed versions and the pitfalls of the local setup go in `docs/GHIDRA.md` and `docs/DEVELOPMENT.md`, so that nobody searches for them twice.
 
-The template's own files are older than this page in one place. Its `docs/IMPLEMENTATION-PLAN.md` has an Open questions section, and its `AGENTS.md` asks every change to update the plan's open questions. Research questions go in `queue/` all the same, the plan's section holds only the questions the owner has to answer, and a change updates the queue where `AGENTS.md` says the plan. Wherever the template's files and this page disagree, this page applies and the template is corrected.
+Where the template's files and this page disagree, this page applies and the template is corrected.
 
 ## Stages
 
@@ -53,7 +40,7 @@ Exit: eligibility and the latest version are recorded, the analysis build has a 
 
 ### Runtime access
 
-Find out what can be done with the original running, before any plan depends on it. Many of these games cannot be controlled by an agent at all: they need a real display and a person at the keyboard, fight a debugger, take their input only from a device an agent cannot reach, or run only on the one machine that has the disc. For most of them, static reading of the executable and data files is the more reliable evidence, and the protocol plans around that.
+Find out what can be done with the original running, before any plan depends on it. Many of these games cannot be controlled by an agent at all, and static reading of the executable and data files is the main source of evidence for every game. Runs of the original are the last resort (see [Running the original](#running-the-original)).
 
 `docs/RUNTIME.md` records, for each build that will be run, how it runs (natively, under Wine, in DOSBox-X or another emulator, in a virtual machine), and whether an agent can do each of the following alone, only while a person runs the game, or not at all:
 
@@ -64,7 +51,7 @@ Find out what can be done with the original running, before any plan depends on 
 - capture frames and sound;
 - play back a recording the original made.
 
-Each answer names the tool and version that was tried and what happened, and, where the answer is no, what would change it. The record says what is true now, and it is updated whenever a tool, a machine or an emulator changes the answer. The methodology asks for a runtime tool that takes text commands and prints text back, and where one works the record says which.
+Finding the answers is the one time the original is run before the static work is done, and it takes the run lock like any other run. Each answer names the tool and version that was tried and what happened, and, where the answer is no, what would change it. The record says what is true now, and it is updated whenever a tool, a machine or an emulator changes the answer. The methodology asks for a runtime tool that takes text commands and prints text back, and where one works the record says which.
 
 Exit: `docs/RUNTIME.md` answers every capability for the analysis build, and each answer names the attempt it comes from.
 
@@ -116,14 +103,12 @@ An attempt that does not settle an item records what it tried under `Tried:`, an
 
 ### Order of work
 
-Items are picked in this order, and an item under Live session is taken up only in a live session, so it never holds up the others:
+Items are picked in this order, within the limits [Running the original](#running-the-original) sets on the Agent run and Live session sections:
 
 1. Items that block the current slice.
 2. Items that others depend on: the random number generator, the main loop and the order of its phases, the save format and the structures the game keeps. Most other experiments need these.
-3. Items where one piece of evidence raises the most entries. Where an agent can run the original, an entry that already has a static finding often needs only an experiment to reach `established`, and that is often the cheapest progress available. The experiment has to cover everything the entry says, every branch of a procedure and, for a random outcome, enough repetitions for its comparison, and a rule stays below `established` while any glossary claim it relies on is `(unknown)`. Where the experiment covers only part of the entry, the entry stays `supported` and its Open questions say which part is left.
-4. Items with the cheapest evidence: a data file before a static reading, a static reading before an agent run.
-
-A question that a static reading can settle is settled that way, even where a run could settle it too. A run of the original can then confirm the reading, which is what raises the entry to `established`.
+3. Items where one piece of evidence raises the most entries. An experiment that raises an entry to `established` has to cover everything the entry says, every branch of a procedure and, for a random outcome, enough repetitions for its comparison, and a rule stays below `established` while any glossary claim it relies on is `(unknown)`. Where the experiment covers only part of the entry, the entry stays `supported` and its Open questions say which part is left.
+4. Items with the cheapest evidence: a data file before a static reading.
 
 ## Batches
 
@@ -172,17 +157,25 @@ A session is one sitting of work, by a person or an agent. It may hold several b
 
 At the start: read `docs/HANDOVER.md` and the file of the goal the session works under, if it has one, check the branch and the working tree against what the handover says, and run the documentation check. A research session then turns any `Spec gap:` notes into queue items and picks the next item from its goal or the queue in the order above. An implementation session picks the next rows of the current slice from its goal or the plan, and opens neither the queue nor the files of research goals.
 
-At the end: stop every process the session started (Ghidra, the original game, test hosts), and leave processes that belong to anyone else alone. Rewrite the handover to describe the state now, commit it with everything else in the working tree or discard what is not worth keeping, so that nothing is left half done without a note saying so, and push the branch. Where the repository's `AGENTS.md` says the owner pushes instead, the handover says how many commits the branch is ahead of its remote, counting its own.
+At the end: stop every process the session started (Ghidra, the original game, test hosts), leave processes that belong to anyone else alone, and release the run lock if the session holds it. Rewrite the handover to describe the state now, commit it with everything else in the working tree or discard what is not worth keeping, so that nothing is left half done without a note saying so, and push the branch. Where the repository's `AGENTS.md` says the owner pushes instead, the handover says how many commits the branch is ahead of its remote, counting its own.
 
-## Live sessions
+## Running the original
 
-Where the runtime record says a run needs a person, the evidence comes from a live session: the maintainer runs the original on their machine and plays to each point the script names, tells the agent when the game is there, and the agent takes its measurement against the running process (a memory read, a breakpoint, a dump of a structure, a frame capture) before the maintainer carries on. The maintainer's time is the scarcest resource a restoration has, so a session is prepared so that it spends that time only on what needs a person.
+Runs of the original are the last resort. An item under Agent run or Live session is taken up only when no item under Static is left that can be worked on, in any area, and only after a static reading of its own question has been tried and recorded under `Tried:`. A question that a static reading can settle is settled that way, even where a run could settle it too. A run can then confirm the reading, which is what raises the entry to `established`.
 
-A live session is proposed, never assumed. When Live session items block a slice, or enough of them have gathered to fill a sitting, the agent adds an owner question to the plan offering one, with the script ready and how long it expects the session to take. The owner accepts it, sets a time, or declines. Until the owner opts in, the items stay under Live session, the plan keeps the rows that need them at `implemented`, and work goes on with everything a live session does not block. An agent never waits idle for one.
+Several agents usually work on different games on the same machine at once, and two runs at the same time take each other's window focus, input, emulator or debugger. An agent therefore runs an original only while it holds the machine's run lock: the file `~/.refurbished-dinosaurs/run.lock`, shared by every game repository on the machine, which names the repository, the session and the time it was taken. The agent takes the lock by creating the file. If the file is already there, it does not wait, and goes on with work that needs no run. It removes the file when its run ends, and never removes one it did not create. A lock that looks abandoned goes in the handover's blockers for the owner. An agent never attaches to, sends input to or stops a process it did not start.
 
-Before a session, the Live session items are collected into a script. Each step gives the entries it concerns, how to reach the starting state (a save patch, or the choices on the way into a new game), the one input to vary, the moment the maintainer signals, what the agent measures then and in which form, and where captures go (`GAME_DIR/captures/`, named by hash). The measurements are written and tried beforehand as far as the original allows without a person, the addresses to read and the breakpoints to set come from the static readings, and the script is ordered so that steps from the same starting state follow each other. Nobody should need to ask a question during the session.
+### Live sessions
 
-After the session, the recordings are turned into findings and experiments with fixtures, as the standard describes, and the items they settle are deleted from the queue. What the session showed about the tools, such as a measurement that a person has to trigger or one that works unattended after all, goes into the runtime record.
+Where the runtime record says a run needs a person, the evidence comes from a live session: the maintainer runs the original on their machine and plays to each point the script names, tells the agent when the game is there, and the agent takes its measurement against the running process (a memory read, a breakpoint, a dump of a structure, a frame capture) before the maintainer carries on. The agent holds the run lock for the whole session. The maintainer's time is the scarcest resource a restoration has, so a session is prepared so that it spends that time only on what needs a person.
+
+A live session is requested, never assumed, and the request is a file in the repository, so that the owner can find it after the agent's session has ended and plan a sitting around it. `docs/live-sessions/NAME.md` opens with a Status line (`requested`, `accepted` with the date agreed, or `declined` with the reason), then names the build and the machine it needs, the queue items it would settle, the slices they block, and how long the session is expected to take, and then gives the script. The owner answers by changing the Status line. An agent does not ask again for a declined session without something the request did not have, such as a new item that blocks a slice. The handover lists the requests that are open.
+
+An agent writes a request once the rules above let the Live session items it would settle be taken up, and when they block a slice or are enough to fill a sitting. Until the owner accepts, the items stay under Live session, the plan keeps the rows that need them at `implemented`, and work goes on with everything a live session does not block. An agent never waits idle for one.
+
+The script lists steps. Each step gives the entries it concerns, how to reach the starting state (a save patch, or the choices on the way into a new game), the one input to vary, the moment the maintainer signals, what the agent measures then and in which form, and where captures go (`GAME_DIR/captures/`, named by hash). The measurements are written and tried beforehand as far as the original allows without a person, the addresses to read and the breakpoints to set come from the static readings, and steps from the same starting state follow each other. Nobody should need to ask a question during the session.
+
+After the session, the recordings are turned into findings and experiments with fixtures, as the standard describes, the items they settle are deleted from the queue, and the request file is deleted in the same commit. What the session showed about the tools, such as a measurement that a person has to trigger or one that works unattended after all, goes into the runtime record.
 
 ## Measuring progress
 
@@ -202,7 +195,7 @@ A test count is not progress, and neither are lines of code or the number of ass
 
 ## What needs the owner
 
-The owner decides eligibility and the supported editions, the scope and the non-goals, any deviation whose default is `on` or `mandatory`, any feature outside the parity matrix such as online play, when a release goes out, and whether and when live sessions happen. Anything else goes ahead without approval, and the owner reviews the result. A question only the owner can answer goes in the plan's owner questions, and the work that depends on it waits under Blocked in the queue.
+The owner decides eligibility and the supported editions, the scope and the non-goals, any deviation whose default is `on` or `mandatory`, any feature outside the parity matrix such as online play, when a release goes out, and whether and when live sessions happen, which they answer in the request files. Anything else goes ahead without approval, and the owner reviews the result. A question only the owner can answer goes in the plan's owner questions, and the work that depends on it waits under Blocked in the queue.
 
 ## Coding agents and long-running goals
 
@@ -236,7 +229,7 @@ Commit: 3f2a9c1 (not pushed)
 Next: RULE-COMBAT-014, the retaliation roll
 ```
 
-The recurring procedures here suit agent skills, one per procedure: checking runtime access, planning and seeding the queue, starting a session, a research batch, an implementation batch, preparing and ingesting a live session, and ending a session. A repository that adds them keeps them in `.claude/skills/`. A skill holds the steps and points to this page and the standard for the rules, so the rules live in one place. Where a skill and this page disagree, this page applies, and the skill is fixed.
+The template ships the protocol's recurring procedures as agent skills in `.claude/skills/`, one per procedure: `runtime-access` checks what can be done with the original running, `plan-work` plans and seeds the queue, `start-session` and `end-session` open and close a session, `research-item` and `implement-rows` carry out a research or implementation batch, and `live-session` requests, prepares and ingests a live session. A skill holds the steps and points to this page and the standard for the rules, so the rules live in one place. Where a skill and this page disagree, this page applies, and the skill is fixed.
 
 Several agents can work on one game at once when each takes different areas. A goal file claims its areas, and the batches of one goal touch only those areas' entries, queue files and parity rows. A goal takes up a queue item only if every entry the item names is in one of its areas or in an area no running goal claims. Each agent works in its own worktree or branch. Two branches that create the same spec ID are handled the way the standard's [Identifiers](/documentation-standard/#identifiers) section says.
 
