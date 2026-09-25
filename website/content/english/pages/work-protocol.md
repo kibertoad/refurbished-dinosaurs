@@ -218,7 +218,7 @@ After the session, the request's Status becomes `held` with the date. The record
 
 An emulated call runs one function of the original executable in a CPU emulator, on arguments and memory the experimenter chooses, and records what the function returns and what it writes. Nothing else of the game runs: there is no window, no timer, no input and no sound, so none of the fragility of the runs above applies. An emulated call starts no process of the game and needs no run lock, and any number of sessions can make them at once. A call takes well under a millisecond, so one experiment can cover thousands of cases, and every run repeats exactly from its fixture.
 
-The emulator is [Unicorn](https://www.unicorn-engine.org), driven through its Python bindings. It emulates the CPU and nothing else, which for x86 covers 16-bit real mode, the 386 instructions that 16-bit compilers emitted, and 32-bit code, and it lets the harness stop at any address. We tried Qiling and Ghidra's p-code emulator on the same functions. Qiling loaded a DOS executable without applying its relocations, and for Win32 code it needed hand-written stubs and ran twenty times slower. Ghidra's emulator needed two fixes before it ran 16-bit code, and ran two hundred times slower.
+The emulator is [Unicorn](https://www.unicorn-engine.org), driven through its Python bindings. It emulates the CPU and nothing else, which for x86 covers 16-bit real mode, the 386 instructions that 16-bit compilers emitted, and 32-bit code, and it lets the harness stop at any address.
 
 ### What an emulated call can settle
 
