@@ -53,7 +53,7 @@ Find out what can be done with the original running, before any plan depends on 
 - play back a recording the original made;
 - call a single function of the executable in the emulator harness (see [Emulated calls](#emulated-calls)).
 
-Finding the answers is the one time the original is run before the static work is done, and it takes the run lock like any other run. Each answer names the tool and version that was tried and what happened, and, where the answer is no, what would change it. The record says what is true now, and it is updated whenever a tool, a machine or an emulator changes the answer. The methodology asks for a runtime tool that takes text commands and prints text back, and where one works the record says which.
+Finding the answers is the one time the original is run before the static work is done, and it takes the run lock like any other run. Each answer names the tool and version that was tried and what happened, and, where the answer is no, what would change it. The record says what is true now, and it is updated whenever a tool, a machine or an emulator changes the answer.
 
 Exit: `docs/RUNTIME.md` answers every capability for the analysis build, and each answer names the attempt it comes from.
 
