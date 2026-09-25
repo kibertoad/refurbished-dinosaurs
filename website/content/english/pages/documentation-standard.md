@@ -5,7 +5,7 @@ description: "The exact structure every restoration uses to record what reverse 
 draft: false
 ---
 
-Every restoration records a game's internals in the format below, down to file names, field lists and number formatting, so that the documentation of one game reads like the documentation of any other and tools can check it. What has to be documented, and why, is covered in [Methodology](/methodology/).
+Every restoration records a game's internals in the format below, down to file names, field lists and number formatting, so that the documentation of one game reads like the documentation of any other and tools can check it. What has to be documented, and why, is covered in [Methodology](/methodology/). How the work that produces it is planned and tracked is covered in the [work protocol](/work-protocol/).
 
 The format borrows from projects that have done parts of this well. The layout tables follow [IESDP](https://gibberlings3.github.io/iesdp/) and the [ModdingWiki](https://moddingwiki.shikadi.net/wiki/UINT16LE), the canonical format definitions are [Kaitai Struct](https://doc.kaitai.io/user_guide.html), the formula entries follow the [OpenMW research wiki](https://wiki.openmw.org/index.php?title=Research), the bug records follow UESP's [bug template](https://en.uesp.net/wiki/Template:Bug), and the way a claim is tied to an address in a hashed binary comes from [reccmp](https://github.com/isledecomp/reccmp/blob/master/docs/annotations.md) and the [zeldaret](https://github.com/zeldaret/oot/blob/main/docs/Documenting.md) projects. None of them gives every claim a stable ID, a status from a fixed list and a link to its evidence, so this standard adds those.
 
@@ -121,14 +121,28 @@ Rules, formats, screens and bugs describe the original, and each carries one of 
 
 | Status | Meaning | Must cite |
 |---|---|---|
-| `unknown` | Listed so that it is not forgotten, not yet studied. | Nothing. |
+| `unknown` | Nothing is claimed yet. The entry is listed so that it is not forgotten, and may hold open readings, with the evidence on each side, in its Open questions section. | Nothing. |
 | `sourced` | Described from the manual or another outside source only. | At least one source. |
-| `supported` | Backed by direct evidence from the original of one kind: static findings, or dynamic findings and experiments. | At least one finding or experiment. |
-| `established` | A reading of the files and a run of the original agree. | At least one static finding, and at least one dynamic finding or experiment. |
+| `supported` | Backed by [direct evidence](#direct-and-circumstantial-evidence) from the original of one kind: static findings, or dynamic findings and experiments. | At least one finding or experiment. |
+| `established` | A reading of the files and a run of the original agree, or a [complete reading](#complete-readings) of the code shows everything the entry says. | At least one static finding, and either at least one dynamic finding or experiment, or static findings listed in `complete_reading`. |
 | `disputed` | Findings or experiments contradict the entry or each other. The body says which and how. | At least one finding or experiment in `conflicting`. |
 | `superseded` | Replaced, or shown to be wrong, by the entries in `superseded_by`. | Nothing further. |
 
 The first four form a scale, from `unknown` up to `established`.
+
+### Direct and circumstantial evidence
+
+A finding is direct evidence for a claim when its observation locates what produces the behaviour: the code that reads or writes the field, takes the branch, makes the calls in that order or computes the value, or, for a dynamic finding, the value or the frame the original produced. Anything else that fits the claim is circumstantial: sizes that divide exactly, a pattern in the values of a shipped file, a name, what the manual says, or what similar games do. Circumstantial evidence is recorded as a finding like any other, and an entry names it in its Open questions section, for or against a reading, but never lists it in `evidence`, and it never counts towards a status. An entry whose only evidence from the original is circumstantial is `unknown`, or `sourced` if a source describes it.
+
+### Complete readings
+
+The code decides most of what a game does, so a reading of it can establish an entry without a run. Static findings establish an entry on their own when together they read all of it in its first build, and the entry lists them in `complete_reading`, a field that rules, formats, screens and bugs may have and that is otherwise absent or empty. A reading is complete when:
+
+- it covers every branch of every procedure the entry describes, and for a format every place the code reads or writes the file or structure, and its findings name the instructions they checked wherever the decompiler's types, signedness or casts decide a result;
+- it locates every caller of those procedures and every write to the state they read, and resolves every indirect call and jump they take;
+- what the entry says depends on nothing the code does not decide: no point where an interrupt handler or a second thread can change the result (a `# may run:` comment in the procedure), no read of memory that nothing wrote first, no timing, such as the length of a tick or the rate at which frames are drawn, and no result from the operating system or a library outside the build, other than a value from outside the game that the procedure reads by its glossary name.
+
+An entry that depends on any of those stays `supported` until a run of the original agrees with the reading. A complete reading that later meets a finding or experiment it does not explain makes the entry `disputed`, the same as any other.
 
 Only evidence from the original can dispute an entry. Manuals are often wrong, and a source that disagrees with the findings is cited in `evidence` like any other source, with the disagreement described in the entry's body (a rule's What the sources say section, and the Open questions section of other kinds) and in the source's Known errors section. Two sources that disagree with each other, and no finding or experiment to settle it, leave the entry `sourced` with the disagreement in its Open questions section. An entry that is not superseded must not cite a superseded entry in its `evidence`, `conflicting` or `related` fields. A superseded entry keeps the links it had when it was replaced, so its history stays readable.
 
@@ -148,7 +162,7 @@ Findings and experiments are evidence rather than claims, so they have a shorter
 | `reproduced` | Repeated by someone other than the person in `recorded_by`, from the entry's own instructions, with the same result, and that person is named in `reproduced_by`. For a random outcome, the same result means a distribution that passes the experiment's own comparison with the recorded one. |
 | `superseded` | Shown to be wrong. `superseded_by` names the entries that show it. |
 
-A claim's status does not depend on whether its evidence has been reproduced, because a project with one person working on it could then never establish anything. The status index lists `established` entries that rest only on `recorded` evidence, which shows where a second person's time does the most good.
+A claim's status does not depend on whether its evidence has been reproduced, because a project with one person working on it could then never establish anything. The status index lists `established` entries that rest only on `recorded` evidence, and separately those established by a complete reading alone, which shows where a second person's time does the most good.
 
 Builds and sources carry no status, but they can still be wrong: a build entry can hold a hash taken from a damaged copy, or a source entry can describe a different printing from the one that was read. A correction that leaves what the entry identifies unchanged, such as a typo in a title or a new URL for the same document, is made in place. Any other correction is a new entry under a new alias, and the old entry's `superseded_by` names it. Every entry that cited the old one then fails the check until it cites the new one, which is the point at which someone confirms that its evidence still holds.
 
@@ -283,7 +297,7 @@ superseded_by: []
 
 Each kind adds fields of its own, and the section for each kind below shows a complete example.
 
-Rules, formats, screens and bugs also have `evidence`, the findings, experiments and sources they rest on, and `conflicting`, the evidence that contradicts them. Both are always present. `conflicting` holds only findings and experiments, and may only be non-empty when the status is `disputed`. They also have `split_with`, which is always present and lists the other entries of a split by build, described below, or is empty.
+Rules, formats, screens and bugs also have `evidence`, the findings, experiments and sources they rest on, and `conflicting`, the evidence that contradicts them. Both are always present. `conflicting` holds only findings and experiments, and may only be non-empty when the status is `disputed`. They also have `split_with`, which is always present and lists the other entries of a split by build, described below, or is empty, and they may have `complete_reading` (see [Complete readings](#complete-readings)).
 
 Rules, formats, bugs and screens also have `related`, links to other claims, which go one way as well. A rule lists the rules it invokes, the formats it reads or writes, and the screens it shows. A format lists the rules its tables name, such as the rule that decompresses a compressed block. A bug lists the rules, formats and screens it occurs in. A screen lists the rules and screens its effects lead to, and the rules that format the values it shows. A format's links to other formats are the types in its layout table, and the check script reads them from there. The indexes carry every link in the other direction.
 
@@ -403,7 +417,7 @@ superseded_by: []
 recorded_by: kibertoad
 reproduced_by: []
 environment: Windows 11 24H2, DxWnd 2.06.10 preset "chaos-16bit"
-starting_state: saves/EXP-COMBAT-004.patch.json   # a save patch, a save, new-game, or null
+starting_state: saves/EXP-COMBAT-004.patch.json   # a save patch, a save, new-game, emulated-call, or null
 recording: null           # the path of a demo or replay the original recorded (see below), or null
 repetitions: 200
 fixture: EXP-COMBAT-004.json
@@ -489,6 +503,8 @@ The schema in the spec package is the authority on these files once it exists. T
 
 Some originals record play themselves, as a demo that plays back on the title screen or a replay file the player saves. A recording like that is an experiment whose inputs come from the file, and the fixture holds the states and events the original reaches as it plays back, the same as for any other experiment. Its `starting_state` is what playback starts from: `new-game` for a recording that holds its own starting choices and seed, or the save or patch for one that the original plays back from a save. The recording's own layout is a format entry. A demo that ships with the game is one of the build's files, so `recording` gives its path as the build entry writes it, and a test finds it with the game's other files. A recording made for the experiment usually holds only a starting seed and the player's inputs. Then it is committed to `recordings/`, `recording` gives that path, and `spec/LICENSE` lists it as covered by neither licence. One that holds any of the game's content is not committed. The maintainer keeps it with the captures, named by its hash, and `recording` gives it as `captures/` followed by that hash. The Setup section says how a recording was made or where it comes from.
 
+An experiment can also call one function of the original in a CPU emulator, following the [work protocol](/work-protocol/#emulated-calls). Its `environment` names the emulator and its version and the commit of the harness that loaded the executable, its `starting_state` is `emulated-call`, and its Setup section names the function by address, the memory the harness writes before each call, and each stub the harness supplies in place of the operating system. Its fixture has no save hash and no inputs. Each run gives the arguments, by the names in the rule's Parameters section, and the memory written before the call, by format ID and field path or by glossary name, never by register, stack offset or address, with the generator's state in `rng_state`, and its end state gives what the function returned, under `return`, and the memory read back after it, addressed by format ID and field path or by glossary name like any other end state. The experiment gives the share of the function's branches its runs reached, and it covers only those: an entry it supports reaches `established` only when its runs reach every branch the entry describes and the static reading of the function's callers and inputs is complete. An emulated call is a run of the original only for what the code decides. It never confirms a reading of something that depends on an interrupt, timing or the operating system, because the harness supplies those itself.
+
 ### Formats
 
 A format entry describes one file format, one structure inside a file, a structure the game keeps only in memory, such as its state block, or a message it sends over a network or serial link. A memory structure or a message has an empty `files` list, and its evidence locates it by the code that builds or reads it.
@@ -531,7 +547,7 @@ In the layout table, fields are never grouped into one row, and unknown bytes an
 | `0x1A` | 2 | `INT16LE` | `unk_1A` | Purpose unknown. 0 in every record of the shipped file, and never read by the executable | established | FND-DATA-002, EXP-DATA-001 |
 | `0x1C` | | | | Total size 28 | | |
 
-Each row's status follows the same table as a whole entry, so an `established` row cites a static finding and a dynamic finding or experiment (here FND-DATA-002 and EXP-DATA-001), and, as for a whole entry, a finding or experiment counts only if it lists the first build in the entry's `builds`. A row takes any status but `superseded`: a row found to be wrong is corrected in place, since rows have no IDs for anything to cite, and git keeps the old reading. A row whose Name changes, such as `unk_1A` once its purpose is known, is renamed in the same change in the `.ksy` definition and in every rule, fixture and save patch that uses it. A row's status covers what the row claims. A row whose purpose is unknown claims its offset, size and type, and whatever has been observed about its values and use, so it can be `established` while its purpose stays in the Open questions section, as `unk_1A` is here. Padding claims that the original never reads the bytes. The entry's own status is the lowest status among the rows of all its tables, layout and enumerations alike, which is why the example is `sourced`, and it is `disputed` if any row is. A `disputed` row's Evidence cell lists the evidence on both sides. The IDs on the side that contradicts the row go in the entry's `conflicting`, and every other ID cited in its tables goes in its `evidence`.
+Each row's status follows the same table as a whole entry, so an `established` row cites a static finding and a dynamic finding or experiment (here FND-DATA-002 and EXP-DATA-001), or only static findings that are all in the entry's `complete_reading`, and, as for a whole entry, a finding or experiment counts only if it lists the first build in the entry's `builds`. A row takes any status but `superseded`: a row found to be wrong is corrected in place, since rows have no IDs for anything to cite, and git keeps the old reading. A row whose Name changes, such as `unk_1A` once its purpose is known, is renamed in the same change in the `.ksy` definition and in every rule, fixture and save patch that uses it. A row's status covers what the row claims. A row whose purpose is unknown claims its offset, size and type, and whatever has been observed about its values and use, so it can be `established` while its purpose stays in the Open questions section, as `unk_1A` is here. Padding claims that the original never reads the bytes. The entry's own status is the lowest status among the rows of all its tables, layout and enumerations alike, which is why the example is `sourced`, and it is `disputed` if any row is. A `disputed` row's Evidence cell lists the evidence on both sides. The IDs on the side that contradicts the row go in the entry's `conflicting`, and every other ID cited in its tables goes in its `evidence`.
 
 A field that holds another structure has that structure's format ID as its type (`FMT-DATA-003`). An array gives the element type and the count, either a number or the name of an earlier field that holds it (`INT16LE[22]`, `FMT-DATA-003[site_count]`). A field whose size depends on the data has that size in the Size column as an expression in the pseudocode's terms (`name_length`, `site_count * 28`). Every row after such a field leaves the Offset column empty, because its position follows from the rows before it, and the total row gives the size as an expression. A `char[]` field leaves the Size column empty, since only the data says where it ends, and a total row after one says `variable`. A field that exists only under a condition has the condition after its size, `2 if version > 1`, and counts as a field whose size depends on the data.
 
@@ -711,6 +727,7 @@ The script, or until then the reviewer, checks that:
 - no entry that exists on the main branch has been deleted or renamed, and no area has been removed from the area list or renamed;
 - every status is from the list for its kind, and no row of a format's tables is `superseded`;
 - every entry cites what its status requires, counting any source, and counting a finding or experiment only when it lists the first build in the entry's `builds`;
+- every ID in a `complete_reading` is a static finding that the entry lists in `evidence` and that lists the entry's first build, and no rule whose procedure has a `# may run:` comment has a non-empty `complete_reading`;
 - every `reproduced` entry names someone in `reproduced_by` other than its `recorded_by`, and every other finding and experiment has an empty `reproduced_by`;
 - every build a `supported` or `established` entry lists is covered by the evidence it cites, and every experiment lists exactly one build;
 - every static finding has at least one location for each build it lists, every location names a build the finding lists and a file in that build's `files` list, and every `address` is written in the notation for that file's format (the unpacked format for a packed file), with an `offset` in its place only for a data file or overlay code;
@@ -739,7 +756,8 @@ The script, or until then the reviewer, checks that:
 - every resource a screen or procedure references, and every file a procedure reads or writes, is in a file that a format entry lists, apart from CD audio tracks, which the build entry lists;
 - every binary format entry's `definition` exists unless the status is `unknown`, and every text format entry's `definition`, `size` and `byte_order` are null;
 - every Kaitai file belongs to the format entry its name and `meta/id` give, compiles, names the licence in `meta/license`, and has fixed sizes that match the layout table in its entry;
-- every experiment's `fixture` exists and validates against the fixture schema, every event it names has a glossary entry, every format, field path and glossary name in its end state exists, it gives the hash of the save its runs started from unless `starting_state` is `new-game`, and, for a patch, the hash of the base save as well;
+- every experiment's `fixture` exists and validates against the fixture schema, every event it names has a glossary entry, every format, field path and glossary name in its end state exists, it gives the hash of the save its runs started from unless `starting_state` is `new-game` or `emulated-call`, and, for a patch, the hash of the base save as well;
+- no rule whose procedure has a `# may run:` comment is `established`, or has a `validated` row, when every experiment it cites has `starting_state: emulated-call`;
 - every `starting_state` that names a save or a patch points to one in `saves/`, and every patch validates against the fixture schema and names formats and field paths that exist in their layout tables with status `supported` or `established`;
 - every save in `saves/` and every file in `recordings/` matches the hash in its fixture, is named by some experiment, and is listed in `spec/LICENSE` as covered by neither licence;
 - every `recording` that gives a path outside `recordings/` and `captures/` names a file in the experiment's build, and every experiment with a `recording` has that recording's hash in its fixture;
@@ -747,7 +765,7 @@ The script, or until then the reviewer, checks that:
 - every Markdown file in `spec/`, `parity/` and `deviations/`, and `PARITY.md`, is at most 1,000 lines long;
 - the four indexes in `spec/index/` are regenerated and up to date, each split as [File size](#file-size) describes, by area, then by kind, then by block, exactly where the limit requires it.
 
-The status index doubles as a progress report: how much of the game is established, how much is still a guess, where the open questions are, and which `established` entries rest only on evidence nobody has reproduced yet.
+The status index doubles as a progress report: how much of the game is established, how much is still a guess, where the open questions are, which `established` entries rest only on evidence nobody has reproduced yet, and which rest on a complete reading alone.
 
 ## Implementation side
 

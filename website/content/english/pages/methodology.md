@@ -7,7 +7,7 @@ draft: false
 
 Every restoration follows the rules on this page. Where our own repositories fall short of them, we change the repositories.
 
-The project has two goals, described under [Philosophy](/philosophy/): a game people can play, and documentation complete enough that anyone can check that game or build their own. Most of these rules serve the second goal, because without it nobody can verify the first.
+The project has two goals, described under [Philosophy](/philosophy/): a game people can play, and documentation complete enough that anyone can check that game or build their own. Most of these rules serve the second goal, because without it nobody can verify the first. How the work is planned, tracked and handed on is set out in the [work protocol](/work-protocol/).
 
 ## Ground rules
 
@@ -27,9 +27,9 @@ The executable has the final word on what the shipped game does. We read it in [
 
 An experiment starts from a saved state, changes one input, and records what follows. It is repeated from the same save, with the random number generator's state varied between runs. Anything that involves random numbers needs many repetitions and a recorded distribution, since a formula inferred from one roll is a guess.
 
-The manual tells us what the designers intended and is often wrong about what shipped. FAQs, wikis and tools written by other fans are leads, which we credit and re-check. A rule stays provisional until two independent kinds of evidence agree: a reading of the executable or data files, and an observation of the original running.
+The manual tells us what the designers intended and is often wrong about what shipped. FAQs, wikis and tools written by other fans are leads, which we credit and re-check. A rule stays provisional until a complete reading of the code shows everything it says, or, where the outcome depends on something the code does not decide, such as timing, interrupts or the operating system, until a reading of the files and an observation of the original running agree. Evidence that only fits a rule, such as sizes that divide or a manual's description, never makes it more than a lead.
 
-We have not settled on a runtime tool yet. It has to take text commands and print text back, so that scripts and language models can run the same experiment the same way every time. We are trying [Frida](https://frida.re), cdb from [WinDbg](https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/), Ghidra's own debugger, and [DOSBox-X](https://dosbox-x.com) for DOS games, and will write up what worked.
+To check what a single function of the executable computes, we call it in the [Unicorn](https://www.unicorn-engine.org) CPU emulator on inputs we choose, with no window and no timing involved, and record each set of calls as an experiment. The [work protocol](/work-protocol/#emulated-calls) gives the procedure. It confirms only what the code decides, since the emulator stands in for the operating system.
 
 ## Writing it down
 
