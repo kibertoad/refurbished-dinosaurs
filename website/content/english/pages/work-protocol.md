@@ -242,6 +242,8 @@ An item under Emulated call names the function a static finding has located and 
 4. It runs every case in the emulator and in each reading, and compares the results exactly. A reading that disagrees on any case is ruled out, and the case goes in the Alternatives section of the finding that rules it out.
 5. It records the experiment and moves the entries along [the life of a claim](#the-life-of-a-claim): `established` where the one reading left covers everything the entry says, `disputed` where the results contradict its description.
 
+When a result looks wrong, or disputes a reading that looked complete, the batch may confirm it by replaying the same cases in Ghidra's p-code emulator, which loads the executable and runs the CPU with code of its own, and recording in the experiment whether the two emulators agree. When they disagree, the harness or an emulator has a defect, and nothing in the spec changes until it is fixed.
+
 A function whose results do not settle an entry, because a stub or a structure the harness would need is missing, keeps its item, with `Tried:` naming what was missing.
 
 ## Reports from testing
