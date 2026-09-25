@@ -9,7 +9,7 @@ Every restoration records a game's internals in the format below, down to file n
 
 The format borrows from projects that have done parts of this well. The layout tables follow [IESDP](https://gibberlings3.github.io/iesdp/) and the [ModdingWiki](https://moddingwiki.shikadi.net/wiki/UINT16LE), the canonical format definitions are [Kaitai Struct](https://doc.kaitai.io/user_guide.html), the formula entries follow the [OpenMW research wiki](https://wiki.openmw.org/index.php?title=Research), the bug records follow UESP's [bug template](https://en.uesp.net/wiki/Template:Bug), and the way a claim is tied to an address in a hashed binary comes from [reccmp](https://github.com/isledecomp/reccmp/blob/master/docs/annotations.md) and the [zeldaret](https://github.com/zeldaret/oot/blob/main/docs/Documenting.md) projects. None of them gives every claim a stable ID, a status from a fixed list and a link to its evidence, so this standard adds those.
 
-Our first two projects, Chaos Overlords and Dark Sun, were documented before this standard existed. Their documentation will be converted to it once the check script described under [Checks](#checks) exists, since reviewing two whole specs against that list by hand would miss too much.
+Our first two projects, Chaos Overlords and Dark Sun, were documented before this standard existed. Chaos Overlords was converted to version 1 in September 2026, and its [spec](https://github.com/kibertoad/chaos-overlords-new-chrome/tree/main/spec) is the first one written to this page. Until the shared check script is published, that repository runs its own copy of the checks listed under [Checks](#checks) on every change. Dark Sun's documentation has not been converted yet.
 
 ## Where it lives
 

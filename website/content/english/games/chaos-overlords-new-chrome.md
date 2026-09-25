@@ -26,7 +26,7 @@ You can play a full match in any of the ten original scenarios, against computer
 
 ## What is missing
 
-It does not yet match the 1996 build rule for rule or pixel for pixel. The repository keeps a parity matrix that lists which mechanics have been checked against the original, which were reconstructed from watching it play, and which parts of the computer players still need work. The game is playable from setup to the end screen and has not reached 1.0.
+It does not yet match the 1996 build rule for rule or pixel for pixel. What the original does is written up in the repository's [spec](https://github.com/kibertoad/chaos-overlords-new-chrome/tree/main/spec), which follows the [documentation standard](/documentation-standard/), and the [parity matrix](https://github.com/kibertoad/chaos-overlords-new-chrome/blob/main/PARITY.md) says how much of each spec entry the rebuild does. In September 2026 it covered 222 rules, formats and screens: the code does all of 117 and part of 85, and none has yet been checked by an automated test against evidence from the original. The game is playable from setup to the end screen and has not reached 1.0.
 
 ## Getting it running
 

@@ -35,7 +35,7 @@ We have not settled on a runtime tool yet. It has to take text commands and prin
 
 The documentation is written to be read without the code. For each game it covers every file format field by field, the rules and formulas with the order they resolve in and the points where random numbers are drawn, the AI as far as it can be reconstructed, and timing and input where they affect play. The original's bugs go into a catalogue, each with the conditions that trigger it.
 
-Every statement carries its evidence and a status saying how well established it is. Someone who wants to build a second engine should be able to do it from these documents alone, and someone who doubts a rule should be able to check it without asking us. The structure is set out in the [documentation standard](/documentation-standard/). Where a community wiki already covers a game's formats, we intend to contribute our findings there too.
+Every statement carries its evidence and a status saying how well established it is. Someone who wants to build a second engine should be able to do it from these documents alone, and someone who doubts a rule should be able to check it without asking us. The structure is set out in the [documentation standard](/documentation-standard/), and the [Chaos Overlords spec](https://github.com/kibertoad/chaos-overlords-new-chrome/tree/main/spec) follows it. Where a community wiki already covers a game's formats, we intend to contribute our findings there too.
 
 ## Checking the rebuild
 
