@@ -123,12 +123,26 @@ Rules, formats, screens and bugs describe the original, and each carries one of 
 |---|---|---|
 | `unknown` | Nothing is claimed yet. The entry is listed so that it is not forgotten, and may hold open readings, with the evidence on each side, in its Open questions section. | Nothing. |
 | `sourced` | Described from the manual or another outside source only. | At least one source. |
-| `supported` | Backed by direct evidence from the original of one kind: static findings, or dynamic findings and experiments. | At least one finding or experiment. |
-| `established` | A reading of the files and a run of the original agree. | At least one static finding, and at least one dynamic finding or experiment. |
+| `supported` | Backed by [direct evidence](#direct-and-circumstantial-evidence) from the original of one kind: static findings, or dynamic findings and experiments. | At least one finding or experiment. |
+| `established` | A reading of the files and a run of the original agree, or a [complete reading](#complete-readings) of the code shows everything the entry says. | At least one static finding, and either at least one dynamic finding or experiment, or static findings listed in `complete_reading`. |
 | `disputed` | Findings or experiments contradict the entry or each other. The body says which and how. | At least one finding or experiment in `conflicting`. |
 | `superseded` | Replaced, or shown to be wrong, by the entries in `superseded_by`. | Nothing further. |
 
 The first four form a scale, from `unknown` up to `established`.
+
+### Direct and circumstantial evidence
+
+A finding is direct evidence for a claim when its observation locates what produces the behaviour: the code that reads or writes the field, takes the branch, makes the calls in that order or computes the value, or, for a dynamic finding, the value or the frame the original produced. Anything else that fits the claim is circumstantial: sizes that divide exactly, a pattern in the values of a shipped file, a name, what the manual says, or what similar games do. Circumstantial evidence is recorded as a finding like any other, and an entry names it in its Open questions section, for or against a reading, but never lists it in `evidence`, and it never counts towards a status. An entry whose only evidence from the original is circumstantial is `unknown`, or `sourced` if a source describes it.
+
+### Complete readings
+
+The code decides most of what a game does, so a reading of it can establish an entry without a run. Static findings establish an entry on their own when together they read all of it in its first build, and the entry lists them in `complete_reading`, a field that rules, formats, screens and bugs may have and that is otherwise absent or empty. A reading is complete when:
+
+- it covers every branch of every procedure the entry describes, and for a format every place the code reads or writes the file or structure, and its findings name the instructions they checked wherever the decompiler's types, signedness or casts decide a result;
+- it locates every caller of those procedures and every write to the state they read, and resolves every indirect call and jump they take;
+- what the entry says depends on nothing the code does not decide: no point where an interrupt handler or a second thread can change the result (a `# may run:` comment in the procedure), no read of memory that nothing wrote first, no timing, such as the length of a tick or the rate at which frames are drawn, and no result from the operating system or a library outside the build, other than a value from outside the game that the procedure reads by its glossary name.
+
+An entry that depends on any of those stays `supported` until a run of the original agrees with the reading. A complete reading that later meets a finding or experiment it does not explain makes the entry `disputed`, the same as any other.
 
 Only evidence from the original can dispute an entry. Manuals are often wrong, and a source that disagrees with the findings is cited in `evidence` like any other source, with the disagreement described in the entry's body (a rule's What the sources say section, and the Open questions section of other kinds) and in the source's Known errors section. Two sources that disagree with each other, and no finding or experiment to settle it, leave the entry `sourced` with the disagreement in its Open questions section. An entry that is not superseded must not cite a superseded entry in its `evidence`, `conflicting` or `related` fields. A superseded entry keeps the links it had when it was replaced, so its history stays readable.
 
@@ -148,7 +162,7 @@ Findings and experiments are evidence rather than claims, so they have a shorter
 | `reproduced` | Repeated by someone other than the person in `recorded_by`, from the entry's own instructions, with the same result, and that person is named in `reproduced_by`. For a random outcome, the same result means a distribution that passes the experiment's own comparison with the recorded one. |
 | `superseded` | Shown to be wrong. `superseded_by` names the entries that show it. |
 
-A claim's status does not depend on whether its evidence has been reproduced, because a project with one person working on it could then never establish anything. The status index lists `established` entries that rest only on `recorded` evidence, which shows where a second person's time does the most good.
+A claim's status does not depend on whether its evidence has been reproduced, because a project with one person working on it could then never establish anything. The status index lists `established` entries that rest only on `recorded` evidence, and separately those established by a complete reading alone, which shows where a second person's time does the most good.
 
 Builds and sources carry no status, but they can still be wrong: a build entry can hold a hash taken from a damaged copy, or a source entry can describe a different printing from the one that was read. A correction that leaves what the entry identifies unchanged, such as a typo in a title or a new URL for the same document, is made in place. Any other correction is a new entry under a new alias, and the old entry's `superseded_by` names it. Every entry that cited the old one then fails the check until it cites the new one, which is the point at which someone confirms that its evidence still holds.
 
@@ -283,7 +297,7 @@ superseded_by: []
 
 Each kind adds fields of its own, and the section for each kind below shows a complete example.
 
-Rules, formats, screens and bugs also have `evidence`, the findings, experiments and sources they rest on, and `conflicting`, the evidence that contradicts them. Both are always present. `conflicting` holds only findings and experiments, and may only be non-empty when the status is `disputed`. They also have `split_with`, which is always present and lists the other entries of a split by build, described below, or is empty.
+Rules, formats, screens and bugs also have `evidence`, the findings, experiments and sources they rest on, and `conflicting`, the evidence that contradicts them. Both are always present. `conflicting` holds only findings and experiments, and may only be non-empty when the status is `disputed`. They also have `split_with`, which is always present and lists the other entries of a split by build, described below, or is empty, and they may have `complete_reading` (see [Complete readings](#complete-readings)).
 
 Rules, formats, bugs and screens also have `related`, links to other claims, which go one way as well. A rule lists the rules it invokes, the formats it reads or writes, and the screens it shows. A format lists the rules its tables name, such as the rule that decompresses a compressed block. A bug lists the rules, formats and screens it occurs in. A screen lists the rules and screens its effects lead to, and the rules that format the values it shows. A format's links to other formats are the types in its layout table, and the check script reads them from there. The indexes carry every link in the other direction.
 
@@ -531,7 +545,7 @@ In the layout table, fields are never grouped into one row, and unknown bytes an
 | `0x1A` | 2 | `INT16LE` | `unk_1A` | Purpose unknown. 0 in every record of the shipped file, and never read by the executable | established | FND-DATA-002, EXP-DATA-001 |
 | `0x1C` | | | | Total size 28 | | |
 
-Each row's status follows the same table as a whole entry, so an `established` row cites a static finding and a dynamic finding or experiment (here FND-DATA-002 and EXP-DATA-001), and, as for a whole entry, a finding or experiment counts only if it lists the first build in the entry's `builds`. A row takes any status but `superseded`: a row found to be wrong is corrected in place, since rows have no IDs for anything to cite, and git keeps the old reading. A row whose Name changes, such as `unk_1A` once its purpose is known, is renamed in the same change in the `.ksy` definition and in every rule, fixture and save patch that uses it. A row's status covers what the row claims. A row whose purpose is unknown claims its offset, size and type, and whatever has been observed about its values and use, so it can be `established` while its purpose stays in the Open questions section, as `unk_1A` is here. Padding claims that the original never reads the bytes. The entry's own status is the lowest status among the rows of all its tables, layout and enumerations alike, which is why the example is `sourced`, and it is `disputed` if any row is. A `disputed` row's Evidence cell lists the evidence on both sides. The IDs on the side that contradicts the row go in the entry's `conflicting`, and every other ID cited in its tables goes in its `evidence`.
+Each row's status follows the same table as a whole entry, so an `established` row cites a static finding and a dynamic finding or experiment (here FND-DATA-002 and EXP-DATA-001), or only static findings that are all in the entry's `complete_reading`, and, as for a whole entry, a finding or experiment counts only if it lists the first build in the entry's `builds`. A row takes any status but `superseded`: a row found to be wrong is corrected in place, since rows have no IDs for anything to cite, and git keeps the old reading. A row whose Name changes, such as `unk_1A` once its purpose is known, is renamed in the same change in the `.ksy` definition and in every rule, fixture and save patch that uses it. A row's status covers what the row claims. A row whose purpose is unknown claims its offset, size and type, and whatever has been observed about its values and use, so it can be `established` while its purpose stays in the Open questions section, as `unk_1A` is here. Padding claims that the original never reads the bytes. The entry's own status is the lowest status among the rows of all its tables, layout and enumerations alike, which is why the example is `sourced`, and it is `disputed` if any row is. A `disputed` row's Evidence cell lists the evidence on both sides. The IDs on the side that contradicts the row go in the entry's `conflicting`, and every other ID cited in its tables goes in its `evidence`.
 
 A field that holds another structure has that structure's format ID as its type (`FMT-DATA-003`). An array gives the element type and the count, either a number or the name of an earlier field that holds it (`INT16LE[22]`, `FMT-DATA-003[site_count]`). A field whose size depends on the data has that size in the Size column as an expression in the pseudocode's terms (`name_length`, `site_count * 28`). Every row after such a field leaves the Offset column empty, because its position follows from the rows before it, and the total row gives the size as an expression. A `char[]` field leaves the Size column empty, since only the data says where it ends, and a total row after one says `variable`. A field that exists only under a condition has the condition after its size, `2 if version > 1`, and counts as a field whose size depends on the data.
 
@@ -711,6 +725,7 @@ The script, or until then the reviewer, checks that:
 - no entry that exists on the main branch has been deleted or renamed, and no area has been removed from the area list or renamed;
 - every status is from the list for its kind, and no row of a format's tables is `superseded`;
 - every entry cites what its status requires, counting any source, and counting a finding or experiment only when it lists the first build in the entry's `builds`;
+- every ID in a `complete_reading` is a static finding that the entry lists in `evidence` and that lists the entry's first build, and no rule whose procedure has a `# may run:` comment has a non-empty `complete_reading`;
 - every `reproduced` entry names someone in `reproduced_by` other than its `recorded_by`, and every other finding and experiment has an empty `reproduced_by`;
 - every build a `supported` or `established` entry lists is covered by the evidence it cites, and every experiment lists exactly one build;
 - every static finding has at least one location for each build it lists, every location names a build the finding lists and a file in that build's `files` list, and every `address` is written in the notation for that file's format (the unpacked format for a packed file), with an `offset` in its place only for a data file or overlay code;
@@ -747,7 +762,7 @@ The script, or until then the reviewer, checks that:
 - every Markdown file in `spec/`, `parity/` and `deviations/`, and `PARITY.md`, is at most 1,000 lines long;
 - the four indexes in `spec/index/` are regenerated and up to date, each split as [File size](#file-size) describes, by area, then by kind, then by block, exactly where the limit requires it.
 
-The status index doubles as a progress report: how much of the game is established, how much is still a guess, where the open questions are, and which `established` entries rest only on evidence nobody has reproduced yet.
+The status index doubles as a progress report: how much of the game is established, how much is still a guess, where the open questions are, which `established` entries rest only on evidence nobody has reproduced yet, and which rest on a complete reading alone.
 
 ## Implementation side
 
