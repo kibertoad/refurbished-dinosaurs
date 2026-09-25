@@ -61,7 +61,7 @@ For now the rebuilds only load saves in our own format, which the original game 
 
 Screens match the original pixel for pixel except where a documented interface change draws something new.
 
-Every deviation is listed in the documentation with its reason. Some of them are settings: Chaos Overlords lets the player choose between filters for the background art and between variants of parts of the interface. Others, such as the tooltips, are always on. The validation suite runs with every optional deviation switched off. Rebalanced units, new features and other changes to the game itself belong in a separate mode or a separate project.
+Every deviation is listed in the documentation with its reason. Some of them are settings: Chaos Overlords lets the player choose between filters for the background art and between variants of parts of the interface. A setting starts with the original's behaviour, unless we can argue that ours is strictly better, and then a player who wants the original can still switch back. A change with no setting at all, such as the tooltips, needs the same argument and a reason the original's version is not worth keeping. The validation suite runs with every setting switched off. Rebalanced units, new features and other changes to the game itself belong in a separate mode or a separate project.
 
 ## Credits
 
