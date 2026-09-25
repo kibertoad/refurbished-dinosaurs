@@ -116,13 +116,29 @@ Items are picked in this order, from every section alike. Within each step, an i
 3. Items where one piece of evidence raises the most entries. An experiment that raises an entry to `established` has to cover everything the entry says, every branch of a procedure and, for a random outcome, enough repetitions for its comparison, and a rule stays below `established` while any glossary claim it relies on is `(unknown)`. Where the experiment covers only part of the entry, the entry stays `supported` and its Open questions say which part is left.
 4. Items with the cheapest evidence: a data file before a static reading.
 
+## The life of a claim
+
+A claim is what a rule, format, screen or bug entry says the original does. It changes only in a research batch, when the evidence changes, and the entry's status says how far that evidence goes.
+
+A claim starts as a listing. The Survey, an implementation batch that meets a gap, a report or a function no entry cites gives the behaviour an `unknown` entry, which claims nothing yet, and a queue item. A manual or another outside source can give the entry a description at once, at `sourced`, and only evidence from the original takes it further.
+
+Research then forms the competing readings. While more than one is still standing, they sit in the entry's Open questions section, each with what it claims, the findings and experiments for and against it by ID, and the evidence that would rule it out, and each has a queue item whose Settles it names that evidence. Outside the spec a reading is cited by its queue item's ID, and the commit that closes the item names it in a `Queue:` trailer, so the reading can be found in the history after the item is gone. Readings get no IDs of their own. An entry whose readings are all still open stays `unknown`, or `sourced` if a source describes it, whatever evidence the readings cite.
+
+When the evidence rules out every reading but one, that reading becomes the entry's description at `supported`, and the readings ruled out move to the Alternatives section of the finding that ruled them out. A description says no more than its evidence shows. What the evidence does not reach stays in Open questions, as readings or as questions. A source that disagrees with the findings stays cited, with the disagreement written in the entry's body and in the source's Known errors section, as the standard says.
+
+The entry reaches `established` when a run of the original agrees with the reading of the files. The run can be an agent run, a live session, or a capture a tester sent with a report, and the item for it is queued as soon as the static reading settles the question. Tests that compare the rebuild with that evidence then take the entry's parity row to `validated`.
+
+Evidence that contradicts the description makes the entry `disputed` at any point, even after its row was `validated`, and the row shows `disputed` until the dispute is settled. If the contradicting finding or experiment turns out to be wrong, it is superseded, and the entry goes back to the status its remaining evidence supports. If the description turns out to be wrong, the entry is superseded by a corrected entry, by the parts it splits into, or, when the mechanic does not exist, by the findings that show it, and citations and code follow `superseded_by` as [Research batches](#research-batches) describes. A superseded entry is never deleted, and it keeps the links it had.
+
+Implementation meets a claim only as the entry's description, or as a question. An open reading never reaches code: a row whose entry is `unknown` cannot be `complete`, and code that needs an open reading stops at a `Spec gap:` note or a `PLACEHOLDER:` comment.
+
 ## Batches
 
 A batch is one unit of work and ends in one commit, or one pull request where the repository uses them. It is small enough to review in one sitting, and it leaves the documentation check and the fast validation gate passing. A batch is research, implementation or tooling, and never more than one of them.
 
 ### Research batches
 
-A research batch settles one queue item, a few items about the same entry, or the items of one area that one live session's recordings settle, or it triages one report from testing. It states the question, forms the competing readings, looks for the evidence that could rule each one out, and records the result as findings or experiments under the standard. Readings that are still open when the batch ends are written down, never left in the session's memory. They go in the Open questions section of the entry they concern, one per reading, each with what it claims, the findings and experiments for and against it by ID, and the evidence that would rule it out, which is also what the queue item's Settles it names. A reading that the evidence rules out moves to the Alternatives section of the finding that ruled it out, and one that survives becomes what the entry says, at the status its evidence supports. A reading never reaches code on its own: an implementation batch builds only what an entry says, and meets an open reading as a question. The entries the evidence concerns take the status it supports, the item is deleted or updated with what was tried, and new questions become new items. The batch leaves the documentation check passing, so it makes the changes elsewhere that the check requires of what it did to the spec, and no others:
+A research batch settles one queue item, a few items about the same entry, or the items of one area that one live session's recordings settle, or it triages one report from testing. It states the question, forms the competing readings, looks for the evidence that could rule each one out, and records the result as findings or experiments under the standard. Readings that are still open when the batch ends are written down, never left in the session's memory. They go in the Open questions section of the entry they concern, one per reading, each with what it claims, the findings and experiments for and against it by ID, and the evidence that would rule it out, and each has a queue item whose Settles it names that evidence (see [The life of a claim](#the-life-of-a-claim)). A reading that the evidence rules out moves to the Alternatives section of the finding that ruled it out, and one that survives becomes what the entry says, at the status its evidence supports. A reading never reaches code on its own: an implementation batch builds only what an entry says, and meets an open reading as a question. The entries the evidence concerns take the status it supports, the item is deleted or updated with what was tried, and new questions become new items. The batch leaves the documentation check passing, so it makes the changes elsewhere that the check requires of what it did to the spec, and no others:
 
 - where an entry's status changes, the Spec status and Status columns of its parity row, and where it becomes `disputed`, a note in the row's Notes naming the evidence in the entry's `conflicting`, which goes again when the dispute is settled;
 - for a new rule, format or screen entry, a parity row with Code `missing`, and for one that is retitled, the Title of its row;
@@ -162,7 +178,7 @@ The resolver calls the attacker's roll before the defender's, and a run of
 Spec: RULE-COMBAT-012, FND-COMBAT-031, EXP-COMBAT-009
 ```
 
-An implementation batch uses the same trailer for the entries it implemented. A batch that changes parity rows adds `Parity:` with the rows whose status it changed.
+An implementation batch uses the same trailer for the entries it implemented. A batch that changes parity rows adds `Parity:` with the rows whose status it changed, and one that closes queue items adds `Queue:` with their IDs, so that an item, and the reading it tested, can still be found after the item is deleted.
 
 ## Sessions
 

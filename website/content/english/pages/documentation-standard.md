@@ -121,7 +121,7 @@ Rules, formats, screens and bugs describe the original, and each carries one of 
 
 | Status | Meaning | Must cite |
 |---|---|---|
-| `unknown` | Listed so that it is not forgotten, not yet studied. | Nothing. |
+| `unknown` | Nothing is claimed yet. The entry is listed so that it is not forgotten, and may hold open readings, with the evidence on each side, in its Open questions section. | Nothing. |
 | `sourced` | Described from the manual or another outside source only. | At least one source. |
 | `supported` | Backed by direct evidence from the original of one kind: static findings, or dynamic findings and experiments. | At least one finding or experiment. |
 | `established` | A reading of the files and a run of the original agree. | At least one static finding, and at least one dynamic finding or experiment. |
