@@ -16,15 +16,15 @@
                 <a class="hover:text-primary dark:hover:text-darkmode-primary text-lg" href="mailto:{{ . }}">{{ . }}</a>
               </div>
             {{ end }}
-            {{ with site.Params.contact.github }}
+            {{ with site.Params.contact.x }}
               <div class="flex items-center gap-4">
-                <i class="fa-brands fa-github text-primary dark:text-darkmode-primary w-8 text-2xl"></i>
+                <i class="fa-brands fa-x-twitter text-primary dark:text-darkmode-primary w-8 text-2xl"></i>
                 <a
                   class="hover:text-primary dark:hover:text-darkmode-primary text-lg"
                   href="{{ . }}"
                   target="_blank"
                   rel="noopener">
-                  {{ strings.TrimPrefix "https://github.com/" . }}
+                  @{{ strings.TrimPrefix "https://x.com/" . }}
                 </a>
               </div>
             {{ end }}

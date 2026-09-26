@@ -258,7 +258,7 @@ enable = true
 endpoint = "https://<worker>.workers.dev/"
 ```
 
-Until `endpoint` is set, the page says voting is not wired up yet and points at GitHub issues.
+Until `endpoint` is set, the page says voting is not wired up yet and asks for nominations by email (`contact.email`).
 The headings, placeholder and footnote on the page are the other keys in that block. The board
 itself is `website/layouts/_partials/wishlist.html` plus `website/assets/js/wishlist.ts`, which
 Hugo bundles with its own esbuild; row markup lives in `<template>` elements in the partial,

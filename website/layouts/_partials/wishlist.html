@@ -9,7 +9,6 @@
      classes out of the rendered HTML, so markup built by script has to come
      from here rather than from strings in the script. */}}
 {{ $wishlist := site.Params.wishlist }}
-{{ $issues := printf "%s/issues" (site.Params.contact.github | default "https://github.com") }}
 
 {{ if and $wishlist.enable $wishlist.endpoint }}
   <div
@@ -137,9 +136,12 @@
        board that cannot load. */}}
   <div class="bg-light dark:bg-darkmode-light rounded-xl px-6 py-8 md:px-8">
     <p class="mb-0">
-      Voting is not wired up yet. Until it is, nominations go
-      <a class="text-primary dark:text-darkmode-primary" href="{{ $issues }}" target="_blank" rel="noopener">
-        in a GitHub issue</a>.
+      Voting is not wired up yet. Until it is, send nominations
+      {{ with site.Params.contact.email -}}
+        to <a class="text-primary dark:text-darkmode-primary" href="mailto:{{ . }}">{{ . }}</a>.
+      {{- else -}}
+        through the <a class="text-primary dark:text-darkmode-primary" href="{{ `contact/` | relLangURL }}">contact page</a>.
+      {{- end }}
     </p>
   </div>
 {{ end }}

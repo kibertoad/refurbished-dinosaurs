@@ -6,4 +6,4 @@ layout: "contact"
 draft: false
 ---
 
-Found a bug, own a rare build, or want to argue that some forgotten 1994 title deserves the treatment? Bug reports and patches belong on GitHub, where they stay attached to the code. Everything else can go to email.
+Found a bug, own a rare build, or want to argue that some forgotten 1994 title deserves the treatment? Bug reports and patches for a game go to its issue tracker, linked from the game's page, where they stay attached to the code. Everything else can go to email.

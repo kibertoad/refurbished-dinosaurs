@@ -69,7 +69,7 @@ keywords = [
 ]
 description = "Bringing obscure old games back from extinction: faithful, playable restorations of forgotten strategy classics."
 author = "Refurbished Dinosaurs"
-twitter = ""
+twitter = "RefurbishedDino"
 image = "images/og-image.png"
 
 
@@ -97,8 +97,8 @@ sidebar = ["categories", "tags"]
 
 ############################ Contacts ############################
 [contact]
-email = "info@refurbished-dinosaurs.org"
-github = "https://github.com/kibertoad/refurbished-dinosaurs"
+email = "kibertoad@dinorefurb.com"
+x = "https://x.com/RefurbishedDino"
 
 
 
@@ -108,8 +108,8 @@ github = "https://github.com/kibertoad/refurbished-dinosaurs"
 #
 # `endpoint` is the Cloudflare Worker in ../../../workers/wishlist. It
 # proxies the game database (so its credentials stay off the page) and
-# stores the votes. Until it is set, the page says so and points at
-# GitHub issues instead.
+# stores the votes. Until it is set, the page says so and asks for
+# nominations by email.
 #
 # See ../../../README.md ("Wishlist") for setup.
 [wishlist]
