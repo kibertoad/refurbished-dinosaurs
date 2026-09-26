@@ -53,7 +53,7 @@ The matrix is our answer to "how accurate is it", published so readers can check
 
 The documentation records the original exactly, bugs included. The game we ship keeps the rules, balance, content, AI and pacing, and a player of the original should recognise every decision they face.
 
-The interface is where we allow ourselves changes. The Chaos Overlords rebuild adds tooltips that show the exact numbers behind a mechanic, which the original left to the manual. A change like that can add information or remove friction. If it would change what the player can do or what the rules produce, it does not go in.
+The interface is where we allow ourselves changes. The Chaos Overlords rebuild adds tooltips that show the exact numbers behind a mechanic, which the original left to the manual. A change like that can add information or remove friction. If it would change what the player can do, or change what the rules produce beyond the small judgement calls described below, it does not go in without a setting.
 
 We fix crashes, corrupted saves, game speed tied to the CPU clock, and logic that plainly does not do what it was written to do. A quirk that players built strategies around is part of the game and stays. When we cannot tell a bug from a design decision, the original behaviour stays and any fix becomes an option.
 
@@ -61,7 +61,7 @@ For now the rebuilds only load saves in our own format, which the original game 
 
 Screens match the original pixel for pixel except where a documented interface change draws something new.
 
-Every deviation is listed in the documentation with its reason. Some of them are settings: Chaos Overlords lets the player choose between filters for the background art and between variants of parts of the interface. A setting starts with the original's behaviour, unless we can argue that ours is strictly better, and then a player who wants the original can still switch back. A change with no setting at all, such as the tooltips, needs the same argument and a reason the original's version is not worth keeping. The validation suite runs with every setting switched off. Rebalanced units, new features and other changes to the game itself belong in a separate mode or a separate project.
+Every deviation is listed in the documentation with its reason. Some of them are settings: Chaos Overlords lets the player choose between filters for the background art and between variants of parts of the interface. A change with no setting at all, such as the tooltips, has to be strictly better than the original, or be a small judgement call that makes the game better to play without touching anything players build strategies around, such as keeping precision the original threw away. Either way the argument is written down, with the reason the original's version is not worth keeping. A change that some players would reasonably not want, because it is a matter of taste or changes what the rules produce in a way players notice, gets a setting that starts with the original's behaviour, so a player can switch it on. The validation suite runs with every setting switched off. Rebalanced units, new features and other changes to the game itself belong in a separate mode or a separate project.
 
 ## Credits
 
