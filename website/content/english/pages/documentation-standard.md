@@ -9,7 +9,7 @@ Every restoration records a game's internals in the format below, down to file n
 
 The format borrows from projects that have done parts of this well. The layout tables follow [IESDP](https://gibberlings3.github.io/iesdp/) and the [ModdingWiki](https://moddingwiki.shikadi.net/wiki/UINT16LE), the canonical format definitions are [Kaitai Struct](https://doc.kaitai.io/user_guide.html), the formula entries follow the [OpenMW research wiki](https://wiki.openmw.org/index.php?title=Research), the bug records follow UESP's [bug template](https://en.uesp.net/wiki/Template:Bug), and the way a claim is tied to an address in a hashed binary comes from [reccmp](https://github.com/isledecomp/reccmp/blob/master/docs/annotations.md) and the [zeldaret](https://github.com/zeldaret/oot/blob/main/docs/Documenting.md) projects. None of them gives every claim a stable ID, a status from a fixed list and a link to its evidence, so this standard adds those.
 
-Our first two projects, Chaos Overlords and Dark Sun, were documented before this standard existed. Chaos Overlords was converted to version 1 in September 2026, and its [spec](https://github.com/kibertoad/chaos-overlords-new-chrome/tree/main/spec) is the first one written to this page. Until the shared check script is published, that repository runs its own copy of the checks listed under [Checks](#checks) on every change. Dark Sun's documentation has not been converted yet.
+Every restoration we have follows version 1: the specs of [Chaos Overlords](https://github.com/kibertoad/chaos-overlords-new-chrome/tree/main/spec), [Dark Sun: Wake of the Ravager](https://github.com/kibertoad/dark-sun-wake-redux/tree/main/spec) and [Conqueror A.D. 1086](https://github.com/kibertoad/reconqueror1086/tree/main/spec) are written to this page. Chaos Overlords and Dark Sun were documented before the standard existed and were converted in September 2026. Each of the three runs the checks listed under [Checks](#checks) on every change.
 
 ## Where it lives
 
@@ -85,7 +85,7 @@ Its handlers are RULE-COMBAT-008 and then RULE-AI-014, run at once
 A function, defined by RULE-RNG-001.
 ```
 
-The front matter schemas, the fixture schema, the manifest schema, the check script and the tool that applies save patches belong to the standard. They go in [refurbished-dinosaurs-toolkit](https://github.com/kibertoad/refurbished-dinosaurs-toolkit), the toolkit every restoration shares, and have not been added yet. They are published from there as a package of their own, the spec package, versioned apart from the toolkit's other schemas, so a change to those never forces a new version of the standard. A game repository starts from the [project template](https://github.com/kibertoad/refurbished-dinosaurs-template) and pins a version of the spec package. Its major version is the version of this standard it checks, so pinning `1.x` means following version 1, and `spec/README.md` states the same number. This page describes version 1. [Versions](#versions) says when the number changes.
+The front matter schemas, the fixture schema, the manifest schema, the check script and the tool that applies save patches belong to the standard, and their home is [refurbished-dinosaurs-toolkit](https://github.com/kibertoad/refurbished-dinosaurs-toolkit), the toolkit every restoration shares. The check script is there, as `tools/check-documentation.mjs` with a GitHub Action that runs it, and it carries the front matter, fixture and manifest rules itself. The tool that applies save patches has not been written. These files are to be published from the toolkit as a package of their own, the spec package, versioned apart from the toolkit's other schemas, so a change to those never forces a new version of the standard. A game repository starts from the [project template](https://github.com/kibertoad/refurbished-dinosaurs-template) and pins a version of the spec package. Its major version is the version of this standard it checks, so pinning `1.x` means following version 1, and `spec/README.md` states the same number. Until the package is published, a repository pins a commit of the toolkit instead. This page describes version 1. [Versions](#versions) says when the number changes.
 
 Each game's spec stands on its own, even when games share an engine and file formats. An entry that another game's spec already covers is written again in this one, and cites the other game's entry through a source entry like any other outside document. Until this game's own files or runs confirm it, the entry stays `sourced`.
 
@@ -717,9 +717,9 @@ An effect names a rule or another screen. A key is named by what is printed on i
 
 ## Checks
 
-The check script runs in each game repository on every change, and the build fails if any check fails. Until the script is in the toolkit, reviewers go through the list below by hand, and four things work differently. There are no indexes, since only the script writes them, so a spec has no `spec/index/` directory and the last check waits. For the same reason the reviewer writes the totals in `PARITY.md` by hand and checks them against the area files. A reviewer compiles each Kaitai file with the Kaitai Struct compiler to check it. Save patches are written and committed as usual, but nothing can apply them yet, so the Setup section of an experiment that uses one also gives each write as a byte offset and a value, worked out from the layout table. When the script arrives, it runs against every spec written in the meantime, and what it finds is fixed before anything else is merged.
+The check script runs in each game repository on every change, and the build fails if any check fails. The Dark Sun and Conqueror repositories run it through the toolkit's action. Chaos Overlords runs `tools/check-spec.mjs`, the copy the toolkit's script was taken from. Save patches are written and committed as usual, but no tool applies them yet, so the Setup section of an experiment that uses one also gives each write as a byte offset and a value, worked out from the layout table.
 
-The script, or until then the reviewer, checks that:
+The script checks that:
 
 - every entry's front matter validates against the schema for its kind, its file name is its ID, and it sits in the directory for its kind;
 - every body has its sections, under the headings given here, in order;
@@ -769,7 +769,7 @@ The status index doubles as a progress report: how much of the game is establish
 
 ## Implementation side
 
-The implementation keeps three things that refer to the spec without being part of it. Code comments and tests cite the spec IDs they implement or check, so a search for an ID finds everything that depends on it. The deviation log records every place the rebuild departs from the spec on purpose. The parity matrix records how much of the spec the rebuild does.
+The implementation keeps three things that refer to the spec without being part of it. Code comments and tests cite the spec IDs they implement or check, so a search for an ID finds everything that depends on it. The deviation log records every place the rebuild departs from the spec on purpose. The parity matrix records how much of the spec the rebuild does, and the [project status](#project-status) is worked out from it.
 
 ### Deviation log
 
@@ -808,7 +808,7 @@ The matrix has one row for every rule, format and screen entry in the spec that 
 
 Spec ID, Title and Spec status are copied from the spec entry. Notes says in plain words what is missing or wrong.
 
-Code is `missing`, `partial` or `complete`, and `complete` means the rebuild does everything the entry describes. A row whose spec status is `unknown` cannot be `complete`, since the entry does not describe anything yet. A placeholder in the code, such as a guessed formula, is marked with a `PLACEHOLDER: <spec ID>` comment, and a row whose ID appears in one cannot be `complete`.
+Code is `missing`, `partial` or `complete`, and `complete` means the rebuild does everything the entry describes. A deviation listed in the row does not count against it: Code measures the rebuild against the entry as its deviations change it, whatever their Default, so a row whose entry a deviation replaces entirely is `complete` once the rebuild does what the deviation says instead. Code records how much of the work on an entry is done, and a part the rebuild does differently on purpose is done. A row whose spec status is `unknown` cannot be `complete`, since the entry does not describe anything yet. A placeholder in the code, such as a guessed formula, is marked with a `PLACEHOLDER: <spec ID>` comment, and a row whose ID appears in one cannot be `complete`.
 
 Tests lists test files by their path from the repository root, and only files whose tests compare the rebuild with evidence from the original: experiment fixtures, including those whose inputs come from a recording the original made, and distributions measured in it. A test that replays a fixture runs against the experiment's build, and a test that compares a distribution runs from the generator states the fixture gives (see [Experiments](#experiments)). Listed tests run with every deviation that has a setting switched off. A `mandatory` deviation cannot be switched off, so a listed test that reaches the behaviour it changes cites the deviation's ID and leaves that case out or compares with the original's result as the deviation changes it.
 
@@ -863,6 +863,27 @@ The test files of the validated parity rows, as they were when every test in the
 Commit is the commit the run tested, Date the day it ran, and Builds the IDs of the builds in `GAME_DIR` it used. The table lists every marked test file that a `validated` row lists, once each, sorted by path, with the SHA-256 of the file's contents with each CRLF read as LF, so that a Windows checkout and a Linux one give the same hash. The record is committed with the change it validates.
 
 The check fails a `validated` row whose marked test file is missing from the record or has changed since it was recorded, a record that lists a file that is not a marked test file of a `validated` row, and a listed test file that mentions `GAME_DIR` without the comment, since that test would skip itself in CI while its row claims to be validated. A change to a validated row's marked tests therefore needs a new local run before it merges. The hash covers only the test file, so a maintainer who changes code that a validated row's marked tests exercise runs those tests again and records the run before the change merges, even though the check cannot tell. The check cannot see an unmarked test that skips itself for some other reason either, and such a test is a bug in the test.
+
+### Project status
+
+A restoration that has a spec and a parity matrix has one of four statuses, which say how far its rebuild has come. The game pages on this site use the same four. A game nobody has started work on has no status.
+
+The conditions are counted in the parity matrix, from the Code column, which a row's deviations do not count against (see [Parity matrix](#parity-matrix)). Rule and screen rows are counted together, and format rows only for `complete`, because a rebuild usually keeps its state and its saves in formats of its own and leaves many of the original's record layouts out. Percentages are of all the rows counted, including those whose spec status is `unknown`.
+
+Playable means that a player can start a new game in the rebuild and reach one of the original's endings through its own interface, without editing a file or using a debugging tool. For a game that has no ending, it means reaching every mode of play the original offers. The repository's `README.md` says how to get the rebuild running.
+
+| Status | When |
+|---|---|
+| `early-prototype` | Work has started, and the conditions of `limited-fidelity-playable` do not hold. |
+| `limited-fidelity-playable` | The rebuild is playable, and at most 10% of rule and screen rows are `missing`. |
+| `high-fidelity-playable` | The rebuild is playable, no screen row and at most 5% of rule rows are `missing`, and at least two thirds of rule and screen rows are `complete`. |
+| `complete` | The rebuild is playable, and every row, formats included, is `complete`. |
+
+A `complete` rebuild can still differ from the original in the places its deviation log records, and in no others. A restoration has the highest status whose conditions hold. A new spec entry adds a row, which can take a condition away, and the status then drops until the rebuild catches up.
+
+A status counts how much of the spec the code does and says nothing about tests. A `complete` rebuild whose rows are `implemented` and not yet `validated` has not been compared with the original, and the Status table in `PARITY.md` shows how far that comparison has got.
+
+The check script does not work out the status. It is stated by hand wherever it is used, and anyone can confirm it from the area files in `parity/`.
 
 ## Licence
 

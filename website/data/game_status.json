@@ -1,30 +1,30 @@
 {
+  "complete": {
+    "key": "complete",
+    "label": "Complete",
+    "icon": "fa-solid fa-circle-check",
+    "order": 1,
+    "description": "Every rule, screen and file format of the original is in the rebuild, except where a recorded deviation changes it."
+  },
   "high-fidelity-playable": {
     "key": "high-fidelity-playable",
     "label": "High-fidelity playable",
     "icon": "fa-solid fa-gamepad",
-    "order": 1,
-    "description": "Playable start to finish, close to the original's rules and feel."
-  },
-  "in-restoration": {
-    "key": "in-restoration",
-    "label": "In restoration",
-    "icon": "fa-solid fa-screwdriver-wrench",
     "order": 2,
-    "description": "Work has started, not playable yet."
+    "description": "Playable start to finish, with every screen in place and at least two thirds of the rules and screens matching the original in full."
   },
-  "on-the-way": {
-    "key": "on-the-way",
-    "label": "On the way",
-    "icon": "fa-solid fa-hourglass-half",
+  "limited-fidelity-playable": {
+    "key": "limited-fidelity-playable",
+    "label": "Limited-fidelity playable",
+    "icon": "fa-solid fa-puzzle-piece",
     "order": 3,
-    "description": "Picked for restoration, work has not started yet."
+    "description": "Playable start to finish, but much of it only approximates the original."
   },
-  "surveying": {
-    "key": "surveying",
-    "label": "Surveying",
-    "icon": "fa-solid fa-binoculars",
+  "early-prototype": {
+    "key": "early-prototype",
+    "label": "Early prototype",
+    "icon": "fa-solid fa-screwdriver-wrench",
     "order": 4,
-    "description": "Under consideration, poking at the data files to see what is feasible."
+    "description": "Work has started, and the game cannot be played through yet."
   }
 }
