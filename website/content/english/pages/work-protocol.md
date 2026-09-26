@@ -69,7 +69,7 @@ A survey keeps later work from being planned around the one subsystem somebody h
 
 ### Slices
 
-Build the game in vertical slices, each of which leaves it playable. The plan lists the slices in order, and each slice names the spec areas or entries it needs and the parity rows it has to bring to `implemented` or `validated`. Each target is one the runtime record makes reachable, and where a row needs a live session nobody has agreed to yet, the plan asks for `implemented` and names the gap in its risks. The first slice gives the rebuild a headless runner that a test drives from a fixture, since every later test that compares the rebuild with the original needs one. Within a slice, research and implementation alternate in small batches, described below.
+Build the game in vertical slices, each of which leaves it playable. The plan lists the slices in order, and each slice names the spec areas or entries it needs and the parity rows it has to bring to `implemented` or `validated`. Each target is one the runtime record makes reachable, and where a row needs a live session nobody has agreed to yet, the plan asks for `implemented` and names the gap in its risks. The first slice gives the rebuild a headless runner that a test drives from a fixture, since every later test that compares the rebuild with the original needs one. A project that adopts this protocol after its first slice builds the runner in its current slice. Within a slice, research and implementation alternate in small batches, described below.
 
 Exit, per slice: every parity row the slice names has reached the status the plan asked for, and every queue item that blocked the slice, named by its ID, is closed or accepted as a known gap in the plan's risks.
 
