@@ -1,10 +1,10 @@
 #################### default parameters ############################
 # logo module: https://github.com/gethugothemes/hugo-modules/tree/master/images#logo-implementation
-logo = ""
-logo_darkmode = ""
+logo = "images/logo.svg"
+logo_darkmode = "images/logo-darkmode.svg"
 # use `px` or `x` with logo_width, example: "100px".
-# Note: logo_width is not work with .svg file
-logo_width = "200px"
+# Both logos have a 222x53.5 viewBox, so keep width/height at that ratio or the SVG gets letterboxed.
+logo_width = "166px"
 logo_height = "40px"
 # if logo_webp set false, will not generate WEBP version of logo | default is true
 logo_webp = true
@@ -25,7 +25,7 @@ google_adsense = ""     # example: ca-pub-xxxxxxxxxxxxxxxx
 # custom script on header, example: custom_script= "<script>console.log(\"Hello World\")</script>"
 custom_script = ""
 # copyright
-copyright = "Refurbished Dinosaurs"
+copyright = "Refurbished Dinosaurs. Thanks to [Eugenija Tereščenko](https://www.behance.net/euhenry) for the logo."
 
 # Preloader
 # preloader module: https://github.com/gethugothemes/hugo-modules/tree/master/components/preloader
