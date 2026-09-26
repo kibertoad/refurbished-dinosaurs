@@ -762,7 +762,7 @@ The script, or until then the reviewer, checks that:
 - every save in `saves/` and every file in `recordings/` matches the hash in its fixture, is named by some experiment, and is listed in `spec/LICENSE` as covered by neither licence;
 - every `recording` that gives a path outside `recordings/` and `captures/` names a file in the experiment's build, and every experiment with a `recording` has that recording's hash in its fixture;
 - the standard version in `spec/README.md` is the major version of the spec package the repository pins;
-- every Markdown file in `spec/`, `parity/` and `deviations/`, and `PARITY.md`, is at most 1,000 lines long;
+- every Markdown file in `spec/`, `parity/` and `deviations/`, `PARITY.md` and `VALIDATION.md` is at most 1,000 lines long;
 - the four indexes in `spec/index/` are regenerated and up to date, each split as [File size](#file-size) describes, by area, then by kind, then by block, exactly where the limit requires it.
 
 The status index doubles as a progress report: how much of the game is established, how much is still a guess, where the open questions are, which `established` entries rest only on evidence nobody has reproduced yet, and which rest on a complete reading alone.
@@ -828,19 +828,41 @@ Status is worked out from the other columns:
 | `implemented` | Code is `complete`, Tests is `None`, and the spec status is not `disputed`. |
 | `validated` | Code is `complete`, Tests lists at least one file, and the spec status is `supported` or `established`. |
 
-A row where Code is `complete`, Tests lists a file and the spec status is `sourced` fails the check. The spec is behind: the evidence behind those tests belongs in the spec entry first.
+A row where Code is `complete`, Tests lists a file and the spec status is `sourced` fails the check. The spec is behind: the evidence behind those tests belongs in the spec entry first. A `validated` row also needs each of its test files in the [validation record](#validation-record), unchanged since the record was written.
 
 An entry can become `disputed` after its row was `validated`, when a new finding or experiment contradicts it. The row then shows `disputed` whatever its Code and Tests say, because nobody can yet tell which side of the dispute the tests should agree with, and its Notes names the evidence in the entry's `conflicting`. Code and Tests stay as they are, so the row goes back to `validated` once the entry is settled in favour of what the tests check. If it is settled the other way, the entry is superseded, and the code and tests move to the entry that replaces it.
 
 Manual play never counts as a test.
 
-The spec check script also checks the parity matrix: every area file is named after an area in the area list and holds only rows of that area (and of its kind and block, in a split file), is split exactly where the size limit requires it, every eligible spec entry has exactly one row, the copied columns match the spec, every status follows the table above, every listed test file exists and mentions the row's ID, no `complete` row has its ID in a `PLACEHOLDER:` comment, every listed deviation exists in `deviations/`, has not been dropped and names the row in its Departs from, every deviation that has not been dropped is listed in each row it names, and `PARITY.md` is regenerated and up to date.
+The spec check script also checks the parity matrix: every area file is named after an area in the area list and holds only rows of that area (and of its kind and block, in a split file), is split exactly where the size limit requires it, every eligible spec entry has exactly one row, the copied columns match the spec, every status follows the table above, every listed test file exists and mentions the row's ID, no `complete` row has its ID in a `PLACEHOLDER:` comment, every listed deviation exists in `deviations/`, has not been dropped and names the row in its Departs from, every deviation that has not been dropped is listed in each row it names, every test file of a `validated` row is in `VALIDATION.md` with the hash it has now, `VALIDATION.md` lists no other file, and `PARITY.md` is regenerated and up to date.
 
 It checks the rest of the implementation's references too. Every spec ID and deviation ID in the code, the tests, `parity/` and `deviations/` must resolve, and a citation of a superseded spec entry fails the check until it is moved to what replaced it, so code does not keep pointing at a claim that was withdrawn. The Departs from item of a dropped deviation is the one exception. Deviation IDs are unique and follow the ID form, every deviation file is named after the ID in its heading, every deviation has its list items in order, every deviation that has not been dropped departs from at least one entry that has a row, its Default follows the rules for deviations above and it has a Justification item exactly when they require one, and no deviation file that exists on the main branch is deleted or renamed.
 
-Most listed tests need the original game's files, which cannot be committed: the art for a screen, the per-unit statistics a combat fixture depends on, the files a decoder reads. Tests find them under the directory named by the `GAME_DIR` environment variable. It holds one directory per build, named by the build's ID, with the files laid out as the build entry's paths give them and a file from a disc under a directory named after the disc (`CD`, `CD2`): `GAME_DIR/BLD-GOG-EN-1.1/Chaos Overlords.exe`. An audio track is the raw audio the build entry hashes, in that directory under its track name with a `.cdda` extension: `GAME_DIR/BLD-GOG-EN-1.1/CD/track02.cdda`. Next to them, `GAME_DIR/captures/` holds the dumps, captures, recordings and saves that cannot be committed, each named by its hash. A test checks every file it reads against the hash its build entry or its finding gives. A test that needs a build or a capture that is not there reports itself as skipped. A format test needs every build its entry lists, and a test that replays a fixture needs the experiment's build, so the copy on the main branch's runner holds every build that a `validated` row's tests use.
+Most listed tests need the original game's files, which cannot be committed: the art for a screen, the per-unit statistics a combat fixture depends on, the files a decoder reads. Tests find them under the directory named by the `GAME_DIR` environment variable. It holds one directory per build, named by the build's ID, with the files laid out as the build entry's paths give them and a file from a disc under a directory named after the disc (`CD`, `CD2`): `GAME_DIR/BLD-GOG-EN-1.1/Chaos Overlords.exe`. An audio track is the raw audio the build entry hashes, in that directory under its track name with a `.cdda` extension: `GAME_DIR/BLD-GOG-EN-1.1/CD/track02.cdda`. Next to them, `GAME_DIR/captures/` holds the dumps, captures, recordings and saves that cannot be committed, each named by its hash. A test checks every file it reads against the hash its build entry or its finding gives. A test that needs a build or a capture that is not there reports itself as skipped. A format test needs every build its entry lists, and a test that replays a fixture needs the experiment's build, so the copy a maintainer runs them with holds every build that a `validated` row's tests use.
 
-The test suite runs on every change and writes a report of which tests passed, failed or were skipped. A failing test fails the build. On the main branch, CI runs with a copy that a maintainer owns, kept on a self-hosted runner or in storage only the maintainers can read, never in the repository or a published build artifact, and the check fails if any test listed for a `validated` row was skipped. A pull request from a fork runs without a copy, and there the check lists those rows as unverified without failing, so the merge to main is what confirms them.
+The test suite runs on every change and writes a report of which tests passed, failed or were skipped. A failing test fails the build. The original's files can never be uploaded anywhere a CI runner could fetch them, so CI runs without them: there the tests that need them report themselves as skipped, and a skipped test does not fail the build. Those tests run on a maintainer's machine, with a copy the maintainer owns, and the validation record is how that run reaches the repository.
+
+#### Validation record
+
+After a run in which every test in every test file of every `validated` row passed and none was skipped, the maintainer records the run with the check script. It writes `VALIDATION.md` at the root of the game repository, next to `PARITY.md`:
+
+```markdown
+# Validation record
+
+The test files of the validated parity rows, as they were when every test in them passed against the original's files.
+
+- Commit: 3f9c2d4e8a1b7c6d5e4f3a2b1c0d9e8f7a6b5c4d
+- Date: 2026-09-26
+- Builds: BLD-GOG-EN-1.1
+
+| Test file | SHA-256 |
+|---|---|
+| `tests/Combat.Tests/DetectionOrderTests.cs` | `9b0e4c1d2a3f4e5d6c7b8a9f0e1d2c3b4a5f6e7d8c9b0a1f2e3d4c5b6a7f8e9d` |
+```
+
+Commit is the commit the run tested, Date the day it ran, and Builds the IDs of the builds in `GAME_DIR` it used. The table lists every test file that a `validated` row lists, once each, sorted by path, with the SHA-256 of the file's contents with each CRLF read as LF, so that a Windows checkout and a Linux one give the same hash. The record is committed with the change it validates.
+
+The check fails a `validated` row whose test file is missing from the record or has changed since it was recorded, and a record that lists a file no `validated` row lists. A change to a validated row's tests therefore needs a new local run before it merges. The hash covers only the test file, so a maintainer who changes code that a validated row's tests exercise runs those tests again and records the run before the change merges, even though the check cannot tell.
 
 ## Licence
 
@@ -852,7 +874,7 @@ Save files are written by the original game, so neither licence covers them. A s
 
 `spec/LICENSE` holds both texts and says which files each covers, and which are covered by neither, so the `spec/` directory keeps its licence when it is copied to a community wiki or into another project.
 
-`PARITY.md`, `parity/` and `deviations/` describe the rebuild and sit outside `spec/`, so they are under the game repository's own licence, the same as the code.
+`PARITY.md`, `parity/`, `VALIDATION.md` and `deviations/` describe the rebuild and sit outside `spec/`, so they are under the game repository's own licence, the same as the code.
 
 ## Versions
 
