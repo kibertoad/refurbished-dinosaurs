@@ -19,6 +19,14 @@ The second goal is complete and accurate technical documentation of each game's 
 
 If we shipped a playable rebuild without the documentation, nobody could check it, and everything we learned would be locked inside one codebase. If we wrote the documentation and never shipped a game, hardly anyone would play the result. A release is unfinished until it has both.
 
+## Careful UX improvements
+
+Games of this era were rough to play. Much of what decided a turn stayed hidden: the odds in a fight, how a stat fed into a formula, what an upgrade changed in numbers. The manual explained some of it, not always correctly, and players had to find out the rest by trial and error or guess. Plenty of them never learned why they lost.
+
+The rebuilds add tooltips that show the numbers behind a mechanic, explanations where the original gave none, and help inside the game next to the thing it describes, so nobody has to keep the manual open while playing. These changes add information and take away friction. The rules, the balance and the decisions the player faces stay as they were.
+
+We also fix the original's bugs as we find them: crashes, corrupted saves, and logic that plainly does not do what it was written to do. A quirk that players built strategies around stays in the game, and [Methodology](/methodology/#where-fidelity-stops) says where that line is drawn.
+
 ## Using what we publish
 
 The runtimes and their source code are published under the MIT licence. The technical documentation is published under Creative Commons Attribution 4.0, except for its machine-readable parts (format definitions, test fixtures and schemas), which are under MIT like the code. Anyone can use all of it without asking us, including in commercial products, as long as they credit the project.
