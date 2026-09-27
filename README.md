@@ -281,11 +281,9 @@ CSS file rather than reading the JSON at build time, so after editing it:
 pnpm theme        # rewrites assets/css/generated-theme.css
 ```
 
-The favicon and Open Graph image are generated pixel art, placeholders until there is real art:
-
-```bash
-pnpm images       # rewrites assets/images/{favicon,og-image}.png
-```
+The logo and the link preview image are in `website/assets/images/`, and the favicons are in
+`website/static/`. Telegram and other sites cache a preview image by its URL, so a new preview
+image needs a new file name, with `image` under `[metadata]` in `params.toml` pointing at it.
 
 ## Deploying
 
