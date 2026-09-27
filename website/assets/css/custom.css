@@ -1,1 +1,16 @@
 /* Add your own custom styles here */
+
+/* Links in the footer's copyright line (the logo credit) share the muted
+   text colour, so underline them to show they can be clicked. */
+footer .border-t p a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+footer .border-t p a:hover {
+  color: var(--color-primary);
+}
+
+.dark footer .border-t p a:hover {
+  color: var(--color-darkmode-primary);
+}
