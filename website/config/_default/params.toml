@@ -67,7 +67,7 @@ keywords = [
   "source ports",
   "Chaos Overlords",
 ]
-description = "Bringing obscure old games back from extinction: faithful, playable restorations of forgotten strategy classics."
+description = "We rebuild lesser-known PC games from 1990 to 2004 so they run natively on current systems, and document how the originals work."
 author = "Refurbished Dinosaurs"
 twitter = "RefurbishedDino"
 image = "images/og-logo.png"
