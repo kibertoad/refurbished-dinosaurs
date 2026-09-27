@@ -1,0 +1,23 @@
+{{ define "main" }}
+  {{ partial "page-header" . }}
+  {{ $inMethod := false }}
+  {{ range site.Menus.method }}
+    {{ if eq .Page $ }}{{ $inMethod = true }}{{ end }}
+  {{ end }}
+  {{ if $inMethod }}
+    {{ partial "method-nav" . }}
+  {{ end }}
+
+
+  <section class="section-sm">
+    <div class="container">
+      <div class="row justify-center">
+        <div class="lg:col-10">
+          <div class="content">
+            {{ .Content }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+{{ end }}

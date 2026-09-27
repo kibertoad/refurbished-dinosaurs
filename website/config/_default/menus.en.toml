@@ -37,6 +37,29 @@ url = "/contact"
 weight = 7
 
 
+# the three pages that set out how a restoration is done, linked from each other's headers
+[[method]]
+name = "Methodology"
+pageRef = "/pages/methodology"
+weight = 1
+[method.params]
+summary = "What counts as evidence, what goes into a repository, and what the rebuild may change."
+
+[[method]]
+name = "Work protocol"
+pageRef = "/pages/work-protocol"
+weight = 2
+[method.params]
+summary = "What to work on next, where open questions are tracked, and how people and agents hand work on."
+
+[[method]]
+name = "Documentation standard"
+pageRef = "/pages/documentation-standard"
+weight = 3
+[method.params]
+summary = "The file layout, IDs, statuses and checks that every game's spec follows."
+
+
 # footer menu
 [[footer]]
 name = "Games"

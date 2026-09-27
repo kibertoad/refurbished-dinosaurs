@@ -1,0 +1,22 @@
+{{/* Cards linking the pages in the "method" menu, shown on each of them. Context: a page. */}}
+{{ $current := . }}
+<nav class="container mt-8" aria-label="How a restoration is done">
+  <div class="row justify-center">
+    <div class="lg:col-10">
+      <ul class="grid gap-4 md:grid-cols-3">
+        {{ range site.Menus.method }}
+          {{ $here := and .Page (eq .Page $current) }}
+          <li>
+            <a
+              class="{{ if $here }}border-primary dark:border-darkmode-primary{{ else }}border-border dark:border-darkmode-border hover:border-primary dark:hover:border-darkmode-primary{{ end }} bg-body dark:bg-darkmode-body block h-full rounded-xl border p-5"
+              href="{{ .URL }}"
+              {{ if $here }}aria-current="page"{{ end }}>
+              <span class="h5 text-dark dark:text-darkmode-dark block">{{ .Name }}</span>
+              <span class="text-text-light dark:text-darkmode-text-light mt-2 block text-sm">{{ .Params.summary }}</span>
+            </a>
+          </li>
+        {{ end }}
+      </ul>
+    </div>
+  </div>
+</nav>
