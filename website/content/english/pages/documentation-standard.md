@@ -211,6 +211,16 @@ A field's neutral name is its Name in the format entry's layout table, like any 
 
 A neutral name belongs to one build, since the same function or global usually sits at a different address in another. When a rule has to use something that has not been identified, it uses the neutral name from the first build in its `builds` list. The glossary gets an entry under that name, giving the build the address comes from and the neutral names it has in other builds, and the rule lists it in its Open questions section. When a finding or experiment shows what it does, the glossary entry and every rule that uses it are renamed in the same change.
 
+### Memory identity and capacity
+
+A reading that treats two accesses as one buffer gives the segment or object used to form each address and the one used to dereference it. In segmented code that includes the effective segment selected by the final addressing mode, any override, and the caller or callee that sets or restores it. A BP-derived offset passed to a helper using DS does not establish that the helper reads the caller's SS storage. When that relationship is unknown, the finding keeps the accesses separate and names the missing evidence. Reports and emulator fixtures retain the same assumptions rather than choosing equal segments to make a reading work.
+
+Each read and write is recorded at its full width and byte interval. When a byte store overlaps a later word read, the reading accounts for the other byte's producer as well. For example, clearing the low byte of a word leaves a nonzero word when its high byte is nonzero. The finding and any fixture preserve that case where the established input contract admits it; naming the low byte as a flag does not give it ownership of the whole word.
+
+An allocation reading distinguishes the requested byte count, arithmetic width and wrapping, admission units, returned pointer normalization, header-derived extent and the range subsequently cleared or written. It follows each conversion between bytes, paragraphs and elements to its producer. A bounded fill chunk says nothing about total capacity. Unknown allocator state or header meaning remains an open dependency. A request that changes allocator state before a later alignment rejection may return null with those effects still present, so the reading follows saved and returned pointers separately and claims rollback only where it finds it.
+
+For a transform, the reading bounds the number of outputs independently of each input count and follows every append, split or pairwise expansion to the destination's write gate. Two admitted input counts do not prove that their product fits. A syntactic maximum of four appends per iteration is an upper bound on candidate writes; it does not prove that one native input takes all four paths. Reports distinguish that bound, the destination capacity and the producer invariants needed to reach it, and retain staging and alias assumptions when describing failure effects. Synthetic cases check those distinctions without establishing that the original's producers can supply them.
+
 ## Formulas and procedures
 
 Rules are written in a small pseudocode whose behaviour is fixed by the sections below. A procedure in it reads like this (the rule is illustrative):
