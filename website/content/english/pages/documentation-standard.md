@@ -344,15 +344,15 @@ files:
 
 A `path` uses forward slashes and is relative to the directory the game is installed to. A file the game reads from its CD and never installs is written `CD:` followed by its path on the disc, or `CD1:`, `CD2:` and so on for a game on more than one disc. `int_width` is the width of the executable that runs the game's rules, where a build also ships a setup program or launcher of another width. A build has one such executable. An installation that ships two, such as a CD with a DOS and a Windows version of the game over the same data files, is two builds, one for each executable, and both list the data files they share.
 
-The manifest is the file denominator for the Survey, not a selection of fingerprints that distinguishes one release from another. At the Survey gate, reconcile it with a full listing of the installation and the media the game reads. Record how that listing was obtained and the reconciliation in the build's Other files section: every path belongs either to the manifest or to an explicit exclusion there, with its reason. A long exclusion list may be linked from that section as a separate inventory. A file whose use is unknown stays in the manifest until evidence supports excluding it. Record the scope of listings of packed content; an archive's presence in the manifest does not claim that its members' formats have been surveyed. Such members are described through the archive's format entries. Listings and manifests contain metadata only, never the files themselves.
-
 `developer` is the studio that made the game and `publisher` the company that released the build, which are often different companies. A re-release keeps the original developer, and its `publisher` names the company that published the original, with the re-release's seller in `distribution`. Where several studios made the game, `developer` names each of them, in the order the game's credits give them.
 
 Body sections:
 
 1. Obtaining: how to get the build.
 2. Compared with other builds: how it differs from the other known builds.
-3. Other files: the files in the installation that are not game data (installers, wrappers, compatibility shims).
+3. Other files: how the installation and the media the game reads were listed, and every path in that listing the manifest leaves out (installers, wrappers, compatibility shims), each with the reason.
+
+The [Survey](/work-protocol/#survey) counts the game's files from the manifest, so the manifest holds every file the game uses, even where a few hashes would be enough to tell one release from another. Every path in the listing is either in the manifest or in the Other files section. A long list of left-out paths can go in a separate file linked from that section. A file whose use is unknown stays in the manifest until evidence shows the game does not use it. Where the listing went inside an archive or another packed file, the Other files section says which ones and how far it went. An archive in the manifest does not mean its members' formats have been surveyed, and those members are described in the archive's format entries. Listings and manifests hold paths, sizes and hashes, never the files themselves.
 
 ### Sources
 
