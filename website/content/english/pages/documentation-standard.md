@@ -605,6 +605,10 @@ Body sections:
 9. Differences between builds.
 10. Open questions.
 
+A procedure keeps each call whose changes a later decision depends on as a step of its own, and says what the rule reads after that call. The Outputs section says which of those changes are left in place when the call is rejected, retried or interrupted. Installing a task or callback and running it are separate steps unless the evidence shows they happen together. A callee whose effects the reading has not resolved is listed in the Open questions section, since describing its caller does not show what the callee changes.
+
+Where other actors or parts of the game see the same state at different times, the procedure marks each point at which a change becomes visible to them, such as a unit reserving its destination, its position on the map changing, and its drawn position moving between two squares. It says when a shared table is refreshed from the record it copies, and what another actor reads between those points. A check made by whatever requests an action and a check made again inside the route or action itself are separate gates, and the procedure gives, for each caller, the mode it passes, the conditions under which it skips the gate, and what happens on a rejection or a retry. What an interrupted procedure leaves behind is an open question until the evidence shows it, and is not assumed to be undone.
+
 The whole of `rules/RULE-COMBAT-007.md`:
 
 ````markdown
