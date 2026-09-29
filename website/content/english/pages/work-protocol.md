@@ -169,6 +169,16 @@ A feature that is not part of a parity row, such as online play, an optional imp
 
 A tooling batch builds something the stages need that has no parity row of its own: the extractor, the Ghidra scripts, the emulator harness, the export of the function inventories, the scripts a live session measures with, the rebuild's headless runner and the test harness that replays fixtures. It needs no decision and no approval, because this page already asks for it. A tool that reads the original belongs to the research side, and one that runs the rebuild to the implementation side, and each is built in a session of that side.
 
+### Checkpoints and replay
+
+A rebuild checkpoint or replay API states what its identity covers. An evidence comparison fingerprint identifies the fields compared in an observation; a save or replay compatibility identity covers the inputs that determine continuation. Reusing the former for the latter needs an argument that it covers all of them. Include behaviour resources such as motion banks, actor profiles, navigation costs and animation instructions where they affect the next update, even if their filenames are unchanged. A map name and dimensions alone do not identify its content. Hash explicit portable fields with a stated encoding and version, and document the migration or rejection policy.
+
+Test changes to continuation inputs independently, including fields omitted from a diagnostic export and resources changed under the same filename. An incompatible checkpoint is rejected without changing the live host. Passing these checks establishes consistency of the rebuild's checkpoint contract; it says nothing about compatibility with the original's save format, which needs its own format and rule evidence.
+
+The contract also says whether snapshots can be branched independently or must be restored into a fresh host. An immutable outer record can still depend on mutable animation progress, a search frontier or a side-effect sink. Restore or recreate each dependency before claiming deterministic continuation. For state deliberately left unsaved, such as a paused frontier, state whether saving is rejected or which specified reconstruction occurs; never silently drop it.
+
+Compare uninterrupted continuation with restoration into a fresh host on both sides of an arrival or other publication boundary. Where animation instructions can advance independently of spatial movement, include that state too. Exercise reuse of an older snapshot: a branchable contract must isolate its effects, while a sequential contract must reject stale state without advancing the host. Include replacement and interruption, and compare emitted effects as well as final values. These are synthetic contract tests and do not raise original-behaviour parity on their own.
+
 ### Commits
 
 A commit message says what changed and what evidence it rests on, in plain words. It ends with trailers naming the entries the batch created or changed, so that the git history can be searched by ID:
