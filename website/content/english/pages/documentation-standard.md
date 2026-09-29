@@ -600,6 +600,10 @@ Body sections:
 9. Differences between builds.
 10. Open questions.
 
+A procedure preserves the boundaries of calls whose mutations affect a later decision. It says which state is read after each call and which changes remain on rejection, retry or interruption. Installing a task or callback and dispatching it are separate operations unless the evidence shows they happen together. An unresolved helper remains an Open question; describing its caller does not establish the helper's effects.
+
+Where consumers see state at different times, the procedure gives those publication points: for example, reserving a destination, changing a base position and advancing an interpolated position. It says when a shared table is refreshed from the authoritative record and what another actor reads between those points. Admission at a producer and admission inside a route or action are separate gates; give each caller's mode, bypass conditions and rejection or retry sequence. Unknown interruption cleanup stays an Open question rather than an assumed rollback.
+
 The whole of `rules/RULE-COMBAT-007.md`:
 
 ````markdown
