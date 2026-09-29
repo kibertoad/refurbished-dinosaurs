@@ -165,6 +165,8 @@ This keeps the clean-room separation that the methodology asks for, and it is al
 
 A feature that is not part of a parity row, such as online play, an optional improved AI or an accessibility setting, is ordinary engineering. It goes in implementation batches of its own, and a decision in `docs/DECISIONS.md` says why the project takes it on. It never counts towards a slice's exit.
 
+A claim that two algorithms are equivalent names the state and outputs being compared, including what a later call observes. Where a search queues work, compare duplicate entries, an improved stored score behind an older queued key, and exhaustion immediately after producing successors, then resume the search. Include the relevant limits and failure paths for other algorithms. Matching successful endpoints does not establish equivalence of intermediate state, event order or continuation. Synthetic comparisons check the rebuild's contract; they do not by themselves raise a spec status or validate a parity row against the original.
+
 ### Tooling batches
 
 A tooling batch builds something the stages need that has no parity row of its own: the extractor, the Ghidra scripts, the emulator harness, the export of the function inventories, the scripts a live session measures with, the rebuild's headless runner and the test harness that replays fixtures. It needs no decision and no approval, because this page already asks for it. A tool that reads the original belongs to the research side, and one that runs the rebuild to the implementation side, and each is built in a session of that side.
