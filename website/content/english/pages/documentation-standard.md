@@ -137,9 +137,7 @@ Builds and sources use a short alias in place of area and number: `BLD-GOG-EN-1.
 
 ###### IDENTIFIERS-5
 
-Areas are added to the list and never removed or renamed. An area whose name turns out to be a poor fit keeps it, and its row in the area list says what it covers.
-
-Renaming an area would rename every ID in it, which is what [IDENTIFIERS-5](#identifiers-5) prevents.
+Areas are added to the list and never removed or renamed, because renaming an area would rename every ID in it. An area whose name turns out to be a poor fit keeps it, and its row in the area list says what it covers.
 
 ###### IDENTIFIERS-6
 
@@ -152,6 +150,8 @@ An entry that turns out to be wrong stays in place with status `superseded`, and
 With [IDENTIFIERS-6](#identifiers-6) and [IDENTIFIERS-7](#identifiers-7) together, anything that cited an old ID can still find out what happened to it.
 
 ## Status
+
+The spec records how well the original is understood. How well our rebuild matches it is recorded in the [parity matrix](#parity-matrix), which uses the same statuses and adds `implemented` and `validated`. [OpenMW](https://wiki.openmw.org/index.php?title=Template:Formula) keeps the same split between analysis status and implementation status.
 
 ###### STATUS-1
 
@@ -245,8 +245,6 @@ An entry that is not superseded must not cite a superseded entry in its `evidenc
 ###### STATUS-18
 
 Status is not tracked per build. An entry's status is what its evidence shows for the first build in its `builds` list, which is the build it was studied in most closely, and another build it lists may rest on less evidence. The entry's Differences between builds section says what was checked in each build.
-
-The spec records how well the original is understood. How well our rebuild matches it is recorded in the [parity matrix](#parity-matrix), which uses the same statuses and adds `implemented` and `validated`. [OpenMW](https://wiki.openmw.org/index.php?title=Template:Formula) keeps the same split between analysis status and implementation status.
 
 ###### STATUS-19
 
@@ -952,7 +950,7 @@ The check script runs in each game repository on every change, and the build fai
 
 The script checks that:
 
-- every entry's front matter validates against the schema for its kind, its file name is its ID, and it sits in the directory for its kind;
+- every entry's front matter validates against the schema for its kind, its file name is its ID, and it sits in the directory for its kind ([ENTRY-TYPES-4](#entry-types-4) to [ENTRY-TYPES-6](#entry-types-6));
 - every body has its sections, under the headings given here, in order ([ENTRY-TYPES-1](#entry-types-1));
 - every ID has the form for its kind, with an area from the area list where the kind has one, every ID cited anywhere resolves to an entry, and no ID is used twice ([IDENTIFIERS-1](#identifiers-1) to [IDENTIFIERS-4](#identifiers-4));
 - no entry that exists on the main branch has been deleted or renamed, and no area has been removed from the area list or renamed ([IDENTIFIERS-5](#identifiers-5) to [IDENTIFIERS-7](#identifiers-7));
@@ -967,9 +965,9 @@ The script checks that:
 - every value file belongs to the entry its name gives and is named by that entry, every `table` that takes its values from one has as many rows as its count, every list written out in a procedure or a `table` definition has at most 64 values, and every value file of an enumeration table has that table's columns;
 - every packed file in a build entry gives its packer and the size, hash, format and unpacking tool of its unpacked form;
 - every pattern in a format entry's `files` matches a file in each build the entry lists;
-- no entry that is not superseded cites a superseded entry, whether in `builds`, a location, `evidence`, `conflicting`, `related` or a draw in an experiment's fixture, and every entry that is not superseded has an empty `superseded_by` ([STATUS-17](#status-17));
+- no entry that is not superseded cites a superseded entry, whether in `builds`, a location, `evidence`, `conflicting`, `related` or a draw in an experiment's fixture, and every entry that is not superseded has an empty `superseded_by` ([STATUS-17](#status-17) and [ENTRY-TYPES-4](#entry-types-4));
 - every superseded entry names what replaced or disproved it, and no chain of `superseded_by` links leads back to where it started ([IDENTIFIERS-7](#identifiers-7));
-- a finding's or experiment's `superseded_by` names only findings and experiments, a build's only builds, a source's only sources, and a source appears in any other kind's `superseded_by` only in a bug's ([IDENTIFIERS-7](#identifiers-7));
+- a finding's or experiment's `superseded_by` names only findings and experiments, a build's only builds, a source's only sources, and a source appears in any other kind's `superseded_by` only in a bug's ([IDENTIFIERS-7](#identifiers-7) and [STATUS-23](#status-23));
 - `conflicting` holds only findings and experiments and is empty unless the status is `disputed`, and `related` links only to the kinds allowed for the entry ([ENTRY-TYPES-5](#entry-types-5) and [ENTRY-TYPES-6](#entry-types-6));
 - a rule's `related` field holds every rule its procedure calls, takes a function or table from, or names in a `# may run:` comment (all the entries of a split rule), every format whose structures it reads, writes, makes with `new` or passes to `read_file` or `write_file`, every format whose enumeration names it uses, and every screen it names with `show`;
 - every rule a format's tables name is in the format's `related` field, every rule and screen a screen's effects or Shows cells name is in the screen's `related` field, and every bug's `related` field names at least one rule, format or screen;

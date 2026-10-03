@@ -7,7 +7,12 @@
      A sixth-level heading that is not a rule label fails the build, and so
      does a label used twice, which Hugo would otherwise quietly anchor at
      #status-14-1. render-link.html checks the other end, that a citation
-     written as [STATUS-14](#status-14) has a rule to land on. */ -}}
+     written as [STATUS-14](#status-14) has a rule to land on.
+
+     Other headings keep every attribute Goldmark gives them. A dynamic
+     attribute name has to go through safeHTMLAttr, since html/template
+     turns a name such as data-x or style into ZgotmplZ; the value is
+     escaped by hand for the same reason. */ -}}
 {{- if eq .Level 6 -}}
   {{- $path := "" -}}
   {{- with .Page.File }}{{ $path = .Path }}{{ end -}}
@@ -19,7 +24,7 @@
 <h6 id="{{ .Anchor }}" class="rule-label"><a href="#{{ .Anchor }}">{{ .Text }}</a></h6>
 {{- else -}}
 <h{{ .Level }} id="{{ .Anchor }}"
-  {{- range $name, $value := .Attributes }}{{ if ne $name "id" }} {{ $name }}="{{ $value }}"{{ end }}{{ end }}>
+  {{- range $name, $value := .Attributes }}{{ if ne $name "id" }} {{ printf `%s="%s"` $name (htmlEscape (string $value)) | safeHTMLAttr }}{{ end }}{{ end }}>
   {{- .Text -}}
 </h{{ .Level }}>
 {{- end -}}
