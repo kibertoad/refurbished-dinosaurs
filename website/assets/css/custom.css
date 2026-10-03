@@ -14,3 +14,10 @@ footer .border-t p a:hover {
 .dark footer .border-t p a:hover {
   color: var(--color-darkmode-primary);
 }
+
+/* The header stays at the top of the window (navbar_fixed), so a link to a
+   heading or a numbered rule would scroll its target underneath it. Keep
+   fragment targets clear of the header's height. */
+html {
+  scroll-padding-top: 6.5rem;
+}

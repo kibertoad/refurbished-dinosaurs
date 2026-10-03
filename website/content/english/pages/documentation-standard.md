@@ -17,7 +17,7 @@ A paragraph that opens with a number such as [ID-1](#id-1) is a rule, and the nu
 
 A rule keeps its number for good. A dropped rule leaves its number unused, and a new rule takes the next free number in its section wherever it sits on the page. Numbering rules changes none of them, so it does not make a new version of the standard.
 
-The page is being numbered one section at a time, starting with [Identifiers](#identifiers). In a section that has no numbers yet, every statement is a rule, as it has been since version 1.
+The page is being numbered one section at a time, starting with [Identifiers](#identifiers). Until a section is numbered, everything it says a spec does is required, as it has been since version 1.
 
 ## Where it lives
 
@@ -117,7 +117,7 @@ An entry that would pass the limit is split by what it describes, never cut at t
 
 ## Identifiers
 
-{{< rule "ID-1" >}} Every entry has an ID of the form `KIND-AREA-NNN`, for example `RULE-COMBAT-007`. `KIND` is one of the directory prefixes above.
+{{< rule "ID-1" >}} Every entry has an ID that starts with its `KIND`, one of the directory prefixes above. Builds and sources follow [ID-4](#id-4), and every other entry's ID has the form `KIND-AREA-NNN`, for example `RULE-COMBAT-007`.
 
 {{< rule "ID-2" >}} `AREA` is a short subsystem name from the area list in `spec/README.md`, such as `RNG`, `COMBAT`, `AI` or `SAVE`, made of upper-case letters and digits and starting with a letter. It never contains a hyphen, so the ID splits into its three parts at the hyphens.
 
@@ -127,13 +127,13 @@ An entry that would pass the limit is split by what it describes, never cut at t
 
 {{< rule "ID-5" >}} Areas are added to the list and never removed or renamed. An area whose name turns out to be a poor fit keeps it, and its row in the area list says what it covers.
 
-Renaming an area would rename every ID in it, which is what ID-5 prevents.
+Renaming an area would rename every ID in it, which is what [ID-5](#id-5) prevents.
 
 {{< rule "ID-6" >}} An ID is never reused or renumbered once it is on the main branch. If two branches create the same ID, the one merged second renumbers its entry before it is merged.
 
 {{< rule "ID-7" >}} An entry that turns out to be wrong stays in place with status `superseded`, and its `superseded_by` field names what took its place: the corrected entry, the parts it was split into, or the entry it was merged into. When nothing takes its place, because a mechanic turns out not to exist, `superseded_by` names the findings or experiments that show it. A bug that turns out to be intended is the one case where it may name sources as well (see [Bugs](#bugs)).
 
-With ID-6 and ID-7 together, anything that cited an old ID can still find out what happened to it.
+With [ID-6](#id-6) and [ID-7](#id-7) together, anything that cited an old ID can still find out what happened to it.
 
 ## Status
 
@@ -813,7 +813,7 @@ The script checks that:
 - every entry's front matter validates against the schema for its kind, its file name is its ID, and it sits in the directory for its kind;
 - every body has its sections, under the headings given here, in order;
 - every ID has the form for its kind, with an area from the area list where the kind has one, every ID cited anywhere resolves to an entry, and no ID is used twice ([ID-1](#id-1) to [ID-4](#id-4));
-- no entry that exists on the main branch has been deleted or renamed, and no area has been removed from the area list or renamed ([ID-5](#id-5), [ID-6](#id-6));
+- no entry that exists on the main branch has been deleted or renamed, and no area has been removed from the area list or renamed ([ID-5](#id-5) to [ID-7](#id-7));
 - every status is from the list for its kind, and no row of a format's tables is `superseded`;
 - every entry cites what its status requires, counting any source, and counting a finding or experiment only when it lists the first build in the entry's `builds`;
 - every ID in a `complete_reading` is a static finding that the entry lists in `evidence` and that lists the entry's first build, and no rule whose procedure has a `# may run:` comment has a non-empty `complete_reading`;
@@ -826,8 +826,8 @@ The script checks that:
 - every packed file in a build entry gives its packer and the size, hash, format and unpacking tool of its unpacked form;
 - every pattern in a format entry's `files` matches a file in each build the entry lists;
 - no entry that is not superseded cites a superseded entry, whether in `builds`, a location, `evidence`, `conflicting`, `related` or a draw in an experiment's fixture, and every entry that is not superseded has an empty `superseded_by`;
-- every superseded entry names what replaced or disproved it, and no chain of `superseded_by` links leads back to where it started;
-- a finding's or experiment's `superseded_by` names only findings and experiments, a build's only builds, a source's only sources, and a source appears in any other kind's `superseded_by` only in a bug's;
+- every superseded entry names what replaced or disproved it, and no chain of `superseded_by` links leads back to where it started ([ID-7](#id-7));
+- a finding's or experiment's `superseded_by` names only findings and experiments, a build's only builds, a source's only sources, and a source appears in any other kind's `superseded_by` only in a bug's ([ID-7](#id-7));
 - `conflicting` holds only findings and experiments and is empty unless the status is `disputed`, and `related` links only to the kinds allowed for the entry;
 - a rule's `related` field holds every rule its procedure calls, takes a function or table from, or names in a `# may run:` comment (all the entries of a split rule), every format whose structures it reads, writes, makes with `new` or passes to `read_file` or `write_file`, every format whose enumeration names it uses, and every screen it names with `show`;
 - every rule a format's tables name is in the format's `related` field, every rule and screen a screen's effects or Shows cells name is in the screen's `related` field, and every bug's `related` field names at least one rule, format or screen;

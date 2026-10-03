@@ -8,6 +8,16 @@
 {{- if not $bare -}}
   {{- $dest = strings.TrimPrefix "/" $dest | relLangURL -}}
 {{- end -}}
+{{- /* A citation of a numbered rule, [ID-1](#id-1), has to land on a
+     paragraph opened with the rule shortcode on the same page. Hugo does
+     not check fragments, so a mistyped or dropped number would otherwise
+     link to nothing. */ -}}
+{{- $rule := upper (strings.TrimPrefix "#" $dest) -}}
+{{- if and (findRE `^#[a-z]+-[1-9][0-9]*$` $dest) (eq .PlainText $rule) -}}
+  {{- if not (findRE (printf `\{\{<\s*rule\s+"%s"\s*>\}\}` $rule) .Page.RawContent) -}}
+    {{- errorf "%s: link to rule %s, which this page does not define" .Page.File.Path $rule -}}
+  {{- end -}}
+{{- end -}}
 <a
   href="{{ $dest | safeURL }}"
   {{- with .Title }} title="{{ . }}"{{ end }}
