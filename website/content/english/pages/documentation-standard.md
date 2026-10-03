@@ -11,6 +11,14 @@ The format borrows from projects that have done parts of this well. The layout t
 
 Every restoration we have follows version 1: the specs of [Chaos Overlords](https://github.com/kibertoad/chaos-overlords-new-chrome/tree/main/spec), [Dark Sun: Wake of the Ravager](https://github.com/kibertoad/dark-sun-wake-redux/tree/main/spec) and [Conqueror A.D. 1086](https://github.com/kibertoad/reconqueror1086/tree/main/spec) are written to this page. Chaos Overlords and Dark Sun were documented before the standard existed and were converted in September 2026. Each of the three runs the checks listed under [Checks](#checks) on every change.
 
+## Reading the rules
+
+A paragraph that opens with a number such as [ID-1](#id-1) is a rule, and the number links to it. The text between rules gives reasons and examples, and adds no requirement of its own. A rule states what a spec does in the present tense, so "every entry has an ID" means an entry without one fails. "May" marks something a spec is allowed to do and does not have to. A check that enforces numbered rules names them in the [Checks](#checks) list.
+
+A rule keeps its number for good. A dropped rule leaves its number unused, and a new rule takes the next free number in its section wherever it sits on the page. Numbering rules changes none of them, so it does not make a new version of the standard.
+
+The page is being numbered one section at a time, starting with [Identifiers](#identifiers). In a section that has no numbers yet, every statement is a rule, as it has been since version 1.
+
 ## Where it lives
 
 Each game repository has a `spec/` directory. It describes the original game and nothing else. It never names a class, file or setting from our implementation, so that someone writing a different engine can use it as it is. The implementation points the other way: code comments, tests and the parity matrix cite spec IDs.
@@ -109,11 +117,23 @@ An entry that would pass the limit is split by what it describes, never cut at t
 
 ## Identifiers
 
-Every entry has an ID of the form `KIND-AREA-NNN`, for example `RULE-COMBAT-007`. `KIND` is one of the directory prefixes above. `AREA` is a short subsystem name from the area list in `spec/README.md`, such as `RNG`, `COMBAT`, `AI` or `SAVE`, made of upper-case letters and digits and starting with a letter. It never contains a hyphen, so the ID splits into its three parts at the hyphens. `NNN` is a number, zero-padded to three digits and written with more once an area passes 999, unique within its kind and area. Builds and sources use a short alias in place of area and number: `BLD-GOG-EN-1.1`, `SRC-MANUAL-1996`. An alias starts with an upper-case letter and contains only upper-case letters, digits, dots and hyphens, so in those two kinds everything after the first hyphen is the alias.
+{{< rule "ID-1" >}} Every entry has an ID of the form `KIND-AREA-NNN`, for example `RULE-COMBAT-007`. `KIND` is one of the directory prefixes above.
 
-Areas are added to the list and never removed or renamed, because renaming an area would rename every ID in it. An area whose name turns out to be a poor fit keeps it, and its row in the area list says what it covers.
+{{< rule "ID-2" >}} `AREA` is a short subsystem name from the area list in `spec/README.md`, such as `RNG`, `COMBAT`, `AI` or `SAVE`, made of upper-case letters and digits and starting with a letter. It never contains a hyphen, so the ID splits into its three parts at the hyphens.
 
-An ID is never reused or renumbered once it is on the main branch. An entry that turns out to be wrong stays in place with status `superseded`, and its `superseded_by` field names what took its place: the corrected entry, the parts it was split into, or the entry it was merged into. When nothing takes its place, because a mechanic turns out not to exist, `superseded_by` names the findings or experiments that show it. A bug that turns out to be intended is the one case where it may name sources as well (see [Bugs](#bugs)). Anything that cited the old ID can still find out what happened to it. If two branches create the same ID, the one merged second renumbers its entry before it is merged.
+{{< rule "ID-3" >}} `NNN` is a number, zero-padded to three digits and written with more once an area passes 999, unique within its kind and area.
+
+{{< rule "ID-4" >}} Builds and sources use a short alias in place of area and number: `BLD-GOG-EN-1.1`, `SRC-MANUAL-1996`. An alias starts with an upper-case letter and contains only upper-case letters, digits, dots and hyphens, so in those two kinds everything after the first hyphen is the alias.
+
+{{< rule "ID-5" >}} Areas are added to the list and never removed or renamed. An area whose name turns out to be a poor fit keeps it, and its row in the area list says what it covers.
+
+Renaming an area would rename every ID in it, which is what ID-5 prevents.
+
+{{< rule "ID-6" >}} An ID is never reused or renumbered once it is on the main branch. If two branches create the same ID, the one merged second renumbers its entry before it is merged.
+
+{{< rule "ID-7" >}} An entry that turns out to be wrong stays in place with status `superseded`, and its `superseded_by` field names what took its place: the corrected entry, the parts it was split into, or the entry it was merged into. When nothing takes its place, because a mechanic turns out not to exist, `superseded_by` names the findings or experiments that show it. A bug that turns out to be intended is the one case where it may name sources as well (see [Bugs](#bugs)).
+
+With ID-6 and ID-7 together, anything that cited an old ID can still find out what happened to it.
 
 ## Status
 
@@ -792,8 +812,8 @@ The script checks that:
 
 - every entry's front matter validates against the schema for its kind, its file name is its ID, and it sits in the directory for its kind;
 - every body has its sections, under the headings given here, in order;
-- every ID has the form for its kind, with an area from the area list where the kind has one, every ID cited anywhere resolves to an entry, and no ID is used twice;
-- no entry that exists on the main branch has been deleted or renamed, and no area has been removed from the area list or renamed;
+- every ID has the form for its kind, with an area from the area list where the kind has one, every ID cited anywhere resolves to an entry, and no ID is used twice ([ID-1](#id-1) to [ID-4](#id-4));
+- no entry that exists on the main branch has been deleted or renamed, and no area has been removed from the area list or renamed ([ID-5](#id-5), [ID-6](#id-6));
 - every status is from the list for its kind, and no row of a format's tables is `superseded`;
 - every entry cites what its status requires, counting any source, and counting a finding or experiment only when it lists the first build in the entry's `builds`;
 - every ID in a `complete_reading` is a static finding that the entry lists in `evidence` and that lists the entry's first build, and no rule whose procedure has a `# may run:` comment has a non-empty `complete_reading`;

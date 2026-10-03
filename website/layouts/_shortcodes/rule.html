@@ -1,0 +1,6 @@
+{{- /* Opens a numbered rule of the documentation standard and anchors it:
+     {{< rule "ID-1" >}} renders a link to #id-1. */ -}}
+{{- $label := .Get 0 -}}
+{{- $anchor := lower $label -}}
+<a id="{{ $anchor }}" href="#{{ $anchor }}" class="font-mono text-sm">{{ $label }}</a>
+{{- /* This comment removes trailing newlines. */ -}}
