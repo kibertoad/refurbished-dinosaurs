@@ -21,3 +21,16 @@ footer .border-t p a:hover {
 html {
   scroll-padding-top: 6.5rem;
 }
+
+/* Rule headings in the documentation standard (render-heading.html) are
+   labels, not titles: small, monospaced, and close to the rule they open. */
+.content h6.rule-label {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.875rem;
+  margin-top: 1.75rem;
+  margin-bottom: 0.25rem;
+}
+
+.content h6.rule-label a {
+  text-decoration: none;
+}

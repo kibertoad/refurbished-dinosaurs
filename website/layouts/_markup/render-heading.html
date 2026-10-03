@@ -1,0 +1,26 @@
+{{- /* Heading render hook. Headings render the way Hugo's default does,
+     except sixth-level ones, which the documentation standard keeps for its
+     numbered rules: "###### STATUS-14" opens a rule and anchors it at
+     #status-14. Plain Markdown headings keep the same anchor on GitHub and
+     in the copies of the page that game repositories vendor.
+
+     A sixth-level heading that is not a rule label fails the build, and so
+     does a label used twice, which Hugo would otherwise quietly anchor at
+     #status-14-1. render-link.html checks the other end, that a citation
+     written as [STATUS-14](#status-14) has a rule to land on. */ -}}
+{{- if eq .Level 6 -}}
+  {{- $path := "" -}}
+  {{- with .Page.File }}{{ $path = .Path }}{{ end -}}
+  {{- if not (findRE `^[A-Z]+(-[A-Z]+)*-[1-9][0-9]*$` .PlainText) -}}
+    {{- errorf "%s: sixth-level heading %q is not a rule label such as \"STATUS-1\"" $path .PlainText -}}
+  {{- else if ne .Anchor (lower .PlainText) -}}
+    {{- errorf "%s: rule %s heads more than one rule; a number belongs to one rule" $path .PlainText -}}
+  {{- end -}}
+<h6 id="{{ .Anchor }}" class="rule-label"><a href="#{{ .Anchor }}">{{ .Text }}</a></h6>
+{{- else -}}
+<h{{ .Level }} id="{{ .Anchor }}"
+  {{- range $name, $value := .Attributes }}{{ if ne $name "id" }} {{ $name }}="{{ $value }}"{{ end }}{{ end }}>
+  {{- .Text -}}
+</h{{ .Level }}>
+{{- end -}}
+{{- /* This comment removes trailing newlines. */ -}}
