@@ -8,14 +8,39 @@
 {{- if not $bare -}}
   {{- $dest = strings.TrimPrefix "/" $dest | relLangURL -}}
 {{- end -}}
-{{- /* A citation of a numbered rule, [STATUS-14](#status-14), has to land
-     on a "###### STATUS-14" heading on the same page (see
-     render-heading.html). Hugo does not check fragments, so a mistyped or
-     dropped number would otherwise link to nothing. */ -}}
-{{- $rule := upper (strings.TrimPrefix "#" $dest) -}}
-{{- if and (findRE `^#[a-z]+(-[a-z]+)*-[1-9][0-9]*$` $dest) (eq .PlainText $rule) -}}
-  {{- if not (findRE (printf `(?m)^###### %s[ \t]*$` $rule) .Page.RawContent) -}}
-    {{- errorf "%s: link to rule %s, which this page does not define" .Page.File.Path $rule -}}
+{{- /* Hugo does not check fragments, so a mistyped heading or rule number
+     would otherwise link to nothing. A link to a fragment on this site, on
+     this page or another one, has to land on a heading of the target page,
+     and rules are headings ("###### STATUS-14", see render-heading.html).
+     Link text that is a rule label, [STATUS-14](#status-14), also has to
+     point at that rule, so [STATUS-14](#status-15) fails rather than
+     sending the reader to the wrong one. A path that is not one of this
+     site's pages (a file, a typo) is left alone. */ -}}
+{{- if not (or $external (strings.HasPrefix $dest "mailto:") (strings.HasPrefix $dest "tel:")) -}}
+  {{- $u := urls.Parse .Destination -}}
+  {{- with $u.Fragment -}}
+    {{- $fragment := . -}}
+    {{- $target := $.Page -}}
+    {{- with $u.Path -}}
+      {{- $path := strings.TrimPrefix "/" . | relLangURL -}}
+      {{- if not (strings.HasSuffix $path "/") }}{{ $path = printf "%s/" $path }}{{ end -}}
+      {{- $target = false -}}
+      {{- range first 1 (where site.Pages "RelPermalink" $path) }}{{ $target = . }}{{ end -}}
+    {{- end -}}
+    {{- with $target -}}
+      {{- $ids := .Fragments.Identifiers -}}
+      {{- if not ($ids.Contains $fragment) -}}
+        {{- errorf "%s: link to %s, but %s has no heading with that anchor" $.Page.Path $.Destination .Path -}}
+      {{- end -}}
+      {{- /* Text that is a rule label of the target page, or that looks like
+           one and links to a rule, has to link to that label. */ -}}
+      {{- $label := lower $.PlainText -}}
+      {{- $toRule := false -}}
+      {{- with index .Fragments.HeadingsMap $fragment }}{{ $toRule = eq .Level 6 }}{{ end -}}
+      {{- if and (findRE `^[a-z]+(-[a-z]+)*-[1-9][0-9]*$` $label) (eq $.PlainText (upper $label)) (ne $label $fragment) (or ($ids.Contains $label) $toRule) -}}
+        {{- errorf "%s: link text %s points at #%s; a citation of %s links to #%s" $.Page.Path $.PlainText $fragment $.PlainText $label -}}
+      {{- end -}}
+    {{- end -}}
   {{- end -}}
 {{- end -}}
 <a
