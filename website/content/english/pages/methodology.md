@@ -19,7 +19,7 @@ We write a new engine from documentation of the original. A rebuild written agai
 
 No original code goes into a repository. Decompiler output, disassembly listings, byte dumps and analysis databases stay on the researcher's machine. What gets committed is a description of behaviour in our own words, such as a formula, a table layout or a state diagram, and the implementation is written from that description.
 
-Every finding names the exact build it came from: the edition, the version and the SHA-256 of the file it was found in. Supported editions are listed by hash, and the importer refuses files it does not recognise instead of guessing.
+Every finding names the exact build it came from: the edition, the version and the xxHash3 (128-bit) hash of the file it was found in. Supported editions are listed by hash, and the importer refuses files it does not recognise instead of guessing.
 
 ## Studying the original
 
