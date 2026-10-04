@@ -19,7 +19,7 @@ For everything else we use the .NET standard library where it can do the job: Sy
 
 ## Importing the original
 
-The importer checks every file against a SHA-256 manifest of the supported editions before it copies anything, and writes the result to a folder outside the repository. A script in each repository fails CI if original assets or analysis output ever end up in git.
+The importer checks every file against a manifest of the supported editions, with each file's size and xxHash3 hash, before it copies anything, and writes the result to a folder outside the repository. A script in each repository fails CI if original assets or analysis output ever end up in git.
 
 ## Tests
 
