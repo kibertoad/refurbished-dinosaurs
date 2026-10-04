@@ -133,7 +133,7 @@ Every entry has an ID that starts with its `KIND`, one of the directory prefixes
 
 ###### IDENTIFIERS-4
 
-Builds and sources use a short alias in place of area and number: `BLD-GOG-EN-1.1`, `SRC-MANUAL-1996`. An alias starts with an upper-case letter and contains only upper-case letters, digits, dots and hyphens, so in those two kinds everything after the first hyphen is the alias.
+Builds and sources use a short alias in place of area and number: `BLD-GOG-EN-1.1`, `SRC-MANUAL-1996`. An alias starts with an upper-case letter and contains only upper-case letters, digits, dots and hyphens, so in those two kinds everything after the first hyphen is the alias. No two builds or sources share an alias.
 
 ###### IDENTIFIERS-5
 
@@ -240,7 +240,7 @@ Only evidence from the original can dispute an entry. Manuals are often wrong, a
 
 ###### STATUS-17
 
-An entry that is not superseded must not cite a superseded entry in its `evidence`, `conflicting` or `related` fields. A superseded entry keeps the links it had when it was replaced, so its history stays readable.
+An entry that is not superseded must not cite a superseded entry anywhere: in its `builds`, a location, its `evidence`, `conflicting` or `related` fields, a draw in an experiment's fixture, or a row of a build's Code ranges section. A superseded entry keeps the links it had when it was replaced, so its history stays readable.
 
 ###### STATUS-18
 
@@ -965,7 +965,7 @@ The script checks that:
 - every value file belongs to the entry its name gives and is named by that entry, every `table` that takes its values from one has as many rows as its count, every list written out in a procedure or a `table` definition has at most 64 values, and every value file of an enumeration table has that table's columns;
 - every packed file in a build entry gives its packer and the size, hash, format and unpacking tool of its unpacked form;
 - every pattern in a format entry's `files` matches a file in each build the entry lists;
-- no entry that is not superseded cites a superseded entry, whether in `builds`, a location, `evidence`, `conflicting`, `related` or a draw in an experiment's fixture, and every entry that is not superseded has an empty `superseded_by` ([STATUS-17](#status-17) and [ENTRY-TYPES-4](#entry-types-4));
+- no entry that is not superseded cites a superseded entry, whether in `builds`, a location, `evidence`, `conflicting`, `related`, a draw in an experiment's fixture or a row of a build's Code ranges section, and every entry that is not superseded has an empty `superseded_by` ([STATUS-17](#status-17) and [ENTRY-TYPES-4](#entry-types-4));
 - every superseded entry names what replaced or disproved it, and no chain of `superseded_by` links leads back to where it started ([IDENTIFIERS-7](#identifiers-7));
 - a finding's or experiment's `superseded_by` names only findings and experiments, a build's only builds, a source's only sources, and a source appears in any other kind's `superseded_by` only in a bug's ([IDENTIFIERS-7](#identifiers-7) and [STATUS-23](#status-23));
 - `conflicting` holds only findings and experiments and is empty unless the status is `disputed`, and `related` links only to the kinds allowed for the entry ([ENTRY-TYPES-5](#entry-types-5) and [ENTRY-TYPES-6](#entry-types-6));
