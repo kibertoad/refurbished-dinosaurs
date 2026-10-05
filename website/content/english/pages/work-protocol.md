@@ -77,7 +77,7 @@ Exit, per slice: every parity row the slice names has reached the status the pla
 
 ### Audit
 
-Close the gaps the slices left. Every function in the inventories is cited by an entry or recorded as out of scope with its reason, every parity row is `validated` or has a note saying why it cannot be, the queue holds only items the owner has accepted as out of reach, and every open report is waiting for what its `Missing:` line names.
+Close the gaps the slices left. Every function in the inventories is cited by an entry or recorded as out of scope with its reason, every parity row is `validated`, or `deviated` where a `mandatory` deviation replaces its entry, or has a note saying why it can be neither, the queue holds only items the owner has accepted as out of reach, and every open report is waiting for what its `Missing:` line names.
 
 ## The queue
 

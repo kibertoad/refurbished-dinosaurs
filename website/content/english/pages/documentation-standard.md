@@ -151,7 +151,7 @@ With [IDENTIFIERS-6](#identifiers-6) and [IDENTIFIERS-7](#identifiers-7) togethe
 
 ## Status
 
-The spec records how well the original is understood. How well our rebuild matches it is recorded in the [parity matrix](#parity-matrix), which uses the same statuses and adds `implemented` and `validated`. [OpenMW](https://wiki.openmw.org/index.php?title=Template:Formula) keeps the same split between analysis status and implementation status.
+The spec records how well the original is understood. How well our rebuild matches it is recorded in the [parity matrix](#parity-matrix), which uses the same statuses and adds `implemented`, `deviated` and `validated`. [OpenMW](https://wiki.openmw.org/index.php?title=Template:Formula) keeps the same split between analysis status and implementation status.
 
 ###### STATUS-1
 
@@ -1013,6 +1013,7 @@ The deviation log is the directory `deviations/` at the root of the game reposit
 - Setting: None
 - Default: mandatory
 - Justification: The original stops responding at this point, so there is nothing after it for a player to keep or a test to compare.
+- Tests: tests/Combat.Tests/DetailedCombatEndTests.cs
 - Dropped: no
 ```
 
@@ -1021,6 +1022,8 @@ Setting is the name of the setting that controls the deviation, or `None`. Defau
 `off` is the default for any deviation. A fix of a bug whose `intent` is `unintended` and whose `player_reliance` is `not-relied-on` is `on`, or `mandatory` with the reasoning below. Any other deviation is `on` or `mandatory` in two cases. The first is where the rebuild's behaviour is strictly better than the original's, so that no player loses anything by it they would miss: it adds to the interface, it changes only what happens once the original would have crashed or hung, or it removes a failure, a delay or a hidden dependency without taking away an outcome the player could reach. The second is a judgement call that makes the game better to play and that a reasonable player would not want undone, such as keeping precision the original threw away, pacing the game by a fixed clock where the original followed the speed of the machine, or laying out text correctly where the original broke on an edge case. A judgement call stays small: it changes nothing players build strategies around and takes away no outcome the player could reach. A change that some players would reasonably prefer the original's way, because it is a matter of taste or because it changes what the rules produce in a way players notice, is not a judgement call of this kind. It gets a setting, and its Default is `off`. A quirk that may be deliberate or that players rely on never qualifies for `on` or `mandatory`, and its deviation stays `off`.
 
 A deviation that is `mandatory`, or `on` without being such a bug fix, has a Justification item between Default and Dropped that makes that argument: why the rebuild's behaviour is strictly better, or, for a judgement call, what it improves for the player and why no player would miss the original's behaviour. For `mandatory` it also says why the original's behaviour is not worth a setting, for example because nothing after a crash can be played, because the original's version cannot be reproduced at all, or because nobody would switch it back. No other deviation has a Justification item.
+
+A deviation may have a Tests item between Justification (or Default, where there is none) and Dropped. It lists, by their path from the repository root and separated by commas, the test files that check the rebuild does what the deviation's Reason says it does in place of the original's behaviour. Each of them mentions the deviation's ID. These tests compare the rebuild with the deviation's own description, so they are not parity tests and the validation record does not list them, and they run in CI like every other test. A Reason that a Tests item checks describes the rebuild's behaviour in terms a test can confirm: what the player sees or can do, what the rebuild writes or reads, which file or value it uses. The Tests item is what lets a row whose entry a `mandatory` deviation replaces become `deviated` in the [parity matrix](#parity-matrix).
 
 Deviation IDs are never reused or renumbered, the same as spec IDs. A deviation that is dropped keeps its file, and its Dropped item gives the date, written `YYYY-MM-DD`, and the reason in place of `no`, so a comment or row that cited it can still find out what happened. Its Departs from item stays as it was when it was dropped, the way a superseded entry keeps its links, and it no longer appears in any parity row.
 
@@ -1055,8 +1058,11 @@ Status is worked out from the other columns:
 | Status | When |
 |---|---|
 | the spec status | Code is `missing` or `partial`, or the spec status is `disputed`. |
-| `implemented` | Code is `complete`, Tests is `None`, and the spec status is not `disputed`. |
+| `implemented` | Code is `complete`, Tests is `None`, the spec status is not `disputed`, and the row is not `deviated`. |
+| `deviated` | Code is `complete`, Tests is `None`, the spec status is not `disputed`, Deviations lists at least one `mandatory` deviation, and every `mandatory` deviation it lists has a Tests item. |
 | `validated` | Code is `complete`, Tests lists at least one file, and the spec status is `supported` or `established`. |
+
+`deviated` is a finished row, the same as `validated`, for an entry the rebuild replaces on purpose and has no way to compare with the original: a network protocol nobody can connect to, a save format the rebuild keeps in a form of its own, a display mode that current systems do not offer. A `mandatory` deviation cannot be switched off, so no test of the rebuild can reach the original's behaviour, and what is checked instead is that the rebuild does what the deviation says. That check is the deviation's Tests item, and a row reaches `deviated` only once every `mandatory` deviation it lists has one. A row that one of its tests can still compare with the original lists that test and becomes `validated` instead, because the comparison with the original is the stronger check. A deviation with a setting never makes a row `deviated`, since the suite runs with the setting switched off and the original's behaviour is there to compare.
 
 A row where Code is `complete`, Tests lists a file and the spec status is `sourced` fails the check. The spec is behind: the evidence behind those tests belongs in the spec entry first. A `validated` row also needs each of its test files that reads the original's files in the [validation record](#validation-record), unchanged since the record was written.
 
@@ -1064,7 +1070,7 @@ An entry can become `disputed` after its row was `validated`, when a new finding
 
 Manual play never counts as a test.
 
-The spec check script also checks the parity matrix: every area file is named after an area in the area list and holds only rows of that area (and of its kind and block, in a split file), is split exactly where the size limit requires it, every eligible spec entry has exactly one row, the copied columns match the spec, every status follows the table above, every listed test file exists and mentions the row's ID, no `complete` row has its ID in a `PLACEHOLDER:` comment, every listed deviation exists in `deviations/`, has not been dropped and names the row in its Departs from, every deviation that has not been dropped is listed in each row it names, no listed test file mentions `GAME_DIR` without the `needs: GAME_DIR` comment, every test file of a `validated` row that has the comment is in `VALIDATION.md` with the hash it has now, `VALIDATION.md` lists no other file, and `PARITY.md` is regenerated and up to date.
+The spec check script also checks the parity matrix: every area file is named after an area in the area list and holds only rows of that area (and of its kind and block, in a split file), is split exactly where the size limit requires it, every eligible spec entry has exactly one row, the copied columns match the spec, every status follows the table above, every listed test file exists and mentions the row's ID, no `complete` row has its ID in a `PLACEHOLDER:` comment, every listed deviation exists in `deviations/`, has not been dropped and names the row in its Departs from, every test file a deviation's Tests item lists exists and mentions the deviation's ID, every deviation that has not been dropped is listed in each row it names, no listed test file mentions `GAME_DIR` without the `needs: GAME_DIR` comment, every test file of a `validated` row that has the comment is in `VALIDATION.md` with the hash it has now, `VALIDATION.md` lists no other file, and `PARITY.md` is regenerated and up to date.
 
 It checks the rest of the implementation's references too. Every spec ID and deviation ID in the code, the tests, `parity/` and `deviations/` must resolve, and a citation of a superseded spec entry fails the check until it is moved to what replaced it, so code does not keep pointing at a claim that was withdrawn. The Departs from item of a dropped deviation is the one exception. Deviation IDs are unique and follow the ID form, every deviation file is named after the ID in its heading, every deviation has its list items in order, every deviation that has not been dropped departs from at least one entry that has a row, its Default follows the rules for deviations above and it has a Justification item exactly when they require one, and no deviation file that exists on the main branch is deleted or renamed.
 
@@ -1111,7 +1117,7 @@ Playable means that a player can start a new game in the rebuild and reach one o
 
 A `complete` rebuild can still differ from the original in the places its deviation log records, and in no others. A restoration has the highest status whose conditions hold. A new spec entry adds a row, which can take a condition away, and the status then drops until the rebuild catches up.
 
-A status counts how much of the spec the code does and says nothing about tests. A `complete` rebuild whose rows are `implemented` and not yet `validated` has not been compared with the original, and the Status table in `PARITY.md` shows how far that comparison has got.
+A status counts how much of the spec the code does and says nothing about tests. A `complete` rebuild whose rows are `implemented` and not yet `validated` or `deviated` has not been compared with the original, and the Status table in `PARITY.md` shows how far that comparison has got.
 
 The check script does not work out the status. It is stated by hand wherever it is used, and anyone can confirm it from the area files in `parity/`.
 
