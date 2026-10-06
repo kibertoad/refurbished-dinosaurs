@@ -1009,7 +1009,7 @@ An effect names a rule or another screen. A key is named by what is printed on i
 
 ## Checks
 
-The check script runs in each game repository on every change, and the build fails if any check fails. The Dark Sun, Conqueror and Chaos Overlords repositories run it through the toolkit's action. Save patches are written and committed as usual, but no tool applies them yet, so the Setup section of an experiment that uses one also gives each write as a byte offset and a value, worked out from the layout table.
+The check script runs in each game repository on every change, and the build fails if any check fails. The Dark Sun and Conqueror repositories run it through the toolkit's action, and Chaos Overlords runs the toolkit's checker from its validation script. Save patches are written and committed as usual, but no tool applies them yet, so the Setup section of an experiment that uses one also gives each write as a byte offset and a value, worked out from the layout table.
 
 The script checks that:
 
