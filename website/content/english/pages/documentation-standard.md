@@ -436,8 +436,8 @@ Every function the sections below define is built in, and needs no glossary entr
 
 ### Rules, functions, tables and clocks
 
-- `call RULE-COMBAT-012(attacker, defender)` runs another rule, whose Parameters section lists the values it takes, in that order. `return x` ends a procedure and gives `x` as its result, so `let damage = call RULE-COMBAT-012(attacker, defender)` uses it. `return` on its own ends a procedure that gives no result, and its Outputs section lists no return value.
-- A rule can define a function that other rules use, such as the generator's `roll(n)`, with `define roll(n: UINT16) -> UINT16:` followed by an indented body that ends in `return`. The types of the parameters and the result may be left out when they are the default integer type. Other rules call it as `roll(100)`, without `call`. A call to a rule or function on a line of its own runs it and discards the result. A function may call itself, and a rule may `call` itself, wherever the original recurses.
+- `call RULE-COMBAT-012(attacker, defender)` runs another rule, passing one argument for each item of its Parameters section, in that order. `return x` ends a procedure and gives `x` as its result, so `let damage = call RULE-COMBAT-012(attacker, defender)` uses it. `return` on its own ends a procedure that gives no result, and its Outputs section lists no return value.
+- A rule can define a function that other rules use, such as the generator's `roll(n)`, with `define roll(n: UINT16) -> UINT16:` followed by an indented body that ends in `return`. The types of the parameters and the result may be left out when they are the default integer type. Other rules call it as `roll(100)`, without `call`, with one argument for each parameter its `define` gives. A call to a rule or function on a line of its own runs it and discards the result. A function may call itself, and a rule may `call` itself, wherever the original recurses.
 - A table that more than one rule uses is defined once, in a rule, with `table falloff: UINT8[4] = [100, 75, 50, 25]` before its procedure, and a finding in the rule's evidence gives the address it was found at, as for any other constant. Other rules use it by name. A table of more than 64 values takes them from a [value file](#file-size) in `rules/` instead of a list: `table sine: INT16[1024] from "RULE-MATH-003.sine.csv"`. The file has the single column `value` and as many rows as the type's count, one per element in index order, and each value is converted to the element type as a list's would be.
 - Constants from the executable appear by value, and a finding in the rule's evidence gives the address each was found at. A table the code indexes, used by one rule only, is written as a list assigned to a local at the start of the procedure: `let falloff: UINT8[4] = [100, 75, 50, 25]`. A list of more than 64 values is a `table` definition with a value file instead, even when one rule uses it.
 - A clock is defined the same way, with `clock bios_tick: 1193182 / 65536 Hz` before the procedure, where the rate is a number or an expression of constants. A clock whose rate the game reprograms while it runs gives the rate it starts at, and the rules that change it say so in their Outputs sections.
@@ -804,7 +804,7 @@ Body sections:
 
 1. Summary: one or two sentences a player would understand.
 2. When it runs: the phase, event or input that triggers it.
-3. Parameters: the values a `call` passes to it, in order, with their types.
+3. Parameters: the values a `call` or an `emit` passes to it, in order, with their types.
 4. Inputs: the state it reads, by glossary name, and for a procedure that computes with floating-point values, the precision and rounding in effect (see [Types and arithmetic](#types-and-arithmetic)).
 5. Procedure: the rule in pseudocode, including every random draw in order.
 6. Outputs: the value it returns and its type, then the state it changes and the events, messages and sounds it produces, in order.
@@ -812,6 +812,17 @@ Body sections:
 8. What the sources say: each source's description with a page or section reference, and where it disagrees with the executable.
 9. Differences between builds.
 10. Open questions.
+
+The check script can count the parameters of a Parameters section that is `None.`, for a rule that takes no parameters, or a list with one item per parameter, in the order a `call` or an `emit` passes them. Each item opens with a code span that holds the parameter's name and type, written the way `define` writes them, then a colon and what the parameter holds:
+
+```markdown
+## Parameters
+
+- `attacker: FMT-DATA-005`: the gang that attacks.
+- `defender: FMT-DATA-005`: the gang it attacks.
+```
+
+The type may be left out for the default integer type, as in `define`. The script counts the items to check every call to the rule and every event the rule handles, so a section in this form holds nothing besides the list. An item that names two parameters, such as ``- `x`, `y`: the cell``, or puts anything between the code span and the colon, makes the list one the script does not count. A section in any other form, `None known.` included, still passes, but the script cannot count its parameters, and it names every call and `emit` it could not check because of that.
 
 A procedure keeps each call whose changes a later decision depends on as a step of its own, and says what the rule reads after that call. The Outputs section says which of those changes are left in place when the call is rejected, retried or abandoned part way through (a unit given a new order in the middle of a move, for example), as far as the reading shows, and the Open questions section lists the cases the reading does not settle. Installing a task or callback and running it are separate steps unless the evidence shows they happen together. A callee whose effects the reading has not resolved is listed in the Open questions section, since describing its caller does not show what the callee changes.
 
@@ -970,6 +981,7 @@ The script checks that:
 - a finding's or experiment's `superseded_by` names only findings and experiments, a build's only builds, a source's only sources, and a source appears in any other kind's `superseded_by` only in a bug's ([IDENTIFIERS-7](#identifiers-7) and [STATUS-23](#status-23));
 - `conflicting` holds only findings and experiments and is empty unless the status is `disputed`, and `related` links only to the kinds allowed for the entry ([ENTRY-TYPES-5](#entry-types-5) and [ENTRY-TYPES-6](#entry-types-6));
 - a rule's `related` field holds every rule its procedure calls, takes a function or table from, or names in a `# may run:` comment (all the entries of a split rule), every format whose structures it reads, writes, makes with `new` or passes to `read_file` or `write_file`, every format whose enumeration names it uses, and every screen it names with `show`;
+- every `call` passes one argument for each item of the called rule's Parameters section, in each entry of a split rule that lists one of the calling rule's builds, every call to a function a rule defines passes one for each parameter of its `define`, every `emit` passes one for each item of the Parameters section of each rule the event's glossary entry names as a handler, in each entry of a split rule that lists one of the emitting rule's builds, and two `emit`s of one event in rules that share a build pass the same number of arguments. An event with no handlers is checked only against its other `emit`s, since its glossary entry gives what it carries in prose. The script names each call and `emit` it could not count because a Parameters section is not in the form [Rules](#rules) gives, and those do not fail the check;
 - every rule a format's tables name is in the format's `related` field, every rule and screen a screen's effects or Shows cells name is in the screen's `related` field, and every bug's `related` field names at least one rule, format or screen;
 - every entry in a `split_with` list names the others back and lists none of their builds, and every build an entry lists is listed by one entry of each split rule it calls or relates to and of each split format it names ([ENTRY-TYPES-8](#entry-types-8));
 - every finding has `environment`, set for a dynamic finding and `null` for a static one;
