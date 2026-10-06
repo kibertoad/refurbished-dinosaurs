@@ -437,6 +437,31 @@ Each line gives a function's start address, written the way the standard's notat
 
 Coverage counts what the inventories list, with the functions they exclude named as excluded, and is never a share of the behaviour understood. A function whose bytes an entry cites has been looked at, not read completely, which only the entry's status says.
 
+### Creating and checking an inventory
+
+Export from the validated analysis database for the exact build and file in the manifest. Record the executable's hash, the analysis tool's version, the database snapshot and the export script's revision alongside the inventory. Open the database read-only with automatic analysis disabled, so measuring it does not change the functions being measured.
+
+Enumerate internal function definitions in address order. Use each function's complete body address set to count its bytes. A body can have several separate ranges, and adding its byte count to its entry address does not give its end. Keep thunks, library routines and unresolved definitions in the initial inventory. An external import with no body in this file contributes no function body here; a DLL the research reads gets its own inventory. An exclusion needs a recorded scope reason, rather than an assumption that a compiler-generated routine cannot matter.
+
+Check that entries are unique and ordered, that each nonempty body contains its entry, and that every exported entry and size agrees with the database. Report definitions with no decoded instruction at their entry as anomalies to investigate; silently dropping them would hide uncertainty. Preserve researcher names and exclusion reasons by entry address when refreshing. If an annotated definition disappears after functions are split or merged, reconcile it before publishing the replacement.
+
+Write to a temporary file and replace the previous inventory only after validation succeeds. Require the script's completion marker and a valid output file as well as a successful process exit: a headless tool can exit successfully after failing to load its export script. Independently check the table's structure, row count and byte totals. Two exports of the same snapshot should be identical. Commit the metadata inventory and its provenance; diagnostic reports that include original symbols, instructions or data remain local.
+
+### Checking the denominator
+
+The inventory's total is the number of functions currently recognized by the database. Check how much code it leaves unassigned before using that total to describe relative progress. Form the union of function body ranges and intersect it with the executable regions for the file, recording which regions and loaded or file-backed bytes were measured. Separately report bodies outside those regions. Executable-region size is a reference total, not a proven code total, because those regions can also contain data and padding.
+
+Partition the executable regions into decoded instruction bytes, defined data bytes and undefined bytes, using the database's current interpretation. For each class, report the bytes outside recognized bodies as well as the total. Check that the classes do not overlap and that their totals equal the measured region size. Decoded instructions outside bodies are concrete leads for missing functions or boundary errors. Undefined bytes require investigation before being called code, data or padding; even decoded instructions can turn out to be data.
+
+Follow entry points and references, including indirect calls and address tables, to investigate those leads. Record unresolved ranges and the questions that would classify them. Function discovery changes the inventory, so every coverage report identifies its inventory revision and shows additions, removals and boundary changes when comparing snapshots. The denominator remains provisional while unresolved code and boundaries remain.
+
+### Reporting research coverage
+
+Report coverage by subsystem, with an unassigned group and named research gaps, rather than combining function counts into one completion percentage. Give function counts and unique body bytes together, so many small helpers do not outweigh an unexplored controller. A function can concern several areas; show that relationship without counting the function or shared body bytes twice in the aggregate. List exclusions and show totals before and after them.
+
+Keep mapping coverage, citation coverage and complete reading separate. Mapping coverage measures recognized bodies against the measured executable regions, with the unresolved bytes alongside it. Citation coverage measures which recognized functions the spec touches. A complete-reading count requires explicit evidence satisfying the documentation standard's complete-reading rules for the whole function and its relevant dependencies. An established entry that cites an address is not enough to mark every function it touches as completely read. If that provenance cannot be checked, report the complete-reading count as unavailable. These figures measure research over the current inventory; behavior and rebuild completion still depend on the spec, open questions and parity matrix.
+
+
 A test count is not progress, and neither are lines of code or the number of assets the importer extracts. A percentage of completion is taken from the parity matrix or not given at all.
 
 ## What needs the owner
