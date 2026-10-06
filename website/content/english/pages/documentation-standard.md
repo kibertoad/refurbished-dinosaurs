@@ -1009,7 +1009,7 @@ An effect names a rule or another screen. A key is named by what is printed on i
 
 ## Checks
 
-The check script runs in each game repository on every change, and the build fails if any check fails. The Dark Sun and Conqueror repositories run it through the toolkit's action. Chaos Overlords runs `tools/check-spec.mjs`, the copy the toolkit's script was taken from. Save patches are written and committed as usual, but no tool applies them yet, so the Setup section of an experiment that uses one also gives each write as a byte offset and a value, worked out from the layout table.
+The check script runs in each game repository on every change, and the build fails if any check fails. The Dark Sun, Conqueror and Chaos Overlords repositories run it through the toolkit's action. Save patches are written and committed as usual, but no tool applies them yet, so the Setup section of an experiment that uses one also gives each write as a byte offset and a value, worked out from the layout table.
 
 The script checks that:
 
@@ -1055,6 +1055,7 @@ The script checks that:
 - every `starting_state` that names a save or a patch points to one in `saves/`, and every patch validates against the fixture schema and names formats and field paths that exist in their layout tables with status `supported` or `established`;
 - every save in `saves/` and every file in `recordings/` matches the hash in its fixture, is named by some experiment, and is listed in `spec/LICENSE` as covered by neither licence;
 - every `recording` that gives a path outside `recordings/` and `captures/` names a file in the experiment's build, and every experiment with a `recording` has that recording's hash in its fixture;
+- no Markdown file in `spec/` names a path in the directories that hold the rebuild's code and tests, or one of the rebuild's source files by its file name, as [Where it lives](#where-it-lives) requires; a tool that reads the original is not part of the rebuild, so a finding may still name one;
 - the standard version in `spec/README.md` is the major version of the spec package the repository pins;
 - every Markdown file in `spec/`, `parity/` and `deviations/`, `PARITY.md` and `VALIDATION.md` is at most 1,000 lines long;
 - the four indexes in `spec/index/` are regenerated and up to date, each split as [File size](#file-size) describes, by area, then by kind, then by block, exactly where the limit requires it.
