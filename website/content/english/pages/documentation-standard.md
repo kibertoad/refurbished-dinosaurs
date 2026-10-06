@@ -149,6 +149,16 @@ An entry that turns out to be wrong stays in place with status `superseded`, and
 
 With [IDENTIFIERS-6](#identifiers-6) and [IDENTIFIERS-7](#identifiers-7) together, anything that cited an old ID can still find out what happened to it.
 
+###### IDENTIFIERS-8
+
+A finding or experiment is edited in place only where the edit changes nothing it records: spelling, grammar, formatting, a broken link, or a sentence reworded to state the same facts. Every entry that cites it then rests on the same evidence as before. A correction to anything it records, such as a constant, an address, a width, a branch condition, an order of calls, a location, the ranges a search covered, a run's setup or results, or what its Interpretation or Conclusion says, supersedes the whole entry under [IDENTIFIERS-7](#identifiers-7), even when only one of its observations was wrong. A status, a `superseded_by` link and a citation each apply to a whole entry, and nothing records which of its observations a claim relied on, so no part of an entry can be superseded on its own.
+
+The observations that still hold go into a replacement entry with the corrected one, under a new ID. Where they are independent of each other and entries cite them for different claims, they may go into one replacement each, so that a later correction to one of them leaves the others alone. The old entry keeps its text as it was, and the replacement's Alternatives section (an experiment's Conclusion) names it, says what it recorded that was wrong and how that was found. A replacement starts as `recorded` with its own `recorded_by`, including for observations the old entry had `reproduced`, because a reproduction repeats an entry's own text.
+
+Every entry that cited the old one then fails the check until it cites the replacements ([STATUS-17](#status-17)), and whoever changes the citation checks what that entry drew from it. A claim that rested only on what still holds keeps its status. A claim that rested on the wrong observation takes the status its remaining evidence supports ([STATUS-20](#status-20)), and a `complete_reading` that needed that observation is no longer complete ([STATUS-14](#status-14)). Where the corrected observation contradicts a claim, the entry is `disputed`, with the replacement in `conflicting`.
+
+For example, FND-COMBAT-011 records the order in which the detection loop visits gangs, and also the constant the loop compares a gang's detection chance against, which a later reading shows was copied from the wrong instruction. FND-COMBAT-012 records the same order and the correct constant, and FND-COMBAT-011 becomes `superseded` with `superseded_by: [FND-COMBAT-012]`. A rule that cited FND-COMBAT-011 only for the order now cites FND-COMBAT-012 and keeps its status. A rule whose threshold came from the wrong constant is contradicted by FND-COMBAT-012, so it is `disputed` until it is corrected.
+
 ## Status
 
 The spec records how well the original is understood. How well our rebuild matches it is recorded in the [parity matrix](#parity-matrix), which uses the same statuses and adds `implemented`, `deviated` and `validated`. [OpenMW](https://wiki.openmw.org/index.php?title=Template:Formula) keeps the same split between analysis status and implementation status.
