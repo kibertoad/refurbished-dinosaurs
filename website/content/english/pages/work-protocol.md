@@ -200,9 +200,21 @@ The resolver calls the attacker's roll before the defender's, and a run of
 200 attacks from a patched save agrees.
 
 Spec: RULE-COMBAT-012, FND-COMBAT-031, EXP-COMBAT-009
+Queue: Q-COMBAT-012
 ```
 
 An implementation batch uses the same trailer for the entries it implemented. A batch that changes parity rows adds `Parity:` with the rows whose status it changed, and one that closes queue items adds `Queue:` with their IDs, so that an item, and the reading it tested, can still be found after the item is deleted.
+
+`Queue:` lists the items the batch closed and no others. An item the batch worked on and left open, by adding `Tried:`, splitting it or moving it to another section or area, stays out of the trailer, and a batch that closes no item has no `Queue:` line. The open item is still in a queue file, and where the attempt recorded findings, its `Tried:` line and the batch's `Spec:` trailer both name them. An earlier attempt at the same question ends like this:
+
+```text
+Record the combat resolver's two roll calls
+
+The resolver's entry makes both rolls, but an indirect call between them
+has not been resolved, so the order is still open.
+
+Spec: RULE-COMBAT-012, FND-COMBAT-030
+```
 
 ## Sessions
 
