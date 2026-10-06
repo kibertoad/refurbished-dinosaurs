@@ -437,6 +437,16 @@ Each line gives a function's start address, written the way the standard's notat
 
 Coverage counts what the inventories list, with the functions they exclude named as excluded, and is never a share of the behaviour understood. A function whose bytes an entry cites has been looked at, not read completely, which only the entry's status says.
 
+### Establishing an early baseline
+
+Set the builds, code files and behavioral scope before computing coverage. Reconcile the build manifests with what the executable loads and what the research reads. List files without inventories and explain exclusions, including files of a supported build that has not yet been analysed. Imported libraries and runtime-generated code may need separate treatment; their absence from the main executable's inventory cannot establish that they are outside scope.
+
+An initial report can be useful before any function has been completely read. Give each file its mapping baseline, the inventory revision and the unassigned ranges from the denominator audit. Use the spec's stable areas to organize research, keeping functions whose area is unresolved in an unassigned group. Linking a function to an area requires evidence about its role; an address mentioned in an area's prose is a lead, not an ownership decision. Validate address joins against the file, build and address notation, and use actual body ranges when a citation names an interior instruction. Neither a start-plus-size interval nor a text search alone is a reliable coverage join.
+
+Define the complete-reading acceptance rule before counting completed research. Keep its provenance in the spec under the standard's rules, rather than inventing a completion flag in the inventory. Check that a function linked to several entries is completely covered by their findings before counting it. Where evidence is absent, say that the numerator is unavailable; where a checked baseline contains no qualifying functions, report zero against that baseline. Do not substitute the number of established entries.
+
+Compare later reports on both their previous and current inventories. Show discoveries, removed or merged definitions and changed boundaries separately from new research evidence. A growing denominator can lower a percentage even though research has advanced. Check the comparison with controlled additions, removals and boundary changes that leave research evidence unchanged. Counts cannot show whether an unresearched controller matters more than several small helpers, so each area also names its unresolved behaviors and dependencies. Spec status, queue questions and parity rows remain a separate view of behavioral completeness; they cannot prove the list of behaviors is exhaustive.
+
 ### Creating and checking an inventory
 
 Export from the validated analysis database for the exact build and file in the manifest. Record the executable's hash, the analysis tool's version, the database snapshot and the export script's revision alongside the inventory. Open the database read-only with automatic analysis disabled, so measuring it does not change the functions being measured.
