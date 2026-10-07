@@ -494,7 +494,7 @@ $ git branch --list 'goal/*'
 
 A session that resumes the combat goal finds `goal/combat-static` this way and continues in the worktree that has it checked out. A session in the economy worktree that is asked to start a goal for the economy areas finds the same branch with its goal file at the tip, so it does not start one, even though the two goals would claim different areas, since only one goal runs while the claims cannot reach the main branch.
 
-`PARITY.md` and the files in `spec/index/` change with almost every batch, and the documentation check writes them. A merge conflict in them is never resolved by hand: take either side and run the check, which writes them again from the merged spec and parity rows. Two branches that create the same spec ID, deviation ID or queue item ID are handled the way the standard's [Identifiers](/documentation-standard/#identifiers) section says: the one merged second renumbers.
+`PARITY.md` and the files in `spec/index/` change with almost every batch, and the documentation check writes them. A merge conflict in them is never resolved by hand: take either side and run the check, which writes them again from the merged spec and parity rows. A repository where they conflict often can leave them to a scheduled job on the main branch, as the standard's [Where it lives](/documentation-standard/#where-it-lives) section describes. Branches then never change them, and the main branch's copies are as old as the job's last run. Two branches that create the same spec ID, deviation ID or queue item ID are handled the way the standard's [Identifiers](/documentation-standard/#identifiers) section says: the one merged second renumbers.
 
 ## Versions
 
