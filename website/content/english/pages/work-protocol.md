@@ -155,7 +155,7 @@ A research batch settles one queue item, a few items about the same entry, or th
 - where a deviation's Departs from moves to a new entry, the Deviations column of that entry's row;
 - for a `Spec gap:` note, the queue item's ID when the note becomes an item, and the note's removal when the item is closed;
 - for a report that shows the rebuild departing from the spec, Code `partial` in place of `complete` and a `Defect (R-NNN):` note, as [Reports from testing](#reports-from-testing) describes;
-- `PARITY.md` and `spec/index/`, which the documentation check writes again.
+- `PARITY.md` and `spec/index/`, which the documentation check writes again, except in a repository that updates them on the main branch only, where the batch leaves them as they are.
 
 Moving a citation changes an ID and nothing else. Apart from that, code is not changed, beyond tools in `tools/` the research needed.
 
@@ -494,7 +494,7 @@ $ git branch --list 'goal/*'
 
 A session that resumes the combat goal finds `goal/combat-static` this way and continues in the worktree that has it checked out. A session in the economy worktree that is asked to start a goal for the economy areas finds the same branch with its goal file at the tip, so it does not start one, even though the two goals would claim different areas, since only one goal runs while the claims cannot reach the main branch.
 
-`PARITY.md` and the files in `spec/index/` change with almost every batch, and the documentation check writes them. A merge conflict in them is never resolved by hand: take either side and run the check, which writes them again from the merged spec and parity rows. A repository where they conflict often can update them on the main branch only, as the standard's [Where it lives](/documentation-standard/#where-it-lives) section describes. Branches then never change them, and the main branch's copies are as old as the last run there. Two branches that create the same spec ID, deviation ID or queue item ID are handled the way the standard's [Identifiers](/documentation-standard/#identifiers) section says: the one merged second renumbers.
+`PARITY.md` and the files in `spec/index/` change with almost every batch, and the documentation check writes them. A merge conflict in them is never resolved by hand: take either side and run the check, which writes them again from the merged spec and parity rows. A repository where they conflict often can update them on the main branch only, as the standard's [Where it lives](/documentation-standard/#where-it-lives) section describes. The check then writes them only on the main branch, a batch never changes them, and the main branch's copies are as old as the last run there. Two branches that create the same spec ID, deviation ID or queue item ID are handled the way the standard's [Identifiers](/documentation-standard/#identifiers) section says: the one merged second renumbers.
 
 ## Versions
 
