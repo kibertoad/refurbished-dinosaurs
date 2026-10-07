@@ -97,7 +97,7 @@ Its handlers are RULE-COMBAT-008 and then RULE-AI-014, run at once
 A function, defined by RULE-RNG-001.
 ```
 
-The front matter schemas, the fixture schema, the manifest schema, the check script and the tool that applies save patches belong to the standard, and their home is [refurbished-dinosaurs-toolkit](https://github.com/kibertoad/refurbished-dinosaurs-toolkit), the toolkit every restoration shares. The check script is there, as the package in `packages/standard-checker` with a GitHub Action that runs it, and it carries the front matter, fixture and manifest rules itself. The tool that applies save patches has not been written. These files are to be published from the toolkit as a package of their own, the spec package, versioned apart from the toolkit's other schemas, so a change to those never forces a new version of the standard. A game repository starts from the [project template](https://github.com/kibertoad/refurbished-dinosaurs-template) and pins a version of the spec package. Its major version is the version of this standard it checks, so pinning `1.x` means following version 1, and `spec/README.md` states the same number. Until the package is published, a repository pins a commit of the toolkit instead. This page describes version 1. [Versions](#versions) says when the number changes.
+The front matter schemas, the fixture schema, the manifest schema, the listing record schema, the check script and the tool that applies save patches belong to the standard, and their home is [refurbished-dinosaurs-toolkit](https://github.com/kibertoad/refurbished-dinosaurs-toolkit), the toolkit every restoration shares. The check script is there, as the package in `packages/standard-checker` with a GitHub Action that runs it, and it carries the front matter, fixture and manifest rules itself. The tool that applies save patches has not been written. These files are to be published from the toolkit as a package of their own, the spec package, versioned apart from the toolkit's other schemas, so a change to those never forces a new version of the standard. A game repository starts from the [project template](https://github.com/kibertoad/refurbished-dinosaurs-template) and pins a version of the spec package. Its major version is the version of this standard it checks, so pinning `1.x` means following version 1, and `spec/README.md` states the same number. Until the package is published, a repository pins a commit of the toolkit instead. This page describes version 1. [Versions](#versions) says when the number changes.
 
 Each game's spec stands on its own, even when games share an engine and file formats. An entry that another game's spec already covers is written again in this one, and cites the other game's entry through a source entry like any other outside document. Until this game's own files or runs confirm it, the entry stays `sourced`.
 
@@ -585,7 +585,7 @@ files:
 
 ###### ENTRY-TYPES-11
 
-A `path` uses forward slashes and is relative to the directory the game is installed to. A file the game reads from its CD and never installs is written `CD:` followed by its path on the disc, or `CD1:`, `CD2:` and so on for a game on more than one disc. A name on an ISO 9660 disc is written without its version suffix and without the dot that ends a name with no extension, so `SETUP.EXE;1` on the disc is `CD:SETUP.EXE` and `README.;1` is `CD:README`. 7-Zip and the toolkit's disc reader give names in this form, so a `CD:` path comes out the same whichever of them listed the disc. Two names in one directory that differ only in what is dropped, such as `README.;1` and `README.;2`, have no file path between them: a listing record gives their shared path as a stopped item ([ENTRY-TYPES-17](#entry-types-17)) instead of picking one.
+A `path` uses forward slashes and is relative to the directory the game is installed to. A file the game reads from its CD and never installs is written `CD:` followed by its path on the disc, or `CD1:`, `CD2:` and so on for a game on more than one disc. A name on an ISO 9660 disc is taken from the disc's primary volume, the plain ISO 9660 directory tree that every such disc has, so a disc gets the same paths whether or not it also carries Joliet or Rock Ridge names. The Joliet name and the primary name of a file point to the same sector, which is how a listing that gives Joliet names is matched to primary ones. The name is written without its version suffix and without the dot that ends a name with no extension, so `SETUP.EXE;1` on the disc is `CD:SETUP.EXE` and `README.;1` is `CD:README`. Where dropping them would give two names in one directory the same path, such as `README.;1` and `README.;2`, both keep their full names, `CD:README.;1` and `CD:README.;2`. The toolkit's disc reader gives names in this form, and a listing made with another tool is converted to it before it is compared.
 
 ###### ENTRY-TYPES-12
 
@@ -602,7 +602,7 @@ The [Survey](/work-protocol/#survey) and the [progress measures](/work-protocol/
 
 ###### ENTRY-TYPES-14
 
-Every path in the listing of the installation and the media the game reads is either in the manifest or in the Other files section, which gives each path the manifest leaves out with its reason. Those paths are the build's list of other files. The section describes how the listing was made closely enough that anyone with the build can make it again and compare. Where the list of other files would take the entry past the [line limit](#file-size), it goes in a YAML file next to the manifest, named after the build's ID, `BLD-GOG-EN-1.1.other-files.yaml`, whose only key `other_files` gives each path with its reason, and the section names that file. Where the listing went inside an archive or a compressed file, the Other files section says which ones and how far it went. An archive in the manifest does not mean its members' formats have been surveyed. Each kind of member gets a format entry of its own that lists the archive in `files`, as [Formats](#formats) describes. Listings, listing records and manifests hold paths, sizes and hashes, never the files themselves.
+Every path in the listing of the installation and the media the game reads, other than a member of an archive the listing went inside, is either in the manifest or in the Other files section, which gives each path the manifest leaves out with its reason. Those paths are the build's list of other files. Neither the manifest nor the list of other files gives a path twice, and no path is in both. The section describes how the listing was made closely enough that anyone with the build can make it again and compare. Where the list of other files would take the entry past the [line limit](#file-size), it goes in a YAML file next to the manifest, named after the build's ID, `BLD-GOG-EN-1.1.other-files.yaml`, whose only key `other_files` gives each path with its reason, and the section names that file. Where the listing went inside an archive or a compressed file, the Other files section says which ones and how far it went. An archive in the manifest does not mean its members' formats have been surveyed. Each kind of member gets a format entry of its own that lists the archive in `files`, as [Formats](#formats) describes. Listings, listing records and manifests hold paths, sizes and hashes, never the files themselves.
 
 ###### ENTRY-TYPES-15
 
@@ -615,7 +615,6 @@ A build may keep its listing in a YAML file next to the manifest, named after th
 ```yaml
 tool: build-listing.mjs a979396  # the program that made the listing, with its version or commit
 date: 2026-10-06
-recursive: true           # true when the listing went into every directory under each medium
 links: listed             # listed, followed or refused: what it did with symbolic links, junctions and other reparse points
 cycles: null              # how it stopped a followed link that leads back to a directory it was in, or null when links are not followed
 media:
@@ -629,21 +628,27 @@ archives:                 # every archive or compressed file the listing went in
   - path: CD:DATA.ARJ
     depth: 1              # 1 lists its members, 2 also lists the members of archives among them, and so on
 items:
-  - path: Chaos Overlords.exe
-    size: 664576
+  - path: CD:DATA.ARJ
+    size: 18341562
   - path: CD:DATA.ARJ|INTRO.FLI
     size: 401220
+  - path: CD:README.;1
+    size: 4210
+  - path: CD:README.;2
+    size: 4388
+  - path: CD:TRAILER.AVI
+    stopped: read error at sector 201344
+  - path: Chaos Overlords.exe
+    size: 664576
   - path: Saves
     link: C:/Users/Public/Documents/Chaos Overlords/Saves
-  - path: CD:README
-    stopped: README.;1 and README.;2 differ only in their version suffix
 ```
 
-`media` names each thing the listing covered: the installation directory with an empty `prefix`, and each disc by the prefix its paths take. A record whose `recursive` is `false`, or whose media leave out a disc the game reads, says in the Other files section what it left out and why.
+`media` names each thing the listing covered: the installation directory with an empty `prefix`, and each disc by the prefix its paths take. The listing goes into every directory under each medium. A record whose media leave out a disc the game reads says in the Other files section which disc and why.
 
 ###### ENTRY-TYPES-17
 
-Each item has a `path`, written as [ENTRY-TYPES-11](#entry-types-11) gives it, and one of three fields: `size` for a file, `link` for a symbolic link, junction or other reparse point, giving its target as stored and not followed, or `stopped` for a path the listing could not give as a file, with the reason, such as a cycle, a reparse point it refused, the depth limit of an archive, two disc names that read as one path, or a file it could not read. A member of an archive the listing went inside is written as the archive's path, `|` and the member's path inside it, `CD:DATA.ARJ|INTRO.FLI`. Windows and ISO 9660 names cannot hold `|`, so a member never shares a path with a file on disk. The record lists every file under a directory exclusion like any other, so how many there are stays visible. No path appears in the record twice, and items are sorted by path compared byte by byte, so two listings of the same build give the same file.
+Each item has a `path`, written as [ENTRY-TYPES-11](#entry-types-11) gives it, and one of three fields: `size` for a file, `link` for a symbolic link, junction or other reparse point, giving its target as stored and not followed, or `stopped` for a path the listing could not give as a file, with the reason, such as a cycle, a reparse point it refused, the depth limit of an archive, a directory it could not enter, or a file it could not read. A member of an archive the listing went inside is written as the archive's path, `|` and the member's path inside it, `CD:DATA.ARJ|INTRO.FLI`. Windows and ISO 9660 names cannot hold `|`, so a member never shares a path with a file on disk. A listing that reads a disc's audio tracks gives each one as a file item under its [track reference](#notation), `CD:track02`, with the size of its raw audio. The record lists every file under a directory exclusion like any other, so how many there are stays visible. No path appears in the record twice, and items are sorted by path compared byte by byte, so two listings of the same files give the same items in the same order.
 
 ###### ENTRY-TYPES-18
 
@@ -651,11 +656,11 @@ Where a build has a listing record, the record agrees with the manifest and the 
 
 - every file item, other than an archive member, is in the manifest with the manifest's size, is in the list of other files, or lies under a directory exclusion;
 - every archive member is under an archive that is a file item of the record;
-- every path in the manifest is a file item, and every path in the list of other files that does not end in `/` is an item;
+- every path in the manifest is a file item, and every path in the list of other files that does not end in `/` is an item, apart from paths on a disc the record's `media` leave out and CD audio tracks on a disc whose tracks the listing did not read;
 - every link and stopped item is in the list of other files by its own path, with a reason;
 - no path in the manifest lies under a directory exclusion.
 
-Agreement shows that the three files name the same paths and nothing more. It does not show that the game uses a file in the manifest, that the members of an archive have been surveyed, or that the Survey is complete. A listing that missed a directory agrees with a manifest that missed it too, which is why the record says how it was made.
+Agreement shows that the record, the manifest and the list of other files name the same paths and nothing more. It does not show that the game uses a file in the manifest, that the members of an archive have been surveyed, or that the Survey is complete. A listing that missed a directory agrees with a manifest that missed it too, which is why the record says how it was made.
 
 ###### ENTRY-TYPES-19
 
@@ -1109,7 +1114,7 @@ The script checks that:
 - every build entry's Code ranges section is a table in the form [ENTRY-TYPES-19](#entry-types-19) gives or says `None.`, every finding a row names lists that build and has a location in that file of that build that is not `kind: file-data`, and every `offset` range in overlay code lies wholly inside one of that section's rows for its file;
 - every build's `manifest` exists and validates against the manifest schema, and every manifest belongs to a build entry ([ENTRY-TYPES-10](#entry-types-10));
 - no path in a build's manifest is listed twice, lies under a directory exclusion, or is also in its list of other files, and every item in the list of other files has a path and a reason and is listed once ([ENTRY-TYPES-14](#entry-types-14) and [ENTRY-TYPES-15](#entry-types-15));
-- every build's `listing`, where it has one, exists, validates against the listing record schema, belongs to that build, lists no path twice in sorted order, and agrees with the manifest and the list of other files ([ENTRY-TYPES-16](#entry-types-16) to [ENTRY-TYPES-18](#entry-types-18));
+- every build's `listing`, where it has one, exists, validates against the listing record schema, belongs to that build, lists no path twice, gives its items in sorted order, and agrees with the manifest and the list of other files, and every listing record belongs to a build entry ([ENTRY-TYPES-16](#entry-types-16) to [ENTRY-TYPES-18](#entry-types-18));
 - every value file belongs to the entry its name gives and is named by that entry, every `table` that takes its values from one has as many rows as its count, every list written out in a procedure or a `table` definition has at most 64 values, and every value file of an enumeration table has that table's columns;
 - every packed file in a build entry gives its packer and the size, hash, format and unpacking tool of its unpacked form;
 - every pattern in a format entry's `files` matches a file in each build the entry lists;
