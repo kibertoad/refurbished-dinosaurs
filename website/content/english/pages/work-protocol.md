@@ -111,7 +111,42 @@ An item is closed by recording its answer in the spec (a finding or an experimen
 
 A static reading that settles an item raises its entries as far as the reading goes. A complete reading, as the standard defines it, makes an entry `established` with no run, and that is how most entries are meant to get there. A reading that settles the question without being complete leaves the entry `supported`, and the same commit adds a Static item for what the reading still has to cover, such as a caller nobody has found or an indirect call nobody has resolved, and an Emulated call item where the harness can reach the functions the reading covers. Only an entry that depends on something the code does not decide needs a run. For such an entry, where the runtime record says an agent or a person can make the run, the same commit adds an item under Agent run or Live session for the experiment that would confirm the reading. Where nobody can, it adds none, and the entry's Open questions section says which observation of the original would confirm it, so that a capture that arrives later with a report can.
 
-An attempt that does not settle an item records what it tried under `Tried:`, and the item is taken up again only with something the first attempt did not have: new evidence, a new tool, or a reading of the code nobody has tried. If the second attempt ends in the same place, the item moves to the section of the evidence that would change the outcome, with what was tried: Emulated call, Agent run or Live session for a run, Source for a document. It goes to Blocked only when that evidence is out of reach for now, such as a tool nobody has, a second edition the owner does not own, or a run the runtime record says nobody can make, and its `Waiting on:` names what is missing.
+An attempt that does not settle an item records what it tried under `Tried:`, one note per attempt, and the item is taken up again only with something the earlier attempts did not have: new evidence, a new tool, or a reading of the code nobody has tried. Where an attempt ends depends on what it did to the item, whatever code it read. It ends in a new place only if it answered part of what the item's Settles it names, with a finding, and took that part out, or moved part of the question into an item of its own. Otherwise it ends in the same place: Settles it names the same evidence as before. That includes an attempt that read a lot of code nobody had read and narrowed nothing, and one that rewrote Settles it to name a caller or callee one step further on, where the same obligation now sits.
+
+Once two attempts in a row have ended in the same place, the batch that made the second one splits the item or moves it. It splits the item when Settles it names parts that can be answered separately, such as a list of callers, several obligations a reading could each close, or a value the code reads at one point together with what follows from each value it can hold. Each part becomes an item with its own Settles it, the way any question with separate parts is split, and takes one `Tried:` note naming the findings of the earlier attempts that concern it, and its own attempts are counted from there. An item that is one question already moves to the section of the evidence that would change the outcome, with what was tried: Emulated call, Agent run or Live session for a run, Source for a document. It goes to Blocked only when that evidence is out of reach for now, such as a tool nobody has, a second edition the owner does not own, or a run the runtime record says nobody can make, and its `Waiting on:` names what is missing.
+
+Here two attempts each read code nobody had read, and neither changed what would settle the item:
+
+```markdown
+- Q-COMBAT-020. RULE-COMBAT-018: Does any of the round handler's eleven
+  callees change a gang's morale? Settles it: every store to the morale
+  byte made by the callees or by the code they hand off to. Blocks: slice 5.
+  Tried: FND-COMBAT-040, a search from the handler for stores to the byte,
+  found none but stopped at two indirect calls.
+  Tried: FND-COMBAT-044 reads the two callees with indirect calls. Both pick
+  their target by the display mode word, whose value at the call is unknown.
+```
+
+The batch that recorded FND-COMBAT-044 splits the item by what each part needs, and `Next ID:` goes from `Q-COMBAT-031` to `Q-COMBAT-034`:
+
+```markdown
+- Q-COMBAT-020. RULE-COMBAT-018: Which values can the display mode word
+  hold when the round handler calls its callees? Settles it: every store to
+  the word that can run before that call. Blocks: slice 5.
+  Tried: FND-COMBAT-044 found that two callees pick their target by the word.
+- Q-COMBAT-031. RULE-COMBAT-018: Does the code the two callees reach while
+  the display mode word is 0 store to the morale byte? Settles it: a
+  reading of the targets for that value. Blocks: slice 5.
+- Q-COMBAT-032. RULE-COMBAT-018: Does the code the two callees reach while
+  the display mode word is 1 store to the morale byte? Settles it: a
+  reading of the targets for that value. Blocks: slice 5.
+- Q-COMBAT-033. RULE-COMBAT-018: Do the round handler's other nine callees
+  store to the morale byte? Settles it: a complete reading of each of them.
+  Blocks: slice 5.
+  Tried: FND-COMBAT-040 found no store to the byte in the code it reached.
+```
+
+If Q-COMBAT-020 shows the word can hold only 0, Q-COMBAT-032 is closed by the same finding.
 
 ### Order of work
 
