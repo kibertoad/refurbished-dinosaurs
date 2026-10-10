@@ -328,6 +328,8 @@ At the start: read the session's handover, and for a goal the rest of its file, 
 
 At the end: stop every process the session started (Ghidra, the original game, test hosts), leave processes that belong to anyone else alone, and release the run lock if the session holds it. Every finished batch has its commit already. Work left half done is finished, discarded, or left out of the batch commits and described under the handover's unfinished work, since a commit that fails the documentation check or the fast gate, or holds two kinds of batch, is never made on the working branch. Where the working tree does not outlive the session, as in a cloud container, the half-done work is committed to a branch of its own, `wip/` followed by the working branch's name, and pushed there, and the handover names it. Then rewrite the handover to describe the state now and commit it on its own. Where the session's goal was met or dropped, that commit deletes the goal file instead and moves what is still worth handing on to `docs/HANDOVER.md` (see [Batches](#batches)). Push the working branch afterwards, unless the repository's `AGENTS.md` says the owner pushes or the person running the session says otherwise. Anyone who needs to know how far the branch is ahead of its remote asks Git, and the handover never records it.
 
+Under a goal whose condition does not hold, the end of a session is a checkpoint and does not end the goal. Once the handover is committed and the branch pushed, the next session under the goal starts at once, in the same conversation, unless one of the reasons to stop in [Coding agents and long-running goals](#coding-agents-and-long-running-goals) applies.
+
 ## Running the original
 
 Runs of the original that an agent drives are the last resort for each question. They are fragile: an old game loses window focus, depends on timing, behaves differently under an emulator's automation, and stops at a dialog nobody expected, and a result that cannot be repeated is not evidence. An [emulated call](#emulated-calls) starts no process of the game, so none of this section applies to it, and it comes before any run in the order of work. Runs of the game are kept to the questions nothing else can answer, and every agent run is scripted, starts from a fixed state, and records enough to be repeated, as [Recorded runs](#recorded-runs) describes. An item under Agent run or Live session is taken up only after a static reading of its own question has been tried and recorded under `Tried:`, or when it asks for the run that confirms a static reading of an entry that depends on something the code does not decide. A question that a static reading can settle is settled that way, even where a run could settle it too. Runs do not wait for the rest of the queue to be empty. They take their place in the [order of work](#order-of-work), where a run that blocks the current slice comes before static work that does not, and within one step of the order the static items come first.
@@ -481,7 +483,7 @@ The owner decides eligibility and the supported editions, the scope and the non-
 
 ## Coding agents and long-running goals
 
-A long-running goal, such as Claude Code's [`/goal`](https://code.claude.com/docs/en/goal), keeps an agent working until a condition holds. In Claude Code a second model judges that condition after every turn from what the conversation shows, without running anything itself. A good condition therefore names a state the agent can demonstrate by running something, has a scope, and has a limit:
+A long-running goal, such as Claude Code's [`/goal`](https://code.claude.com/docs/en/goal), keeps an agent working until a condition holds. In Claude Code a second model judges that condition after every turn from what the conversation shows, without running anything itself. A good condition therefore names a state the agent can demonstrate by running something, has a scope, and has a limit. For a goal with a bounded scope the limit is a number of turns:
 
 ```text
 Every item under Static in queue/COMBAT.md is closed or moved to Blocked with
@@ -498,6 +500,35 @@ stop after 60 turns.
 ```
 
 A goal as broad as "finish the combat system" gives the judge nothing to check and the agent no reason to stop. The goal's file in `docs/goals/` holds the same condition with its scope and the areas it must not touch, so a second session can see that the areas are taken.
+
+A standing goal runs until the restoration ends, and that end is its limit. Its condition names the state the [Audit](#audit) stage ends in, such as every queue item closed or under Blocked with `Waiting on:`, or every parity row `validated` or `deviated`, and gives no number of turns. The reasons to stop listed below take the place of the turn limit:
+
+```text
+Every queue item is closed or under Blocked with Waiting on, the documentation
+check passes on the last commit, and each batch ended with a status block; stop
+earlier only for a reason the work protocol's goal section lists.
+```
+
+```text
+Every parity row that is not superseded is validated or deviated, or partial
+with a Spec gap note naming an open queue item, the fast validation gate and the
+documentation check pass on the last commit, and the only changes under spec/
+are added open questions and unknown entries; stop earlier only for a reason
+the work protocol's goal section lists.
+```
+
+A goal stays on one side of the clean room, as a session does: research and the tooling that reads the original, or implementation and the tooling that runs the rebuild. A restoration that should run to its end therefore takes two standing goals, one for research and one for implementation, each in its own conversation and worktree, and each claiming its areas like any other goal. Where sessions cannot push to the main branch, only one goal runs at a time (see below), so the two take turns. When every row left to the implementation goal waits on research, every item in its scope is blocked, and it stops until the owner or a scheduled task starts it again.
+
+Apart from its condition holding, an agent under a goal stops only for one of these reasons, and the handover of its last session names the reason:
+
+- the owner asked it to wrap up and the wrap-up below is done, or the owner told it to stop;
+- every item in the goal's scope is under Blocked, or needs a person or a run that cannot happen now, and planning adds no item it can take;
+- a decision only the owner can make blocks all the work left in the goal's scope;
+- for a bounded goal, it has reached its turn limit.
+
+A finished batch, a printed status block, a committed handover, a long conversation, a check running in the background and a question from the owner are not reasons to stop. The agent answers the question and goes on, and it takes up other work while the check runs.
+
+When the owner asks an agent to wrap up while work in the goal's scope is left, it starts no new item and no new agent. The batch in progress is finished and committed as one batch, or what is left of it is described under the handover's unfinished work, as at the end of any session. The session then ends as [Sessions](#sessions) says, with a handover that records the stop at the owner's request. The goal file stays, since the goal was neither met nor dropped, and a later session resumes it. The work is then pushed to the main branch: the request to wrap up authorizes that push, unless it says otherwise or the repository's `AGENTS.md` says the owner pushes. A session without the access to push to the main branch pushes its working branch, as at the end of any session. Then the agent stops, although the goal's condition does not hold.
 
 Every batch ends by printing a status block, which is the evidence the judge reads and a summary the next person can use:
 
