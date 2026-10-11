@@ -157,7 +157,7 @@ A research batch settles one queue item, a few items about the same entry, or th
 - for a report that shows the rebuild departing from the spec, Code `partial` in place of `complete` and a `Defect (R-NNN):` note, as [Reports from testing](#reports-from-testing) describes;
 - `PARITY.md` and `spec/index/`, which the documentation check writes again, except in a repository that updates them on the main branch only, where the batch leaves them as they are.
 
-Moving a citation changes an ID and nothing else. Apart from that, code is not changed, beyond tools in `tools/` the research needed.
+Moving a citation changes an ID and nothing else, except a citation in `tools/` whose value rested on the wrong observation, which [IDENTIFIERS-8](/documentation-standard/#identifiers-8) says how to correct. Apart from that, code is not changed, beyond tools in `tools/` the research needed.
 
 ### Implementation batches
 
