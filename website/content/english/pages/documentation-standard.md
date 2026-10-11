@@ -1098,6 +1098,8 @@ Body sections, each table with an `Evidence` column as its last:
 8. Differences between builds.
 9. Open questions.
 
+A mouse input row's Region cell names the region, then a comma and the event that triggers the effect: a button (`left`, `right`, `middle` or `any`) followed by `press`, `release` or `double click`, or one of `pointer enter`, `pointer leave` and `pointer move`, as in `Spell frame, left release`. A region with several effects has a row for each event. A Region cell that names no event says the event is not known.
+
 An effect names a rule or another screen. A key is named by what is printed on it on a US keyboard (`A`, `F1`, `Enter`, `Left`), with modifiers joined by `+` (`Ctrl+S`). Keys that work on every screen are described in a rule, and a game that reads scan codes, or behaves differently with another keyboard layout, says so in that rule. Text shown on the screen is referenced as a resource, in the [notation](#notation) for resources. The entry may quote a short label beside the reference, such as a button caption or a screen title, and never copies longer text. An element that draws a value the game computes, such as the player's cash or the turn number, gives in its Shows cell the value by glossary name and the rule that turns it into text, and its Resource cell gives the font it is drawn in. An element that draws only a resource says `None` in Shows. Every rule a Shows cell names is in the screen's `related` field.
 
 ## Checks
