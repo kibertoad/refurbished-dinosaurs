@@ -103,7 +103,7 @@ An item is a single list entry:
   Blocks: slice 4.
 ```
 
-It gives its ID, the entries, the question as a question, what would settle it, and the slice it blocks or `none`. An item asks one question that one piece of evidence can settle. A question whose parts can be answered separately, such as a formula and the caller that decides when it runs, is split into items before anyone works on it. It goes in the queue file of the area of the first entry it names. The ID is `Q-`, the area of the file it was created in and a number, taken from the file's `Next ID:` line, which then goes up by one. It is never reused, even after the item is deleted, and it stays the same when the item moves to another section or another area. When an item is split, one half keeps the ID and the other takes a new one. Everything outside the queue refers to an item by its ID: the handovers, live session requests, slice exits, `Spec gap:` notes and status blocks. Two branches that create the same item ID are handled the way the standard handles two that create the same spec ID.
+It gives its ID, the entries, the question as a question, what would settle it, and the slice it blocks or `none`. An item asks one question that one piece of evidence can settle. A question whose parts can be answered separately, such as a formula and the caller that decides when it runs, is split into items before anyone works on it. It goes in the queue file of the area of the first entry it names. The ID is `Q-`, the area of the file it was created in and a number, taken from the file's `Next ID:` line, which then goes up by one. It is never reused, even after the item is deleted, and it stays the same when the item moves to another section or another area. When an item is split, one part keeps the ID and the others take new ones. Everything outside the queue refers to an item by its ID: the handovers, live session requests, slice exits, `Spec gap:` notes and status blocks. Two branches that create the same item ID are handled the way the standard handles two that create the same spec ID.
 
 When the runtime record changes, the items it affects move between Agent run and Live session in the same commit. Where the record answers the parts of a capability separately, an item under Agent run or Live session says in what settles it which of those parts its run needs, such as only the keyboard, so that the items a changed part affects can be found. An item that has already been worked on adds `Tried:` saying what was examined and why that did not settle the question, so that nobody repeats it. What the attempt did learn about the original goes in the spec as a finding first, and `Tried:` names the finding. An item under Blocked adds `Waiting on:` with what has to change first.
 
@@ -111,7 +111,47 @@ An item is closed by recording its answer in the spec (a finding or an experimen
 
 A static reading that settles an item raises its entries as far as the reading goes. A complete reading, as the standard defines it, makes an entry `established` with no run, and that is how most entries are meant to get there. A reading that settles the question without being complete leaves the entry `supported`, and the same commit adds a Static item for what the reading still has to cover, such as a caller nobody has found or an indirect call nobody has resolved, and an Emulated call item where the harness can reach the functions the reading covers. Only an entry that depends on something the code does not decide needs a run. For such an entry, where the runtime record says an agent or a person can make the run, the same commit adds an item under Agent run or Live session for the experiment that would confirm the reading. Where nobody can, it adds none, and the entry's Open questions section says which observation of the original would confirm it, so that a capture that arrives later with a report can.
 
-An attempt that does not settle an item records what it tried under `Tried:`, and the item is taken up again only with something the first attempt did not have: new evidence, a new tool, or a reading of the code nobody has tried. If the second attempt ends in the same place, the item moves to the section of the evidence that would change the outcome, with what was tried: Emulated call, Agent run or Live session for a run, Source for a document. It goes to Blocked only when that evidence is out of reach for now, such as a tool nobody has, a second edition the owner does not own, or a run the runtime record says nobody can make, and its `Waiting on:` names what is missing.
+An attempt that does not settle an item records what it tried under `Tried:`, one note per attempt, and the item is taken up again only with something the earlier attempts did not have: new evidence, a new tool, or a reading of the code nobody has tried. An attempt ends in a new place only if it recorded a finding that answered part of what the item's Settles it names and took that part out, or a finding that showed part of the question can be settled on its own and moved that part into an item of its own. Otherwise it ends in the same place, however much code it read that nobody had read. That includes an attempt that rewrote Settles it to name a caller or callee one step further on, where the same obligation now sits.
+
+Once two attempts in a row have ended in the same place, the batch that made the second one splits the item or moves it. An item that already has two such attempts is split or moved by the next batch that takes it up, before it tries anything else. The item is split when the attempts have shown parts of Settles it that can be answered separately, such as callers in a list that need evidence the others do not, several obligations a reading could each close, or a value the code reads at one point together with what follows from each value it can hold. Each part gets its own Settles it. The part that still asks the item's question about what is left keeps the ID, so that a `Spec gap:` note or a handover naming the item still points at that question, and the other parts take new IDs. Each part takes one `Tried:` note naming the earlier findings that concern it, and its own attempts are counted after that note. An item that is one question moves to the section of the evidence that would change the outcome, with what was tried: Emulated call, Agent run or Live session for a run, Source for a document. It goes to Blocked only when that evidence is out of reach for now, such as a tool nobody has, a second edition the owner does not own, or a run the runtime record says nobody can make, and its `Waiting on:` names what is missing.
+
+Here two attempts each read code nobody had read, and neither changed what would settle the item:
+
+```markdown
+- Q-COMBAT-020. RULE-COMBAT-018: Does any of the round handler's eleven
+  callees change a gang's morale? Settles it: every store to the morale
+  byte made by the callees or by the code they hand off to. Blocks: slice 5.
+  Tried: FND-COMBAT-040, a search from the handler for stores to the byte,
+  found none but stopped at two indirect calls.
+  Tried: FND-COMBAT-044 reads the two callees with indirect calls. Both pick
+  their target by whether the display mode word is 0, and the word's value
+  at the call is unknown.
+```
+
+The batch that recorded FND-COMBAT-044 splits the item by what each part needs. Q-COMBAT-020 keeps the morale question for the nine callees without indirect calls, and `Next ID:` goes from `Q-COMBAT-031` to `Q-COMBAT-034`:
+
+```markdown
+- Q-COMBAT-020. RULE-COMBAT-018: Do the round handler's other nine callees
+  store to the morale byte? Settles it: a complete reading of each of them.
+  Blocks: slice 5.
+  Tried: FND-COMBAT-040 found no store to the byte in the code it reached.
+- Q-COMBAT-031. RULE-COMBAT-018: Which values can the display mode word
+  hold when the round handler calls its callees? Settles it: every store to
+  the word that can run before that call. Blocks: slice 5.
+  Tried: FND-COMBAT-044 found that two callees pick their target by the word.
+- Q-COMBAT-032. RULE-COMBAT-018: Does the code the two callees reach while
+  the display mode word is 0 store to the morale byte? Settles it: a
+  reading of the targets for that value. Blocks: slice 5.
+  Tried: FND-COMBAT-040 stopped at the two callees' indirect calls, and
+  FND-COMBAT-044 found that they pick their target by the word.
+- Q-COMBAT-033. RULE-COMBAT-018: Does the code the two callees reach while
+  the display mode word is not 0 store to the morale byte? Settles it: a
+  reading of the targets for that value. Blocks: slice 5.
+  Tried: FND-COMBAT-040 stopped at the two callees' indirect calls, and
+  FND-COMBAT-044 found that they pick their target by the word.
+```
+
+If Q-COMBAT-031 shows the word can hold only 0, Q-COMBAT-033 is closed by the same finding.
 
 ### Order of work
 
