@@ -37,9 +37,14 @@ url = "/blog"
 weight = 7
 
 [[main]]
+name = "Support us"
+url = "/support"
+weight = 8
+
+[[main]]
 name = "Contacts"
 url = "/contact"
-weight = 8
+weight = 9
 
 
 # the three pages that set out how a restoration is done, linked from each other's headers
@@ -102,11 +107,16 @@ url = "/blog"
 weight = 7
 
 [[footer]]
+name = "Support us"
+url = "/support"
+weight = 8
+
+[[footer]]
 name = "Contacts"
 url = "/contact"
-weight = 8
+weight = 9
 
 [[footer]]
 name = "Privacy"
 url = "/privacy-policy"
-weight = 9
+weight = 10
