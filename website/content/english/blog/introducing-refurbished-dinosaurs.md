@@ -9,9 +9,9 @@ tags: ["announcement"]
 draft: false
 ---
 
-As far back as I can remember, I was always fascinated by the games I couldn't play. During my school years, I was a bookworm, and spent great deal more time reading about games than actually playing them, as my eyesight was poor, and videogame magazines were much more readily available than the videogames themselves.
+As far back as I can remember, I was always fascinated by the games I couldn't play. During my school years, I was a bookworm, and spent a great deal more time reading about games than actually playing them, as my eyesight was poor, and videogame magazines were much more readily available than the videogames themselves.
 
-In 2008 year GOG.com was established, and it changed me. Words "game preservation" were quite new for me, but they rang true; and I have discovered my deepest passion yet.
+In 2008 GOG.com was established, and it changed me. Words "game preservation" were quite new for me, but they rang true; and I have discovered my deepest passion yet.
 
 It's 2026 now, and AI agents are eating the software world. Decompilations and recompilations are dime a dozen, but I wanted to do something a tad bit more interesting than just one more one-and-done all-time favourite of mine, and as a wise guy Claude would put it, "I didn't just do a game, I did a whole methodology".
 
