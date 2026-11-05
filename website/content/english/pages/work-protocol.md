@@ -168,6 +168,20 @@ Once this order has picked an item in code that earlier batches have partly read
 
 The batch then says which of the remaining obligations it can remove and what result would remove each one, and is planned as [Research batches](#research-batches) describes. Whatever it leaves open stays in Settles it.
 
+### Recovering research that does not converge
+
+When successive snapshots add findings but no qualifying complete readings, answered queue items or evidenced narrowing of the active items, the next research batch assesses existing evidence before opening more original code. Use the exact revisions and the same scope; splits and moves are not answers. Keep the priority order above, including reports and current-slice blockers. This review is part of research, not a new stage or evidence status.
+
+Select up to ten existing rule, format, screen or bug entries tied to the current subsystem, or all of them when fewer exist. Name the selection and its limits. For each, compare the findings already recorded with every complete-reading condition. Distinguish evidence that qualifies but has not been declared from missing branches, callers, state writers and lifetimes, indirect targets, and evidence the code cannot supply. Record qualifying findings in `complete_reading` only when the whole entry qualifies. Otherwise name the specific remaining mechanisms and the queue items that hold them. Zero qualifying entries is a valid review result, but a list of unchecked boxes is not an assessment.
+
+Give the chosen contract a finite ownership and dependency map tied to the current function inventories. An obligation has a stable local ID and references the queue item that holds its question and settling condition; the map does not duplicate those conditions. Name shared and unassigned functions and missing inventories, including functions outside this assessment. Assignment is not evidence of understanding. Keep record layout, placement, cache management and rendering separate where they describe independently testable behavior. A split preserves unresolved claims, their evidence and references under the standard's identity rules; it does not turn an unanswered question into an answer.
+
+The next batch names one closure objective: the obligation it can remove, the result that would remove it and the connected callers and helpers needed to decide it. Before following another dependency, identify which obligation it answers. A dependency belonging to another contract gets its own bounded queue question. Do not grow the original entry to absorb it. A remaining writer or alias obligation names the state, the possible access or transfer mechanisms, the searched scope and the controls or exclusions still missing. A generic warning about other writers is not a settling condition.
+
+Use a supported decompiler with cross-references and call graphs, such as Ghidra, to read connected behavior when available. Verify the instructions wherever inferred types, arithmetic widths, register returns, segment identity, indirect transfers or failure ordering decide the claim. Reuse controlled reports and the approved bounded reporters for censuses. Linear listings support that reading; repeatedly extending them through helpers does not replace a caller or writer audit. If decompilation is unavailable or unreliable for the file, record the limitation and use bounded instruction and reference analysis. Keep original-derived output local and write findings in independent words.
+
+For the next three batches, record elapsed research, tooling, validation and handover time separately, including failed checks and retries. Distinguish elapsed time from active effort and keep commit counts separate; neither proves overhead by itself. Keep every required gate, hook, batch-kind boundary and evidence condition. After two closure-focused research batches, compare their outcomes with the assessment baseline at exact revisions: qualifying complete readings, evidenced answers and removed obligations, followed by remaining gaps. Report a lack of closure and adjust the next objective rather than lowering the evidence threshold or requiring a success quota.
+
 ## The life of a claim
 
 A claim is what a rule, format, screen or bug entry says the original does. It changes only in a research batch, when the evidence changes, and the entry's status says how far that evidence goes.
@@ -511,6 +525,8 @@ The session that receives a report answers the reporter with what happened, nami
 Screenshots of the original are what a report is compared with, so the project keeps a durable local store of them. It is `GAME_DIR/captures/`, where the standard already keeps the captures and saves that cannot be committed, each named by its hash. It lives with the maintainer's copy of the game, is backed up with it, and loses nothing when a report or item closes, since findings cite captures by hash. A local index in the store, `GAME_DIR/captures/index.tsv`, gives each capture's hash, build, the screen entry it shows and the state it was taken in, so that the capture for a reported screen can be found. The index is not committed, since its descriptions of states can hold the game's text. Screenshots of the rebuild from reports go in `GAME_DIR/reports/`, named the same way. Where the store has no capture of a screen a report concerns, the queue item for it says which capture would settle it.
 
 ## Measuring progress
+
+Lead a research comparison with qualifying complete readings, evidenced queue closures and resolved caller, writer or indirect-transfer obligations, retaining their evidence and exact revisions. Keep outstanding obligations and denominator gaps visible. Finding and commit counts follow as activity measures.
 
 Progress is measured by numbers a script computes from the repository, never by numbers someone writes down:
 
