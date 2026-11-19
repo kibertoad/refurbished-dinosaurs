@@ -71,6 +71,14 @@ Checking the format definitions against some of the files, such as the few whose
 
 A survey keeps later work from being planned around the one subsystem somebody happened to open first, and it makes the size of the game visible before anyone estimates it.
 
+#### Using a decompiler during the survey
+
+If researchers keep losing time finding the same callers, run the decompiler's analysis once on the identified build. Keep its project and cross-references on the research side. Generate pseudocode for a function when a question leads there. A batch export can help when several questions span the same executable. Index it locally by build and address, record the tool version and loader settings, and mark functions the tool skipped or failed to read. A successful export says how much text the tool produced. It earns no reading or parity credit on its own.
+
+Use the index to find an experiment that distinguishes two readings. For example, a target selector can return the nearest depot every time it runs while the unit keeps an existing assignment between calls. Find who calls the selector and who clears the assignment. Give the original a depot, let the unit select it, introduce a nearer depot, then make the first one unavailable. Record which depot the unit uses after each change. If two readings depend on a signed comparison or the order of two writes, check those instructions at the recorded build address.
+
+Keep listings and annotated exports in a private research directory outside the implementation workspace. Only the [function inventory](#measuring-progress) in its permitted form goes into coverage. Write the finding in independent words, giving the original build and location, the setup, observed results and the cases still open. Describe what another implementation must do. Translating the listing line by line, renaming its variables or sending its branch structure as a test plan carries the original expression across the boundary. An implementer starts in a [fresh session](#sessions) with the spec and chooses the data structures, control flow and tests independently. A missing case goes back to research as a question.
+
 ### Slices
 
 Build the game in vertical slices, each of which leaves it playable. The plan lists the slices in order, and each slice names the spec areas or entries it needs and the parity rows it has to bring to `implemented`, `deviated` or `validated`. Each target is one the runtime record makes reachable, and where a row needs a live session nobody has agreed to yet, the plan asks for `implemented` and names the gap in its risks. The first slice gives the rebuild a headless runner that a test drives from a fixture, since every later test that compares the rebuild with the original needs one. Within a slice, research and implementation alternate in small batches, described below.
