@@ -76,6 +76,14 @@ Checking the format definitions against some of the files, such as the few whose
 
 A survey keeps later work from being planned around the one subsystem somebody happened to open first, and it makes the size of the game visible before anyone estimates it.
 
+#### Using a decompiler during the survey
+
+If researchers keep losing time finding the same callers, run the decompiler's analysis once on the identified build. Keep its project and cross-references on the research side. Where the [lift](#the-lift) has `verified` a function, read the lifted function instead, and generate pseudocode only for a function the lift has not verified, when a question leads there. A batch export can help when several questions span the same executable. Index it locally by build and address, record the tool version and loader settings, and mark functions the tool skipped or failed to read. A successful export says how much text the tool produced. It earns no reading or parity credit on its own.
+
+Use the index to find an experiment that distinguishes two readings. For example, a target selector can return the nearest depot every time it runs while the unit keeps an existing assignment between calls. Find who calls the selector and who clears the assignment. Give the original a depot, let the unit select it, introduce a nearer depot, then make the first one unavailable. Record which depot the unit uses after each change. If two readings depend on a signed comparison or the order of two writes, check those instructions at the recorded build address, or read the function in the lift where it is `verified`, which counts as reading its instructions ([STATUS-45](/documentation-standard/#status-45)).
+
+Keep listings, annotated exports and the index in `GAME_DIR`, with the analysis database and the lift, outside the implementation workspace. Only the [function inventory](#measuring-progress) in its permitted form goes into coverage. Write the finding in independent words, giving the original build and location, the setup, observed results and the cases still open. Describe what another implementation must do. Translating the listing line by line, renaming its variables or sending its branch structure as a test plan carries the original expression across the boundary. An implementer starts in a [fresh session](#sessions) with the spec and chooses the data structures, control flow and tests independently. A missing case goes back to research as a question.
+
 ### Lift
 
 Translate the code of each file in the function inventories into the lift and check each function against the original, as [The lift](#the-lift) describes. A project whose runtime record says no lift harness loads its build, or can be built for it, skips the stage, and the plan says why and what would change that.
