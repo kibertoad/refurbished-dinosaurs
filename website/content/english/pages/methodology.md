@@ -23,7 +23,7 @@ Every finding names the exact build it came from: the edition, the version and t
 
 ## Studying the original
 
-The executable has the final word on what the shipped game does. We read it in [Ghidra](https://github.com/NationalSecurityAgency/ghidra) and watch it run under a debugger. Where an emulator can run the game and swap one of its functions for a translated one, we read the lift instead of the decompiler's guesses, since each lifted function has been run against the original and gives every width and flag the instructions use. Functions and variables keep neutral names until their behaviour is confirmed, because a wrong name given early steers every later reading.
+The executable has the final word on what the shipped game does. We read it in [Ghidra](https://github.com/NationalSecurityAgency/ghidra) and watch it run under a debugger. Where an emulator can run the game and swap one of its functions for a translated one, we read the lift instead of the decompiler's guesses for each lifted function that has been run against the original on cases reaching all of its branches, since it gives every width and flag the instructions use. Functions and variables keep neutral names until their behaviour is confirmed, because a wrong name given early steers every later reading.
 
 An experiment starts from a saved state, changes one input, and records what follows. It is repeated from the same save, with the random number generator's state varied between runs. Anything that involves random numbers needs many repetitions and a recorded distribution, since a formula inferred from one roll is a guess.
 
